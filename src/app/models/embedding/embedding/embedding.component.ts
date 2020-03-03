@@ -14,6 +14,7 @@ import {PhraseDialogComponent} from '../phrase-dialog/phrase-dialog.component';
 import {SelectionModel} from '@angular/cdk/collections';
 import {QueryDialogComponent} from 'src/app/shared/components/dialogs/query-dialog/query-dialog.component';
 import {ConfirmDialogComponent} from 'src/app/shared/components/dialogs/confirm-dialog/confirm-dialog.component';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-embedding',
@@ -42,8 +43,7 @@ export class EmbeddingComponent implements OnInit, OnDestroy, AfterViewInit {
   // For custom filtering, such as text search in description
   inputFilterQuery = '';
   filteringValues = {};
-
-
+  queueNewEmbedding$ = new Subject<void>();
   currentProject: Project;
   resultsLength: number;
 
@@ -58,7 +58,11 @@ export class EmbeddingComponent implements OnInit, OnDestroy, AfterViewInit {
     this.tableData.paginator = this.paginator;
 
     // check for updates after 30s every 30s
-    timer(30000, 30000).pipe(takeUntil(this.destroyed$),
+
+    timer(30000, 30000).pipe(takeUntil(this.destroyed$)).subscribe(x => {
+      this.queueNewEmbedding$.next();
+    });
+    this.queueNewEmbedding$.pipe(takeUntil(this.destroyed$),
       switchMap(_ => this.embeddingsService.getEmbeddings(
         this.currentProject.id,
         `page=${this.paginator.pageIndex + 1}&page_size=${this.paginator.pageSize}`
@@ -227,6 +231,26 @@ export class EmbeddingComponent implements OnInit, OnDestroy, AfterViewInit {
       width: '700px',
     });
   }
+
+  public exportModel(embedding: Embedding) {
+    if (embedding && embedding.id && this.currentProject.id) {
+      this.embeddingsService.exportModel(this.currentProject.id, embedding.id).subscribe(x => {
+        if (x) {
+          FileSaver.saveAs(x, 'embedding_model' + embedding.id + '.zip');
+        }
+      });
+    }
+  }
+
+  public importModel(event: File) {
+    this.embeddingsService.importModel(this.currentProject.id, event).subscribe(x => {
+      if (x && !(x instanceof HttpErrorResponse)) {
+        this.logService.snackBarMessage(x.message, 2000);
+        this.queueNewEmbedding$.next();
+      }
+    });
+  }
+
 
   applyFilter(filterValue: string, field: string) {
     this.filteringValues[field] = filterValue;

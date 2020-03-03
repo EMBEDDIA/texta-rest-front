@@ -45,6 +45,7 @@ import {MaterialFileInputModule} from 'ngx-material-file-input';
 import {FormatTextaFactsPipe} from './pipes/format-texta-facts.pipe';
 import { IsObjectPipe } from './pipes/is-object.pipe';
 import {NgxMatSelectSearchModule} from 'ngx-mat-select-search';
+import { FileInputButtonComponent } from './components/file-input-button/file-input-button.component';
 
 @NgModule({
   declarations: [LoginDialogComponent, GenericTableComponent,
@@ -55,7 +56,8 @@ import {NgxMatSelectSearchModule} from 'ngx-mat-select-search';
     GenericDialogComponent,
     SavedSearchAutocompleteComponent,
     FormatTextaFactsPipe,
-    IsObjectPipe
+    IsObjectPipe,
+    FileInputButtonComponent
   ],
   imports: [
     CommonModule,
@@ -135,7 +137,8 @@ import {NgxMatSelectSearchModule} from 'ngx-mat-select-search';
     LineChartModule,
     InfiniteScrollModule,
     MaterialFileInputModule,
-    NgxMatSelectSearchModule
+    NgxMatSelectSearchModule,
+    FileInputButtonComponent
   ],
   entryComponents: [
     LoginDialogComponent,

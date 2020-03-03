@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import {Injectable} from '@angular/core';
 import {environment} from '../../../../environments/environment';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {catchError, tap} from 'rxjs/operators';
@@ -17,12 +17,13 @@ export class TaggerGroupService {
   constructor(private http: HttpClient, private localStorageService: LocalStorageService,
               private logService: LogService) {
   }
-  getTaggerGroups(projectId: number,  params = ''): Observable<{count: number, results: TaggerGroup[]} | HttpErrorResponse> {
-    return this.http.get<{count: number, results: TaggerGroup[]}>(
+
+  getTaggerGroups(projectId: number, params = ''): Observable<{ count: number, results: TaggerGroup[] } | HttpErrorResponse> {
+    return this.http.get<{ count: number, results: TaggerGroup[] }>(
       `${this.apiUrl}/projects/${projectId}/${this.apiEndpoint}/?${params}`,
     ).pipe(
       tap(e => this.logService.logStatus(e, 'getTaggerGroups')),
-      catchError(this.logService.handleError<{count: number, results: TaggerGroup[]}>('getTaggerGroups')));
+      catchError(this.logService.handleError<{ count: number, results: TaggerGroup[] }>('getTaggerGroups')));
   }
 
   createTaggerGroup(body: {}, projectId: number): Observable<TaggerGroup | HttpErrorResponse> {
@@ -35,7 +36,7 @@ export class TaggerGroupService {
   }
 
   modelsRetrain(taggerGroupId: number, projectId: number) {
-    return this.http.post<{'success': 'retraining tasks created'}>(
+    return this.http.post<{ 'success': 'retraining tasks created' }>(
       `${this.apiUrl}/projects/${projectId}/${this.apiEndpoint}/${taggerGroupId}/models_retrain/`, {}
     ).pipe(
       tap(e => this.logService.logStatus(e, 'modelsRetrain')),
@@ -51,7 +52,7 @@ export class TaggerGroupService {
   }
 
   tagText(body: {}, projectId: number, taggerId):
-   Observable<{ probability: number, tag: string, tagger_id: number }[] | HttpErrorResponse> {
+    Observable<{ probability: number, tag: string, tagger_id: number }[] | HttpErrorResponse> {
     return this.http.post<{ probability: number, tag: string, tagger_id: number }[]>(
       `${this.apiUrl}/projects/${projectId}/${this.apiEndpoint}/${taggerId}/tag_text/`,
       body
@@ -61,7 +62,7 @@ export class TaggerGroupService {
   }
 
   tagDoc(body: {}, projectId: number, taggerId):
-   Observable<{ probability: number, tag: string, tagger_id: number }[] | HttpErrorResponse> {
+    Observable<{ probability: number, tag: string, tagger_id: number }[] | HttpErrorResponse> {
     return this.http.post<{ probability: number, tag: string, tagger_id: number }[]>(
       `${this.apiUrl}/projects/${projectId}/${this.apiEndpoint}/${taggerId}/tag_doc/`,
       body
@@ -78,7 +79,7 @@ export class TaggerGroupService {
   }
 
   bulkDeleteTaggerGroups(projectId: number, body: { ids: any[]; }) {
-    return this.http.post<{'num_deleted': number, 'deleted_types': {string: number}[] }>
+    return this.http.post<{ 'num_deleted': number, 'deleted_types': { string: number }[] }>
     (`${this.apiUrl}/projects/${projectId}/${this.apiEndpoint}/bulk_delete/`, body).pipe(
       tap(e => this.logService.logStatus(e, 'bulkDeleteTaggerGroups')),
       catchError(this.logService.handleError<unknown>('bulkDeleteTaggerGroups')));
@@ -88,6 +89,22 @@ export class TaggerGroupService {
     return this.http.delete(`${this.apiUrl}/projects/${projectId}/${this.apiEndpoint}/${taggerId}/`).pipe(
       tap(e => this.logService.logStatus(e, 'deleteTaggerGroup')),
       catchError(this.logService.handleError<unknown>('deleteTaggerGroup')));
+  }
+
+  exportModel(projectId: number, taggerId: number): Observable<Blob | HttpErrorResponse> {
+    return this.http.get<Blob>
+    (`${this.apiUrl}/projects/${projectId}/tagger_groups/${taggerId}/export_model/`, {responseType: 'blob' as 'json'}).pipe(
+      tap(e => this.logService.logStatus(e, 'exportTaggerGroupModel')),
+      catchError(this.logService.handleError<Blob>('exportTaggerGroupModel')));
+  }
+
+  importModel(projectId: number, file: File): Observable<{ id: number, message: string } | HttpErrorResponse> {
+    const form: FormData = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post<{ id: number, message: string }>
+    (`${this.apiUrl}/projects/${projectId}/tagger_groups/import_model/`, form).pipe(
+      tap(e => this.logService.logStatus(e, 'importTaggerGroupModel')),
+      catchError(this.logService.handleError<{ id: number, message: string }>('importTaggerGroupModel')));
   }
 
 }

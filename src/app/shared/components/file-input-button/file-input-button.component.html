@@ -1,0 +1,4 @@
+<div (click)="fileInput.click()">
+  <ng-content></ng-content>
+</div>
+<input hidden (change)="onFileSelected()" #fileInput type="file" id="file">

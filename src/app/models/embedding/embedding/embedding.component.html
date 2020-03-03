@@ -13,6 +13,9 @@
               matTooltip="Delete selected" [disabled]="selectedRows.selected.length < 1">
         <mat-icon>delete</mat-icon>
       </button>
+      <app-file-input-button (fileChanged)="importModel($event)">
+        <button mat-button color="primary" type="button">IMPORT</button>
+      </app-file-input-button>
       <mat-form-field class="m-l-15">
         <mat-icon matSuffix>search</mat-icon>
         <input matInput (keyup)="applyFilter($event.target.value, 'description')" placeholder="Filter description">
@@ -186,6 +189,9 @@
               <button mat-menu-item (click)="phrase(element)">
                 Phrase
               </button>
+              <button mat-menu-item (click)="exportModel(element)">
+                Export model
+              </button>
               <mat-divider></mat-divider>
             </div>
             <button mat-menu-item (click)="onDelete(element, i)">
@@ -206,8 +212,6 @@
     </table>
 
   </div>
-
-
 
 
 </div>

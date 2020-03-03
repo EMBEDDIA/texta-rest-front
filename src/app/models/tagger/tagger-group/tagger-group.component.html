@@ -13,6 +13,9 @@
               matTooltip="Delete selected" [disabled]="selectedRows.selected.length < 1">
         <mat-icon>delete</mat-icon>
       </button>
+      <app-file-input-button (fileChanged)="importModel($event)">
+        <button mat-button color="primary" type="button">IMPORT</button>
+      </app-file-input-button>
       <mat-form-field class="m-l-15">
         <mat-icon matSuffix>search</mat-icon>
         <input matInput (keyup)="applyFilter($event.target.value, 'description')" placeholder="Filter description">
@@ -25,7 +28,7 @@
 
   <div class="table-container">
     <table mat-table [dataSource]="tableData" matSort multiTemplateDataRows
-           matSort matSortDisableClear matSortDirection="asc">
+           matSort matSortDisableClear matSortDirection="asc" [trackBy]="trackById">
       <ng-container matColumnDef="select">
         <th mat-header-cell *matHeaderCellDef>
           <mat-checkbox (change)="$event ? masterToggle() : null" [checked]="selectedRows.hasValue() && isAllSelected()"
@@ -180,6 +183,9 @@
             </button>
             <button mat-menu-item (click)="tagRandomDocDialog(element)">
               Tag random doc
+            </button>
+            <button mat-menu-item (click)="exportModel(element)">
+              Export model
             </button>
             <mat-divider></mat-divider>
             <button mat-menu-item (click)="onDelete(element, i)">

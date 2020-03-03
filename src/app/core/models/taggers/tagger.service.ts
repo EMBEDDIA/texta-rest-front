@@ -15,13 +15,14 @@ import {TaggerOptions} from '../../../shared/types/tasks/TaggerOptions';
 export class TaggerService {
   apiUrl = environment.apiHost + environment.apiBasePath;
 
-  constructor(private http: HttpClient, private logService: LogService) {}
+  constructor(private http: HttpClient, private logService: LogService) {
+  }
 
-  getTaggers(projectId: number, params = ''): Observable<{count: number, results: Tagger[]} | HttpErrorResponse> {
-    return this.http.get<{count: number, results: Tagger[]}>(`${this.apiUrl}/projects/${projectId}/taggers/?${params}`,
+  getTaggers(projectId: number, params = ''): Observable<{ count: number, results: Tagger[] } | HttpErrorResponse> {
+    return this.http.get<{ count: number, results: Tagger[] }>(`${this.apiUrl}/projects/${projectId}/taggers/?${params}`,
     ).pipe(
       tap(e => this.logService.logStatus(e, 'getTaggers')),
-      catchError(this.logService.handleError<{count: number, results: Tagger[]}>('getTaggers')));
+      catchError(this.logService.handleError<{ count: number, results: Tagger[] }>('getTaggers')));
   }
 
   createTagger(body: {}, projectId: number): Observable<Tagger | HttpErrorResponse> {
@@ -48,10 +49,10 @@ export class TaggerService {
       catchError(this.logService.handleError<unknown>('retrainTagger')));
   }
 
-  getStopWords(projectId: number, taggerId: number): Observable<{'stop_words': string} | HttpErrorResponse> {
-    return this.http.get<{'stop_words': string}>(`${this.apiUrl}/projects/${projectId}/taggers/${taggerId}/stop_words/`).pipe(
+  getStopWords(projectId: number, taggerId: number): Observable<{ 'stop_words': string } | HttpErrorResponse> {
+    return this.http.get<{ 'stop_words': string }>(`${this.apiUrl}/projects/${projectId}/taggers/${taggerId}/stop_words/`).pipe(
       tap(e => this.logService.logStatus(e, 'getStopWords')),
-      catchError(this.logService.handleError<{'stop_words': string}>('getStopWords')));
+      catchError(this.logService.handleError<{ 'stop_words': string }>('getStopWords')));
   }
 
   listFeatures(projectId: number, taggerId: number): Observable<ListFeaturesResponse | HttpErrorResponse> {
@@ -60,10 +61,10 @@ export class TaggerService {
       catchError(this.logService.handleError<ListFeaturesResponse>('listFeatures')));
   }
 
-  postStopWords(projectId: number, taggerId: number, payload): Observable<{'stop_words': string} | HttpErrorResponse> {
-    return this.http.post<{'stop_words': string}>(`${this.apiUrl}/projects/${projectId}/taggers/${taggerId}/stop_words/`, payload).pipe(
+  postStopWords(projectId: number, taggerId: number, payload): Observable<{ 'stop_words': string } | HttpErrorResponse> {
+    return this.http.post<{ 'stop_words': string }>(`${this.apiUrl}/projects/${projectId}/taggers/${taggerId}/stop_words/`, payload).pipe(
       tap(e => this.logService.logStatus(e, 'postStopWords')),
-      catchError(this.logService.handleError<{'stop_words': string}>('postStopWords')));
+      catchError(this.logService.handleError<{ 'stop_words': string }>('postStopWords')));
   }
 
   // todo backend seperate endpoint
@@ -116,9 +117,23 @@ export class TaggerService {
   }
 
   bulkDeleteTaggers(projectId: number, body) {
-    return this.http.post<{'num_deleted': number, 'deleted_types': {string: number}[] }>
+    return this.http.post<{ 'num_deleted': number, 'deleted_types': { string: number }[] }>
     (`${this.apiUrl}/projects/${projectId}/taggers/bulk_delete/`, body).pipe(
       tap(e => this.logService.logStatus(e, 'bulkDeleteTaggers')),
       catchError(this.logService.handleError<unknown>('bulkDeleteTaggers')));
+  }
+
+  exportModel(projectId: number, taggerId: number): Observable<unknown | HttpErrorResponse> {
+    return this.http.get<unknown>
+    (`${this.apiUrl}/projects/${projectId}/taggers/${taggerId}/export_model/`).pipe(
+      tap(e => this.logService.logStatus(e, 'exportTaggerModel')),
+      catchError(this.logService.handleError<unknown>('exportTaggerModel')));
+  }
+
+  importModel(projectId: number, file): Observable<unknown | HttpErrorResponse> {
+    return this.http.post<unknown>
+    (`${this.apiUrl}/projects/${projectId}/taggers/import_model/`, file).pipe(
+      tap(e => this.logService.logStatus(e, 'importTaggerModel')),
+      catchError(this.logService.handleError<unknown>('importTaggerModel')));
   }
 }

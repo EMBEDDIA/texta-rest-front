@@ -3,7 +3,7 @@ import {startWith, switchMap, debounceTime, takeUntil} from 'rxjs/operators';
 import {LogService} from '../../../core/util/log.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {Project} from '../../../shared/types/Project';
-import {Subscription, Subject, merge, of} from 'rxjs';
+import {Subscription, Subject, merge, of, timer} from 'rxjs';
 import {ProjectStore} from '../../../core/projects/project.store';
 import {MatDialog, MatPaginator, MatSort, MatTableDataSource} from '@angular/material';
 import {Tagger, TaggerGroup} from '../../../shared/types/tasks/Tagger';
@@ -16,6 +16,7 @@ import {TaggerGroupTagTextDialogComponent} from './tagger-group-tag-text-dialog/
 import {TaggerGroupTagDocDialogComponent} from './tagger-group-tag-doc-dialog/tagger-group-tag-doc-dialog.component';
 import {ConfirmDialogComponent} from 'src/app/shared/components/dialogs/confirm-dialog/confirm-dialog.component';
 import {TaggerGroupTagRandomDocDialogComponent} from './tagger-group-tag-random-doc-dialog/tagger-group-tag-random-doc-dialog.component';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-tagger-group',
@@ -43,10 +44,10 @@ export class TaggerGroupComponent implements OnInit, OnDestroy, AfterViewInit {
   // For custom filtering, such as text search in description
   inputFilterQuery = '';
   filteringValues = {};
-
   currentProject: Project;
   resultsLength: number;
   destroyed$ = new Subject<boolean>();
+  queueNewTaggerUpdate$: Subject<void> = new Subject<void>();
 
 
   constructor(public dialog: MatDialog,
@@ -68,6 +69,20 @@ export class TaggerGroupComponent implements OnInit, OnDestroy, AfterViewInit {
         this.isLoadingResults = false;
       }
     });
+    timer(30000, 30000).pipe(takeUntil(this.destroyed$)).subscribe(x => {
+      this.queueNewTaggerUpdate$.next();
+    });
+    this.queueNewTaggerUpdate$.pipe(takeUntil(this.destroyed$), debounceTime(50), switchMap(_ =>
+      this.taggerGroupService.getTaggerGroups(this.currentProject.id,
+        `page=${this.paginator.pageIndex + 1}&page_size=${this.paginator.pageSize}`)))
+      .subscribe((resp: { count: number, results: TaggerGroup[] } | HttpErrorResponse) => {
+        if (resp && !(resp instanceof HttpErrorResponse)) {
+          this.tableData.data = resp.results;
+        } else if (resp instanceof HttpErrorResponse) {
+          this.logService.snackBarError(resp, 5000);
+          this.isLoadingResults = false;
+        }
+      });
   }
 
   ngAfterViewInit() {
@@ -219,12 +234,31 @@ export class TaggerGroupComponent implements OnInit, OnDestroy, AfterViewInit {
           const body = {ids: idsToDelede};
           // Refresh taggers
           this.taggerGroupService.bulkDeleteTaggerGroups(this.currentProject.id, body).subscribe(() => {
-            this.logService.snackBarMessage(`${this.selectedRows.selected.length} Taggers deleted`, 2000);
+            this.logService.snackBarMessage(`${this.selectedRows.selected.length} Tagger Groups deleted`, 2000);
             this.removeSelectedRows();
           });
         }
       });
     }
+  }
+
+  public exportModel(taggerGroup: TaggerGroup) {
+    if (taggerGroup && taggerGroup.id && this.currentProject.id) {
+      this.taggerGroupService.exportModel(this.currentProject.id, taggerGroup.id).subscribe(x => {
+        if (x) {
+          FileSaver.saveAs(x, 'tagger_group_' + taggerGroup.id + '.zip');
+        }
+      });
+    }
+  }
+
+  public importModel(event: File) {
+    this.taggerGroupService.importModel(this.currentProject.id, event).subscribe(x => {
+      if (x && !(x instanceof HttpErrorResponse)) {
+        this.logService.snackBarMessage(x.message, 2000);
+        this.queueNewTaggerUpdate$.next();
+      }
+    });
   }
 
   removeSelectedRows() {
@@ -241,6 +275,10 @@ export class TaggerGroupComponent implements OnInit, OnDestroy, AfterViewInit {
     this.paginator.pageIndex = 0;
     this.filterQueriesToString();
     this.filteredSubject.next();
+  }
+
+  trackById(index, item: TaggerGroup) {
+    return item.id;
   }
 
   filterQueriesToString() {
