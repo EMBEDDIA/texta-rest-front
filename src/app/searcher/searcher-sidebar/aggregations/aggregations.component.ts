@@ -175,8 +175,12 @@ export class AggregationsComponent implements OnInit, OnDestroy {
       }
     }
     if (inCaseNoAggsFound) {
-      if (aggregation[inCaseNoAggsFound].hasOwnProperty('field')) {
+      const aggProperty = aggregation[inCaseNoAggsFound];
+      if (aggProperty.hasOwnProperty('field')) {
         return aggregation;
+      }
+      if (aggProperty.hasOwnProperty('reverse_nested')) {
+        return aggProperty;
       } else {
         return this.getInnerMostAggs(aggregation[inCaseNoAggsFound]);
       }

@@ -80,9 +80,9 @@ export class TextAggregationComponent implements OnInit, OnDestroy {
                   field:
                     `${this.fieldsFormControl.value.path}.str_val`,
                   size: this.aggregationSize,
-                  order: {'top_reverse_nested.doc_count': 'desc'}
+                  order: {'fact_val_reverse.doc_count': 'desc'},
                 },
-                aggregations: {top_reverse_nested: {reverse_nested: {}}}
+                aggs: {fact_val_reverse: {reverse_nested: {}}}
               }
             }
           }
