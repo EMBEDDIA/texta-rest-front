@@ -40,7 +40,6 @@ describe('should be able to build aggregations', function () {
     cy.get('[data-cy=appSearcherSidebarAggregationsSubmit]').should('be.visible').click();
     cy.wait('@searcherQuery').then(x => {
       let totalLines = 0;
-      console.log(x.response.body.aggs);
       for (const el in x.response.body.aggs) {
         if (x.response.body.aggs.hasOwnProperty(el)) {
           totalLines += getBuckets(x.response.body.aggs[el]).length
