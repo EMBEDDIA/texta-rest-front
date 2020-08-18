@@ -27,6 +27,7 @@ export class TextAggregationComponent implements OnInit, OnDestroy {
     this.isMainAgg = val;
     if (!this.isMainAgg) {
       this.aggregationType = 'terms';
+      this.updateAggregations();
     }
   }
 

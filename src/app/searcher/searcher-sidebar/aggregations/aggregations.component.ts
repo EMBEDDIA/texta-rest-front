@@ -152,9 +152,10 @@ export class AggregationsComponent implements OnInit, OnDestroy {
       const aggregationToAdd = JSON.parse(JSON.stringify(aggregation.aggregation));
       if (!finalAgg) {
         finalAgg = aggregationToAdd;
+        innermostAgg = finalAgg;
         continue;
       }
-      innermostAgg = this.getInnerMostAggs(finalAgg);
+      innermostAgg = this.getInnerMostAggs(innermostAgg);
       innermostAgg.aggs = aggregationToAdd;
     }
 
