@@ -47,54 +47,46 @@ Cypress.Commands.add('createTestSavedSearch', (projectId) => {
 });
 Cypress.Commands.add('importTestTagger', (projectId) => {
   cy.fixture('tagger_model_141495.zip', 'base64').then(x=>{
-    Cypress.Blob.base64StringToBlob(x).then(blob=>{
+    const blob = Cypress.Blob.base64StringToBlob(x);
       let formData = new FormData();
       formData.append('file',new File([blob],'tagger_model_141495.zip'));
       const xhr = new XMLHttpRequest();
       xhr.open('POST', `${Cypress.env('api_host')}${Cypress.env('api_basePath')}/projects/${projectId}/taggers/import_model/`);
       xhr.setRequestHeader('Authorization', 'Token ' + JSON.parse(localStorage.getItem('user')).key);
       xhr.send(formData);
-      return xhr;
-    });
   });
 });
 Cypress.Commands.add('importTestEmbedding', (projectId) => {
   cy.fixture('embedding_model_24.zip', 'base64').then(x=>{
-    Cypress.Blob.base64StringToBlob(x).then(blob=>{
+    const blob = Cypress.Blob.base64StringToBlob(x);
       let formData = new FormData();
       formData.append('file',new File([blob],'embedding_model_24.zip'));
       const xhr = new XMLHttpRequest();
       xhr.open('POST', `${Cypress.env('api_host')}${Cypress.env('api_basePath')}/projects/${projectId}/embeddings/import_model/`);
       xhr.setRequestHeader('Authorization', 'Token ' + JSON.parse(localStorage.getItem('user')).key);
       xhr.send(formData);
-      return xhr;
-    });
   });
 });
 Cypress.Commands.add('importTestTorchTagger', (projectId) => {
   cy.fixture('torchtagger_model_7.zip', 'base64').then(x=>{
-    Cypress.Blob.base64StringToBlob(x).then(blob=>{
+    const blob = Cypress.Blob.base64StringToBlob(x);
       let formData = new FormData();
       formData.append('file',new File([blob],'torchtagger_model_7.zip'));
       const xhr = new XMLHttpRequest();
       xhr.open('POST', `${Cypress.env('api_host')}${Cypress.env('api_basePath')}/projects/${projectId}/torchtaggers/import_model/`);
       xhr.setRequestHeader('Authorization', 'Token ' + JSON.parse(localStorage.getItem('user')).key);
       xhr.send(formData);
-      return xhr;
-    });
   });
 });
 Cypress.Commands.add('importTestTaggerGroup', (projectId) => {
   cy.fixture('tagger_group_101.zip', 'base64').then(x=>{
-    Cypress.Blob.base64StringToBlob(x).then(blob=>{
+    const blob = Cypress.Blob.base64StringToBlob(x);
       let formData = new FormData();
       formData.append('file',new File([blob],'tagger_group_101.zip'));
       const xhr = new XMLHttpRequest();
       xhr.open('POST', `${Cypress.env('api_host')}${Cypress.env('api_basePath')}/projects/${projectId}/tagger_groups/import_model/`);
       xhr.setRequestHeader('Authorization', 'Token ' + JSON.parse(localStorage.getItem('user')).key);
       xhr.send(formData);
-      return xhr;
-    });
   });
 });
 Cypress.Commands.add('deleteUser', (url) => {
