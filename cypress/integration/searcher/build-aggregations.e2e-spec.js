@@ -111,12 +111,12 @@ describe('should be able to build aggregations', function () {
     cy.get('mat-option').contains('@timestamp').scrollIntoView().click();
     cy.wait('@searcherQuery');
     submitAndCheckTreeResult(2);
-    /* cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
+    cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
     cy.get('mat-option').contains('comment_subject').scrollIntoView().click();
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:first()').scrollIntoView().click();
     cy.get('mat-option').contains('@timestamp').scrollIntoView().click({force: true});
     cy.wait('@searcherQuery');
-    submitAndCheckGraphResult(1);
+    submitAndCheckGraphResult(1);/*
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:first()').scrollIntoView().click();
     cy.get('mat-option').contains('comment_subject').scrollIntoView().click({force: true});
     cy.wait(100);
