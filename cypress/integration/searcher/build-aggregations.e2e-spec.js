@@ -111,7 +111,7 @@ describe('should be able to build aggregations', function () {
     cy.get('mat-option').contains('@timestamp').scrollIntoView().click();
     cy.wait('@searcherQuery');
     submitAndCheckTreeResult(2);
-    cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
+    /* cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
     cy.get('mat-option').contains('comment_subject').scrollIntoView().click();
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:first()').scrollIntoView().click();
     cy.get('mat-option').contains('@timestamp').scrollIntoView().click({force: true});
@@ -139,6 +139,6 @@ describe('should be able to build aggregations', function () {
     cy.get('.mat-tree-node').should('be.visible');
     cy.get('app-aggregation-results .mat-tab-label').should('have.length', 2);
     cy.get('.mat-tab-label-container mat-icon:first()').click();
-    cy.get('.svg-container').should('be.visible');
+    cy.get('.svg-container').should('be.visible'); */
   });
 });
