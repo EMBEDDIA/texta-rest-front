@@ -102,12 +102,12 @@ describe('should be able to build aggregations', function () {
   });
 
   it('check nested aggs', function () {
- /*    cy.get('[data-cy=appSearcherSidebarAggregationsPanel]').should('be.visible').click();
+    cy.get('[data-cy=appSearcherSidebarAggregationsPanel]').should('be.visible').click();
     cy.get('[data-cy=appSearcherSidebarAggregationsAddNew]').scrollIntoView().click();
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
     cy.get('mat-option').contains('comment_content').scrollIntoView().click();
     submitAndCheckTreeResult(2);
-    cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
+ /*    cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
     cy.get('mat-option').contains('@timestamp').scrollIntoView().click();
     cy.wait('@searcherQuery');
     submitAndCheckTreeResult(2);

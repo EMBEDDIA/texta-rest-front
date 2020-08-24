@@ -25,7 +25,6 @@ variables:
     FF_NETWORK_PER_BUILD: 1
 
 stages:
-  - unit-test
   - e2e-test
   - build
 
