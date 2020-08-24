@@ -130,14 +130,14 @@ describe('should be able to build aggregations', function () {
     submitAndCheckTreeResult(2);
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:first()').click();
     cy.get('mat-option').contains('texta_facts').scrollIntoView().click();
-    submitAndCheckTreeResult(3);/*
+    submitAndCheckTreeResult(3);
     cy.get('[data-cy=appSearcherSidebarSavedSearches] .cdk-column-select:nth(1)').scrollIntoView().click('left');
-    cy.wait(50); // subscriber can be funky?
+    cy.wait(50);
     cy.get('[data-cy=appSearcherSidebarAggregationsSubmit]').scrollIntoView().click();
     cy.wait('@searcherQuery');
     cy.get('.mat-tree-node').should('be.visible');
     cy.get('app-aggregation-results .mat-tab-label').should('have.length', 2);
     cy.get('.mat-tab-label-container mat-icon:first()').click();
-    cy.get('.svg-container').should('be.visible'); */
+    cy.get('.svg-container').should('be.visible');
   });
 });
