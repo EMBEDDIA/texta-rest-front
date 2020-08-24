@@ -127,11 +127,10 @@ describe('should be able to build aggregations', function () {
     cy.get('[data-cy=appSearcherSidebarAggregationsAddNew]').scrollIntoView().click();
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
     cy.get('mat-option').contains('comment_content').scrollIntoView().click();
-    submitAndCheckTreeResult(2);/*
-    // cy.get('mat-option.mat-option-disabled .mat-option-text').contains('@timestamp');// only one date allowed
+    submitAndCheckTreeResult(2);
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:first()').click();
     cy.get('mat-option').contains('texta_facts').scrollIntoView().click();
-    submitAndCheckTreeResult(3);
+    submitAndCheckTreeResult(3);/*
     cy.get('[data-cy=appSearcherSidebarSavedSearches] .cdk-column-select:nth(1)').scrollIntoView().click('left');
     cy.wait(50); // subscriber can be funky?
     cy.get('[data-cy=appSearcherSidebarAggregationsSubmit]').scrollIntoView().click();
