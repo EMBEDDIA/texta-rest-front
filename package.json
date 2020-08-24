@@ -14,7 +14,7 @@
     "cy:cache:list": "cypress cache list",
     "cy:open": "cypress open",
     "cypress:run": "cypress run --browser chrome",
-    "cypress:ci": "ng build --configuration=cypress-production && run-p --race start:ci DEBUG=cypress:server:util:process_profiler cypress:run",
+    "cypress:ci": "ng build --configuration=cypress-production && run-p --race start:ci cypress:run",
     "start:ci": "http-server ./dist/TEXTA -a localhost -p 4200 -c-1 --proxy http://localhost:4200/index.html?"
   },
   "private": true,

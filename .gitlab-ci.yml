@@ -39,8 +39,7 @@ Cypress:
   script:
     - npm run cy:verify
     - npm run cy:info
-    - DEBUG=cypress:*
-    - npm run cypress:ci
+    - DEBUG=cypress:server:util:process_profiler cypress run
   artifacts:
     when: always
     paths:
