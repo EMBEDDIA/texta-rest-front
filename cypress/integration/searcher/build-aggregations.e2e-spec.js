@@ -86,7 +86,7 @@ describe('should be able to build aggregations', function () {
     cy.get('[data-cy=appSearcherSidebarSavedSearches] .cdk-column-select:nth(1)').should('be.visible').click('left');
 
     // check date aggregations
-/*     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]').should('be.visible').click();
+    cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]').should('be.visible').click();
     cy.get('mat-option').contains('@timestamp').scrollIntoView().should('be.visible').click();
     cy.wait('@searcherQuery');
     submitAndCheckGraphResult(1);
@@ -98,11 +98,11 @@ describe('should be able to build aggregations', function () {
     submitAndCheckGraphResult(1);
     cy.get('[data-cy=appSearcherSidebarAggregationsDateInterval]').should('be.visible').click();
     cy.get('mat-option').contains('month').should('be.visible').click();
-    submitAndCheckGraphResult(1); */
+    submitAndCheckGraphResult(1);
   });
 
   it('check nested aggs', function () {
-/*     cy.get('[data-cy=appSearcherSidebarAggregationsPanel]').should('be.visible').click();
+    cy.get('[data-cy=appSearcherSidebarAggregationsPanel]').should('be.visible').click();
     cy.get('[data-cy=appSearcherSidebarAggregationsAddNew]').scrollIntoView().click();
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
     cy.get('mat-option').contains('comment_content').scrollIntoView().click();
@@ -139,6 +139,6 @@ describe('should be able to build aggregations', function () {
     cy.get('.mat-tree-node').should('be.visible');
     cy.get('app-aggregation-results .mat-tab-label').should('have.length', 2);
     cy.get('.mat-tab-label-container mat-icon:first()').click();
-    cy.get('.svg-container').should('be.visible'); */
+    cy.get('.svg-container').should('be.visible');
   });
 });
