@@ -39,7 +39,7 @@ Cypress:
   script:
     - npm run cy:verify
     - npm run cy:info
-    - DEBUG=cypress:server:util:process_profiler cypress run
+    - DEBUG=cypress:server:util:process_profiler cypress run --browser chrome
   artifacts:
     when: always
     paths:
