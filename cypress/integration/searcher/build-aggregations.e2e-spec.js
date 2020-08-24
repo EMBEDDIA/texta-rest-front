@@ -123,11 +123,11 @@ describe('should be able to build aggregations', function () {
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
     cy.get('mat-option').contains('@timestamp').scrollIntoView().click();
     cy.wait('@searcherQuery');
-    submitAndCheckTreeResult(1);/*
+    submitAndCheckTreeResult(1);
     cy.get('[data-cy=appSearcherSidebarAggregationsAddNew]').scrollIntoView().click();
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:last()').scrollIntoView().click();
     cy.get('mat-option').contains('comment_content').scrollIntoView().click();
-    submitAndCheckTreeResult(2);
+    submitAndCheckTreeResult(2);/*
     // cy.get('mat-option.mat-option-disabled .mat-option-text').contains('@timestamp');// only one date allowed
     cy.get('[data-cy=appSearcherSidebarAggregationsSelectField]:first()').click();
     cy.get('mat-option').contains('texta_facts').scrollIntoView().click();
