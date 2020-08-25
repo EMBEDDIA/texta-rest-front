@@ -25,9 +25,18 @@ variables:
     FF_NETWORK_PER_BUILD: 1
 
 stages:
+  - unit-test
   - e2e-test
   - build
 
+Karma:
+  image: circleci/node:10-browsers
+  script:
+    - npm ci
+    - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
+  stage: unit-test
+  tags:
+  - ci-test
 
 Cypress:
   image: cypress/browsers:node12.16.2-chrome81-ff75
