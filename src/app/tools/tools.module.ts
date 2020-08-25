@@ -8,6 +8,10 @@ import {CreateDatasetDialogComponent} from './dataset-importer/create-dataset-di
 import {MLPComponent} from './mlp/mlp.component';
 import {MLPCreateIndexDialogComponent} from './mlp/mlp-create-index-dialog/mlp-create-index-dialog.component';
 import { MLPApplyTextDialogComponent } from './mlp/mlp-apply-text-dialog/mlp-apply-text-dialog.component';
+import { AnonymizerComponent } from './anonymizer/anonymizer.component';
+import { CreateAnonymizerDialogComponent } from './anonymizer/create-anonymizer-dialog/create-anonymizer-dialog.component';
+import { AnonymizeTextDialogComponent } from './anonymizer/anonymize-text-dialog/anonymize-text-dialog.component';
+import { EditAnonymizerDialogComponent } from './anonymizer/edit-anonymizer-dialog/edit-anonymizer-dialog.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +21,11 @@ import { MLPApplyTextDialogComponent } from './mlp/mlp-apply-text-dialog/mlp-app
     CreateDatasetDialogComponent,
     MLPComponent,
     MLPCreateIndexDialogComponent,
-    MLPApplyTextDialogComponent
+    MLPApplyTextDialogComponent,
+    AnonymizerComponent,
+    CreateAnonymizerDialogComponent,
+    AnonymizeTextDialogComponent,
+    EditAnonymizerDialogComponent
   ],
   imports: [
     SharedModule,

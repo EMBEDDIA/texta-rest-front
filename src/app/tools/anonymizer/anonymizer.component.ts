@@ -1,38 +1,34 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {ProjectStore} from '../../core/projects/project.store';
-import {MatDialog} from '@angular/material/dialog';
-import {LogService} from '../../core/util/log.service';
-import {MLPService} from '../../core/tools/mlp/mlp.service';
-import {HttpErrorResponse} from '@angular/common/http';
-import {MLPCreateIndexDialogComponent} from './mlp-create-index-dialog/mlp-create-index-dialog.component';
-import {merge, of, Subject} from 'rxjs';
-import {debounceTime, startWith, switchMap, takeUntil} from 'rxjs/operators';
-import {Project} from '../../shared/types/Project';
 import {MatTableDataSource} from '@angular/material/table';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
-import {MLP} from '../../shared/types/tasks/MLP';
+import {merge, of, Subject} from 'rxjs';
+import {Project} from '../../shared/types/Project';
+import {ProjectStore} from '../../core/projects/project.store';
+import {MatDialog} from '@angular/material/dialog';
+import {LogService} from '../../core/util/log.service';
+import {debounceTime, startWith, switchMap, takeUntil} from 'rxjs/operators';
+import {HttpErrorResponse} from '@angular/common/http';
 import {ConfirmDialogComponent} from '../../shared/components/dialogs/confirm-dialog/confirm-dialog.component';
-import {QueryDialogComponent} from '../../shared/components/dialogs/query-dialog/query-dialog.component';
-import {expandRowAnimation} from '../../shared/animations';
-import {MLPApplyTextDialogComponent} from './mlp-apply-text-dialog/mlp-apply-text-dialog.component';
+import {AnonymizerService} from './anonymizer.service';
 import {Index} from '../../shared/types/Index';
+import {Anonymizer} from './types/Anonymizer';
+import {CreateAnonymizerDialogComponent} from './create-anonymizer-dialog/create-anonymizer-dialog.component';
+import {AnonymizeTextDialogComponent} from './anonymize-text-dialog/anonymize-text-dialog.component';
+import {EditAnonymizerDialogComponent} from './edit-anonymizer-dialog/edit-anonymizer-dialog.component';
 
 @Component({
-  selector: 'app-mlp',
-  templateUrl: './mlp.component.html',
-  styleUrls: ['./mlp.component.scss'],
-  animations: [
-    expandRowAnimation
-  ]
+  selector: 'app-anonymizer',
+  templateUrl: './anonymizer.component.html',
+  styleUrls: ['./anonymizer.component.scss']
 })
-export class MLPComponent implements OnInit, OnDestroy, AfterViewInit {
-  expandedElement: MLP | null;
-  public tableData: MatTableDataSource<MLP> = new MatTableDataSource();
-  selectedRows = new SelectionModel<MLP>(true, []);
-  public displayedColumns = ['select', 'id', 'description', 'analyzers', 'query', 'task__time_started',
-    'task__time_completed', 'task__status'];
+export class AnonymizerComponent implements OnInit, OnDestroy, AfterViewInit {
+  expandedElement: Anonymizer | null;
+  public tableData: MatTableDataSource<Anonymizer> = new MatTableDataSource();
+  selectedRows = new SelectionModel<Anonymizer>(true, []);
+  public displayedColumns = ['select', 'id', 'description', 'misspelling_threshold',
+    'replace_misspelled_names', 'replace_single_last_names', 'replace_single_first_names', 'mimic_casing', 'actions'];
   public isLoadingResults = true;
 
   @ViewChild(MatSort) sort: MatSort;
@@ -40,14 +36,15 @@ export class MLPComponent implements OnInit, OnDestroy, AfterViewInit {
   resultsLength: number;
   destroyed$: Subject<boolean> = new Subject<boolean>();
   currentProject: Project;
+  patchRowQueue: Subject<Anonymizer> = new Subject();
 
   constructor(private projectStore: ProjectStore,
-              private mlpService: MLPService,
+              private anonymizerService: AnonymizerService,
               public dialog: MatDialog,
               private logService: LogService) {
   }
 
-  public indicesAccessor = (x: Index) => x.name;
+  setRowValueByProperty = <U extends keyof T, T extends object>(key: U, obj: T, row: T) => row[key] = obj[key];
 
   ngOnInit(): void {
 
@@ -62,6 +59,12 @@ export class MLPComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       } else {
         this.isLoadingResults = false;
+      }
+    });
+
+    this.patchRowQueue.pipe(takeUntil(this.destroyed$), debounceTime(50)).subscribe(row => {
+      if (this.currentProject) {
+        this.anonymizerService.patchAnonymizer(this.currentProject.id, row.id, row).subscribe();
       }
     });
   }
@@ -80,7 +83,7 @@ export class MLPComponent implements OnInit, OnDestroy, AfterViewInit {
         switchMap(proj => {
           if (proj) {
             const sortDirection = this.sort.direction === 'desc' ? '-' : '';
-            return this.mlpService.getMLPTasks(
+            return this.anonymizerService.getAnonymizers(
               this.currentProject.id,
               // Add 1 to to index because Material paginator starts from 0 and DRF paginator from 1
               `ordering=${sortDirection}${this.sort.active}&page=${this.paginator.pageIndex + 1}&page_size=${this.paginator.pageSize}`);
@@ -97,32 +100,41 @@ export class MLPComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-
-  openQueryDialog(query: unknown): void {
-    query = JSON.stringify(query);
-    const dialogRef = this.dialog.open(QueryDialogComponent, {
-      data: {query},
-      maxHeight: '965px',
-      width: '700px',
-    });
-  }
-
-  openApplyTextDialog(): void {
-    this.dialog.open(MLPApplyTextDialogComponent, {
-      maxHeight: '80vh',
-      width: '700px',
+  openAnonymizeTextDialog(element: Anonymizer): void {
+    this.dialog.open(AnonymizeTextDialogComponent, {
+      maxHeight: '650px',
+      width: '70vw',
+      data: element
     });
   }
 
   openCreateDialog(): void {
-    const dialogRef = this.dialog.open(MLPCreateIndexDialogComponent, {
+    const dialogRef = this.dialog.open(CreateAnonymizerDialogComponent, {
       maxHeight: '650px',
-      width: '700px',
+      width: '500px',
       disableClose: true
     });
     dialogRef.afterClosed().subscribe(resp => {
-      if (resp && !(resp instanceof HttpErrorResponse)) {
-        this.tableData.data = [...this.tableData.data, resp];
+      if (resp) {
+        this.tableData.data = [resp, ...this.tableData.data];
+      }
+    });
+  }
+
+  openEditDialog(element: Anonymizer): void {
+    const dialogRef = this.dialog.open(EditAnonymizerDialogComponent, {
+      maxHeight: '90vh',
+      width: '800px',
+      disableClose: true,
+      data: element,
+    });
+    dialogRef.afterClosed().subscribe((resp: Anonymizer) => {
+      if (resp) {
+        for (const property in resp) {
+          if (resp.hasOwnProperty(property)) {
+            this.setRowValueByProperty<keyof Anonymizer, Anonymizer>((property as keyof Anonymizer), resp, element);
+          }
+        }
       }
     });
   }
@@ -148,18 +160,18 @@ export class MLPComponent implements OnInit, OnDestroy, AfterViewInit {
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {
         data: {
           confirmText: 'Delete',
-          mainText: `Are you sure you want to delete ${this.selectedRows.selected.length} Tasks?`
+          mainText: `Are you sure you want to delete ${this.selectedRows.selected.length} anonymizers?`
         }
       });
 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
 
-          const idsToDelete = this.selectedRows.selected.map((mlp: MLP) => mlp.id);
+          const idsToDelete = this.selectedRows.selected.map((anonymizer: Anonymizer) => anonymizer.id);
           const body = {ids: idsToDelete};
 
-          this.mlpService.bulkDeleteMLPTasks(this.currentProject.id, body).subscribe(() => {
-            this.logService.snackBarMessage(`Deleted ${this.selectedRows.selected.length} Tasks.`, 2000);
+          this.anonymizerService.bulkDeleteAnonymizers(this.currentProject.id, body).subscribe(() => {
+            this.logService.snackBarMessage(`Deleted ${this.selectedRows.selected.length} anonymizers.`, 2000);
             this.removeSelectedRows();
           });
         }
@@ -168,12 +180,16 @@ export class MLPComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   removeSelectedRows(): void {
-    this.selectedRows.selected.forEach((selectedMLP: MLP) => {
-      const index: number = this.tableData.data.findIndex(mlp => mlp.id === selectedMLP.id);
+    this.selectedRows.selected.forEach((selectedAnonymizer: Anonymizer) => {
+      const index: number = this.tableData.data.findIndex(anonymizer => anonymizer.id === selectedAnonymizer.id);
       this.tableData.data.splice(index, 1);
       this.tableData.data = [...this.tableData.data];
     });
     this.selectedRows.clear();
+  }
+
+  updateAnonymizerRow(row: Anonymizer): void {
+    this.patchRowQueue.next(row);
   }
 
   ngOnDestroy(): void {
