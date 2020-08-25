@@ -136,8 +136,8 @@ describe('should be able to build aggregations', function () {
     cy.get('[data-cy=appSearcherSidebarAggregationsSubmit]').scrollIntoView().click();
     cy.wait('@searcherQuery');
     cy.get('.mat-tree-node').should('be.visible');
-    cy.get('app-aggregation-results .mat-tab-label').should('have.length', 2);/*
+    cy.get('app-aggregation-results .mat-tab-label').should('have.length', 2);
     cy.get('.mat-tab-label-container mat-icon:first()').click();
-    cy.get('.svg-container').should('be.visible'); */
+/*     cy.get('.svg-container').should('be.visible'); */
   });
 });
