@@ -19,8 +19,9 @@
     "typescript": "~4.0.2"
   },
   "devDependencies": {
-    "@types/node": "^12.11.1",
+    "@angular-devkit/schematics-cli": "^0.1001.0",
     "@types/jasmine": "~3.5.0",
+    "@types/node": "^12.11.1",
     "jasmine": "^3.5.0"
   }
 }

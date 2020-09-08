@@ -6,99 +6,42 @@ import {
   Rule,
   SchematicContext,
   Tree,
-  url
+  url,
+  SchematicsException
 } from '@angular-devkit/schematics';
 
-import {basename, dirname, join, normalize, Path, strings, virtualFs, workspaces} from '@angular-devkit/core';
+import {normalize, strings, experimental} from '@angular-devkit/core';
 import {Schema} from './schema';
 
-export interface Location {
-  name: string;
-  path: Path;
-}
-
-export enum ProjectType {
-  Application = 'application',
-  Library = 'library',
-}
-
-function createHost(tree: Tree): workspaces.WorkspaceHost {
-  return {
-    async readFile(path: string): Promise<string> {
-      const data = tree.read(path);
-      if (!data) {
-        throw new Error('File not found.');
-      }
-
-      return virtualFs.fileBufferToString(data);
-    },
-    async writeFile(path: string, data: string): Promise<void> {
-      return tree.overwrite(path, data);
-    },
-    async isDirectory(path: string): Promise<boolean> {
-      // approximate a directory check
-      return !tree.exists(path) && tree.getDir(path).subfiles.length > 0;
-    },
-    async isFile(path: string): Promise<boolean> {
-      return tree.exists(path);
-    },
-  };
-}
-
-// tslint:disable-next-line:typedef
-export async function getWorkspace(tree: Tree, path = '/') {
-  const host = createHost(tree);
-
-  const {workspace} = await workspaces.readWorkspace(path, host);
-
-  return workspace;
-}
-
-/**
- * Build a default project path for generating.
- * @param project The project which will have its default path generated.
- */
-export function buildDefaultPath(project: workspaces.ProjectDefinition): string {
-  const root = project.sourceRoot ? `/${project.sourceRoot}/` : `/${project.root}/src/`;
-  const projectDirName = project.extensions.projectType === ProjectType.Application ? 'app' : 'lib';
-
-  return `${root}${projectDirName}`;
-}
-
-export async function createDefaultPath(tree: Tree, projectName: string): Promise<string> {
-  const workspace = await getWorkspace(tree);
-  const project = workspace.projects.get(projectName);
-  if (!project) {
-    throw new Error('Specified project does not exist.');
-  }
-
-  return buildDefaultPath(project);
-}
-
-export function parseName(path: string, name: string): Location {
-  const nameWithoutPath = basename(normalize(name));
-  const namePath = dirname(join(normalize(path), name) as Path);
-
-  return {
-    name: nameWithoutPath,
-    path: normalize('/' + namePath),
-  };
-}
 
 // You don't have to export the function as default. You can also have more than one rule factory
 // per file.
 export function generateTextaModelModule(options: Schema): Rule {
   // tslint:disable-next-line:variable-name
-  return async (_tree: Tree, _context: SchematicContext) => {
-    if (options.path === undefined) {
-      options.path = await createDefaultPath(_tree, options.project as string);
+  return (_tree: Tree) => {
+    const workspaceConfig = _tree.read('/angular.json');
+    if (!workspaceConfig) {
+      throw new SchematicsException('Could not find Angular workspace configuration');
     }
 
-    options.type = !!options.type ? `.${options.type}` : '';
+    // convert workspace to string
+    const workspaceContent = workspaceConfig.toString();
 
-    const parsedPath = parseName(options.path, options.name);
-    options.name = parsedPath.name;
-    options.path = parsedPath.path;
+    // parse workspace string into JSON object
+    const workspace: experimental.workspace.WorkspaceSchema = JSON.parse(workspaceContent);
+    if (!options.project) {
+      options.project = workspace.defaultProject;
+    }
+
+    const projectName = options.project as string;
+
+    const project = workspace.projects[projectName];
+
+    const projectType = project.projectType === 'application' ? 'app' : 'lib';
+
+    if (options.path === undefined) {
+      options.path = `./${project.sourceRoot}/${projectType}`;
+    }
 
     const templateSource = apply(url('./files'), [
       applyTemplates({
@@ -131,7 +74,7 @@ export function generateTaskServices(options: Schema): Rule {
         camelize: strings.camelize,
         name: options.name
       }),
-      move('/src/app/core/models/' + strings.dasherize(options.name))
+      move('./src/app/core/models/' + strings.dasherize(options.name))
     ]);
 
     return mergeWith(templateSource);
@@ -149,7 +92,7 @@ export function generateTaskTypes(options: Schema): Rule {
         camelize: strings.camelize,
         name: options.name
       }),
-      move('/src/app/shared/types/tasks/')
+      move('./src/app/shared/types/tasks/')
     ]);
 
     return mergeWith(templateSource);

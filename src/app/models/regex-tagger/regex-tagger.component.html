@@ -17,14 +17,14 @@
       <button (click)="openMultiTagDialog()" data-cy="appRegexTaggerMultiTagBtn" mat-stroked-button>
         Multi tag text
       </button>
-      <mat-paginator [length]="resultsLength" [pageSizeOptions]="[25, 50, 100]" showFirstLastButtons>
+      <mat-paginator [pageSizeOptions]="[25, 50, 100]" showFirstLastButtons>
       </mat-paginator>
     </div>
   </div>
 
   <div [appScrollTop]="tableData" class="table-container overflow-auto">
     <table [dataSource]="tableData" mat-table
-           matSort matSortDirection="desc" matSortDisableClear matSortActive="id"
+           matSort matSortDirection="desc" matSortActive="id"
            multiTemplateDataRows>
       <ng-container matColumnDef="select">
         <th *matHeaderCellDef mat-header-cell>
@@ -97,7 +97,7 @@
       <ng-container matColumnDef="edit">
         <th *matHeaderCellDef mat-header-cell mat-sort-header><div class="edit-header">Edit</div></th>
         <td *matCellDef="let element;" mat-cell>
-          <button (click)="edit(element);$event.stopPropagation();" mat-icon-button>
+          <button (click)="edit(element);$event.stopPropagation();" mat-icon-button color="primary">
             <mat-icon aria-label="Edit regex tagger">edit</mat-icon>
           </button>
         </td>
