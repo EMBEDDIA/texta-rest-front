@@ -28,7 +28,7 @@ export class RegexTaggerGroupComponent implements OnInit, OnDestroy, AfterViewIn
   expandedElement: RegexTaggerGroup | null;
   public tableData: MatTableDataSource<RegexTaggerGroup> = new MatTableDataSource();
   selectedRows = new SelectionModel<RegexTaggerGroup>(true, []);
-  public displayedColumns = ['select', 'id', 'author_username', 'description', 'regex_taggers'];
+  public displayedColumns = ['select', 'id', 'author_username', 'description', 'regex_taggers', 'actions'];
   public isLoadingResults = true;
 
   @ViewChild(MatSort) sort: MatSort;
@@ -100,6 +100,23 @@ export class RegexTaggerGroupComponent implements OnInit, OnDestroy, AfterViewIn
     });
   }
 
+  onDelete(cluster: RegexTaggerGroup, index: number): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {confirmText: 'Delete', mainText: 'Are you sure you want to delete this clustering?'}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+
+        const body = {ids: [index]};
+        this.regexTaggerGroupService.bulkDeleteRegexTaggerGroupTasks(this.currentProject.id, body).subscribe(() => {
+          this.logService.snackBarMessage(`Deleted Regex Tagger Group ${cluster.description}`, 2000);
+          this.tableData.data.splice(index, 1);
+          this.tableData.data = [...this.tableData.data];
+        });
+      }
+    });
+  }
 
   /** Whether the number of selected elements matches the total number of rows. */
   isAllSelected(): boolean {
@@ -121,7 +138,7 @@ export class RegexTaggerGroupComponent implements OnInit, OnDestroy, AfterViewIn
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {
         data: {
           confirmText: 'Delete',
-          mainText: `Are you sure you want to delete ${this.selectedRows.selected.length} Tasks?`
+          mainText: `Are you sure you want to delete ${this.selectedRows.selected.length} Regex Tagger Groups?`
         }
       });
 
@@ -132,7 +149,7 @@ export class RegexTaggerGroupComponent implements OnInit, OnDestroy, AfterViewIn
           const body = {ids: idsToDelete};
 
           this.regexTaggerGroupService.bulkDeleteRegexTaggerGroupTasks(this.currentProject.id, body).subscribe(() => {
-            this.logService.snackBarMessage(`Deleted ${this.selectedRows.selected.length} Tasks.`, 2000);
+            this.logService.snackBarMessage(`Deleted ${this.selectedRows.selected.length} Regex Tagger Groups.`, 2000);
             this.removeSelectedRows();
           });
         }
