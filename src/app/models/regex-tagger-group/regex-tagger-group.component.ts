@@ -7,14 +7,19 @@ import {MatTableDataSource} from '@angular/material/table';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
-import { CreateRegexTaggerGroupDialogComponent } from './create-regex-tagger-group-dialog/create-regex-tagger-group-dialog.component';
+import {CreateRegexTaggerGroupDialogComponent} from './create-regex-tagger-group-dialog/create-regex-tagger-group-dialog.component';
 import {expandRowAnimation} from '../../shared/animations';
 import {RegexTaggerGroup} from '../../shared/types/tasks/RegexTaggerGroup';
 import {Project} from '../../shared/types/Project';
 import {ProjectStore} from '../../core/projects/project.store';
-import {RegexTaggerGroupService} from '../../core/models/regex-tagger-group/regex-tagger-group.service';
+import {RegexTaggerGroupService} from '../../core/models/taggers/regex-tagger-group/regex-tagger-group.service';
 import {LogService} from '../../core/util/log.service';
 import {ConfirmDialogComponent} from '../../shared/components/dialogs/confirm-dialog/confirm-dialog.component';
+import {MultiTagTextDialogComponent} from './multi-tag-text-dialog/multi-tag-text-dialog.component';
+import {ApplyTaggerGroupDialogComponent} from './apply-tagger-group-dialog/apply-tagger-group-dialog.component';
+import {TagTextDialogComponent} from './tag-text-dialog/tag-text-dialog.component';
+import {TagDocDialogComponent} from './tag-doc-dialog/tag-doc-dialog.component';
+import {TagRandomDocComponent} from './tag-random-doc/tag-random-doc.component';
 
 @Component({
   selector: 'app-regex-tagger-group',
@@ -97,6 +102,52 @@ export class RegexTaggerGroupComponent implements OnInit, OnDestroy, AfterViewIn
       if (resp && !(resp instanceof HttpErrorResponse)) {
         this.tableData.data = [resp, ...this.tableData.data];
       }
+    });
+  }
+
+  onTagText(element: RegexTaggerGroup): void {
+    this.dialog.open(TagTextDialogComponent, {
+      maxHeight: '750px',
+      width: '700px',
+      disableClose: true,
+      data: {currentProjectId: this.currentProject.id, tagger: element}
+    });
+  }
+
+
+  onTagDoc(element: RegexTaggerGroup): void {
+    this.dialog.open(TagDocDialogComponent, {
+      maxHeight: '750px',
+      width: '700px',
+      disableClose: true,
+      data: {currentProjectId: this.currentProject.id, tagger: element}
+    });
+  }
+
+  onTagRandomDoc(element: RegexTaggerGroup): void {
+    this.dialog.open(TagRandomDocComponent, {
+      maxHeight: '750px',
+      width: '700px',
+      disableClose: true,
+      data: {currentProjectId: this.currentProject.id, tagger: element}
+    });
+  }
+
+  openMultiTagDialog(): void {
+    this.dialog.open(MultiTagTextDialogComponent, {
+      maxHeight: '90vh',
+      width: '700px',
+      data: JSON.parse(JSON.stringify(this.tableData.data)),
+      disableClose: true
+    });
+  }
+
+  applyTaggerGroup(): void {
+    this.dialog.open(ApplyTaggerGroupDialogComponent, {
+      maxHeight: '90vh',
+      width: '700px',
+      data: JSON.parse(JSON.stringify(this.tableData.data)),
+      disableClose: true
     });
   }
 

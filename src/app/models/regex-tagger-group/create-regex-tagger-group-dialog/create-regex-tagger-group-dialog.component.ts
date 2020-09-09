@@ -7,7 +7,7 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {HttpErrorResponse} from '@angular/common/http';
 import {Field, Project, ProjectIndex} from '../../../shared/types/Project';
 import {UtilityFunctions} from '../../../shared/UtilityFunctions';
-import {RegexTaggerGroupService} from '../../../core/models/regex-tagger-group/regex-tagger-group.service';
+import {RegexTaggerGroupService} from '../../../core/models/taggers/regex-tagger-group/regex-tagger-group.service';
 import {LiveErrorStateMatcher} from '../../../shared/CustomerErrorStateMatchers';
 import {ProjectService} from '../../../core/projects/project.service';
 import {ProjectStore} from '../../../core/projects/project.store';

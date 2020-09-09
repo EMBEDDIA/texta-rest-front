@@ -13,6 +13,13 @@
               mat-icon-button matTooltip="Delete selected">
         <mat-icon>delete</mat-icon>
       </button>
+      <button (click)="openMultiTagDialog()" data-cy="appRegexTaggerGroupMultiTagBtn" mat-stroked-button>
+        Multi tag text
+      </button>
+      <button (click)="applyTaggerGroup()" data-cy="appRegexTaggerGroupApplyTaggerGroupBtn" mat-stroked-button
+              style="margin-left: 10px">
+        Apply tagger group
+      </button>
       <mat-paginator [pageSizeOptions]="[25, 50, 100]" showFirstLastButtons>
       </mat-paginator>
     </div>
@@ -98,14 +105,20 @@
 
 <mat-menu #editMenu="matMenu">
   <ng-template let-element="element" let-i="i" matMenuContent>
-    <div *ngIf="element.task && element.task.status === 'completed'">
-      <button [routerLink]="[element.id]" data-cy="appClusteringMenuViewClusters"
-              mat-menu-item>
-        View clusters
-      </button>
-    </div>
+    <button (click)="onTagDoc(element)" data-cy="appRegexTaggerGroupMenuTagDoc"
+            mat-menu-item>
+      Tag doc
+    </button>
+    <button (click)="onTagRandomDoc(element)" data-cy="appRegexTaggerGroupMenuTagRandomDoc"
+            mat-menu-item>
+      Tag random doc
+    </button>
+    <button (click)="onTagText(element)" data-cy="appRegexTaggerGroupMenuTagText"
+            mat-menu-item>
+      Tag texts
+    </button>
     <mat-divider></mat-divider>
-    <button (click)="onDelete(element, i)" data-cy="appClusteringMenuDelete" mat-menu-item>
+    <button (click)="onDelete(element, i)" data-cy="appRegexTaggerGroupMenuDelete" mat-menu-item>
       Delete
     </button>
   </ng-template>
