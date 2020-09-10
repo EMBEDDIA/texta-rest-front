@@ -46,7 +46,7 @@ export class RegexTaggerGroupService {
       tap(e => this.logService.logStatus(e, 'tagRandomDoc')),
       catchError(this.logService.handleError<{ matches: unknown, texts: string[] }>('tagRandomDoc')));
   }
-  
+
   tagText(projectId: number, groupId: number, body: unknown): Observable<{ matches: unknown } | HttpErrorResponse> {
     return this.http.post<{ matches: unknown }>(`${this.apiUrl}/projects/${projectId}/regex_tagger_groups/${groupId}/tag_text/`, body).pipe(
       tap(e => this.logService.logStatus(e, 'tagText')),

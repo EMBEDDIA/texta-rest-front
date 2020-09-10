@@ -18,7 +18,7 @@
         </mat-option>
       </mat-select>
       <mat-error *ngIf="regexTaggerGroupForm.get('indicesFormControl')?.hasError('required')">
-        Need at least 1 index
+        Index is <strong>required</strong>
       </mat-error>
     </mat-form-field>
     <mat-form-field data-cy="appRegexTaggerGroupApplyTaggerDialogFields">
@@ -48,14 +48,15 @@
         </mat-option>
       </mat-select>
       <mat-error *ngIf="regexTaggerGroupForm.get('regexTaggersFormControl')?.hasError('required')">
-        Select at least <strong>1 regex tagger</strong>
+        Regex tagger group is <strong>required</strong>
       </mat-error>
     </mat-form-field>
 
     <div class="flex-col">
       <div class="flex-row">
         <div class="flex-item-left">
-          <button class="flex-item-left" mat-button mat-dialog-close type="button">Close</button>
+          <button class="flex-item-left" mat-button mat-dialog-close type="button"
+                  data-cy="appRegexTaggerGroupApplyTaggerDialogClose">Close</button>
         </div>
         <div class="flex-item-right">
           <button [disabled]="!regexTaggerGroupForm.valid" data-cy="appRegexTaggerGroupApplyTaggerDialogSubmit"

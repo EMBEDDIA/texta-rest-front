@@ -2,7 +2,7 @@
 
 <div mat-dialog-content>
   <form #docForm="ngForm" (ngSubmit)="onSubmit()" class="max-width" id="docForm">
-    <mat-form-field class="max-width">
+    <mat-form-field class="max-width" data-cy="appRegexTaggerGroupTagDocDialogDocument">
       <input #doc="ngModel"
              (ngModelChange)="docChanged($event, doc)"
              [(ngModel)]="model.doc"
@@ -17,7 +17,7 @@
         Document has to be in <strong>JSON</strong> format
       </mat-error>
     </mat-form-field>
-    <mat-form-field class="max-width">
+    <mat-form-field class="max-width" data-cy="appRegexTaggerGroupTagDocDialogFields">
       <mat-select #selectedFields="ngModel" [(ngModel)]="model.selectedFields"
                   [errorStateMatcher]="matcher"
                   multiple
@@ -30,7 +30,7 @@
       </mat-select>
 
       <mat-error *ngIf="selectedFields.hasError('required')">
-        Select at least <strong>1</strong> field
+        Field is <strong>required</strong>
       </mat-error>
     </mat-form-field>
     <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
@@ -48,7 +48,7 @@
   <div class="flex-col max-width">
     <div class="flex-row">
       <div class="flex-item-left">
-        <button mat-stroked-button mat-dialog-close="">Close</button>
+        <button mat-stroked-button mat-dialog-close="" data-cy="appRegexTaggerGroupTagDocDialogClose">Close</button>
       </div>
       <div class="flex-item-right">
         <button [disabled]="docForm.invalid" form="docForm" mat-stroked-button type="submit">Tag</button>

@@ -78,8 +78,12 @@
             <div class="flex-col m-l-r-5" fxFlex="50">
               <table class="simple-table">
                 <tr>
-                  <th class="mat-body-strong">Resource id</th>
-                  <td>{{element.id}}</td>
+                  <th class="mat-body-strong">Regex tagger description</th>
+                  <th class="mat-body-strong">id</th>
+                </tr>
+                <tr *ngFor="let tagger of element.tagger_info">
+                  <td>{{tagger.description}}</td>
+                  <td>{{tagger.tagger_id}}</td>
                 </tr>
               </table>
             </div>

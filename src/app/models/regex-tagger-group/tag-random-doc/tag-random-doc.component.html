@@ -13,7 +13,7 @@
         </mat-option>
       </mat-select>
       <mat-error *ngIf="indices.hasError('required')">
-        Need at least 1 index
+        Index is <strong>required</strong>
       </mat-error>
     </mat-form-field>
     <mat-form-field class="max-width" data-cy="appRegexTaggerGroupTagRandomDocDialogfields">
@@ -28,7 +28,6 @@
         Field is <strong>required</strong>
       </mat-error>
     </mat-form-field>
-
 
     <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
     <div class="m-top-10"><span class="mat-body-strong">Result: </span>
@@ -46,7 +45,7 @@
   <div class="flex-col max-width">
     <div class="flex-row">
       <div class="flex-item-left">
-        <button mat-dialog-close="" mat-stroked-button>Close</button>
+        <button mat-dialog-close="" mat-stroked-button data-cy="appRegexTaggerGroupTagRandomDocDialogClose">Close</button>
       </div>
       <div class="flex-item-right">
         <button [disabled]="docForm.invalid" form="docForm" mat-stroked-button type="submit">Tag</button>

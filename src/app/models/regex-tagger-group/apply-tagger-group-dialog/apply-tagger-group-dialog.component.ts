@@ -8,13 +8,12 @@ import {RegexTagger} from '../../../shared/types/tasks/RegexTagger';
 import {MatDialogRef} from '@angular/material/dialog';
 import {ProjectService} from '../../../core/projects/project.service';
 import {RegexTaggerGroupService} from '../../../core/models/taggers/regex-tagger-group/regex-tagger-group.service';
-import {RegexTaggerService} from '../../../core/models/taggers/regex-tagger.service';
 import {LogService} from '../../../core/util/log.service';
 import {ProjectStore} from '../../../core/projects/project.store';
 import {filter, mergeMap, switchMap, take, takeUntil} from 'rxjs/operators';
 import {HttpErrorResponse} from '@angular/common/http';
 import {UtilityFunctions} from '../../../shared/UtilityFunctions';
-import {Index} from '../../../shared/types/Index';
+import {RegexTaggerGroup} from '../../../shared/types/tasks/RegexTaggerGroup';
 
 @Component({
   selector: 'app-apply-tagger-group-dialog',
@@ -35,14 +34,13 @@ export class ApplyTaggerGroupDialogComponent implements OnInit, OnDestroy {
   matcher: ErrorStateMatcher = new LiveErrorStateMatcher();
   currentProject: Project;
   destroyed$: Subject<boolean> = new Subject<boolean>();
-  projectRegexTaggers: RegexTagger[] = [];
+  projectRegexTaggers: RegexTaggerGroup[] = [];
   indices: ProjectIndex[];
   fieldsUnique: Field[] = [];
 
   constructor(private dialogRef: MatDialogRef<ApplyTaggerGroupDialogComponent>,
               private projectService: ProjectService,
               private regexTaggerGroupService: RegexTaggerGroupService,
-              private regexTaggerService: RegexTaggerService,
               private logService: LogService,
               private projectStore: ProjectStore) {
   }
@@ -52,7 +50,7 @@ export class ApplyTaggerGroupDialogComponent implements OnInit, OnDestroy {
       if (proj) {
         this.currentProject = proj;
         return forkJoin({
-          taggers: this.regexTaggerService.getRegexTaggers(proj.id),
+          taggers: this.regexTaggerGroupService.getRegexTaggerGroupTasks(proj.id),
           indices: this.projectStore.getProjectIndices().pipe(filter(x => !!x), take(1)),
         });
       }
@@ -101,8 +99,7 @@ export class ApplyTaggerGroupDialogComponent implements OnInit, OnDestroy {
         description: formData.descriptionFormControl,
         indices: formData.indicesFormControl.map((x: ProjectIndex) => [{name: x.index}]).flat(),
         fields: formData.fieldsFormControl,
-        ...this.query ? {query: JSON.parse(this.query)} : {},
-        regex_taggers: formData.regexTaggersFormControl.map(x => [x.id]).flat()
+        ...this.query ? {query: this.query} : {}
       };
 
       return this.regexTaggerGroupService.applyRegexTaggerGroup(this.currentProject.id, group.id, body);

@@ -13,6 +13,7 @@
         {{tagger.description}}
       </mat-option>
     </mat-select>
+    <mat-hint>Uses all regex-tagger-groups by default</mat-hint>
   </mat-form-field>
   <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
 
@@ -27,7 +28,8 @@
 <mat-dialog-actions>
   <div class="flex-row max-width">
     <div class="flex-item-left">
-      <button class="flex-item-left" mat-button mat-dialog-close type="button">Close</button>
+      <button class="flex-item-left" mat-button mat-dialog-close type="button"
+              data-cy="appRegexTaggerGroupMultiTagDialogClose">Close</button>
     </div>
     <div class="flex-item-right">
       <button (click)="onSubmit(text, selectedTaggers)" [disabled]="!text"
