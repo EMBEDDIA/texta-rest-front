@@ -153,7 +153,7 @@ export class RegexTaggerGroupComponent implements OnInit, OnDestroy, AfterViewIn
 
   onDelete(cluster: RegexTaggerGroup, index: number): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {confirmText: 'Delete', mainText: 'Are you sure you want to delete this clustering?'}
+      data: {confirmText: 'Delete', mainText: 'Are you sure you want to delete this regex tagger group?'}
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -161,7 +161,7 @@ export class RegexTaggerGroupComponent implements OnInit, OnDestroy, AfterViewIn
 
         const body = {ids: [index]};
         this.regexTaggerGroupService.bulkDeleteRegexTaggerGroupTasks(this.currentProject.id, body).subscribe(() => {
-          this.logService.snackBarMessage(`Deleted Regex Tagger Group ${cluster.description}`, 2000);
+          this.logService.snackBarMessage(`Deleted regex tagger group ${cluster.description}`, 2000);
           this.tableData.data.splice(index, 1);
           this.tableData.data = [...this.tableData.data];
         });

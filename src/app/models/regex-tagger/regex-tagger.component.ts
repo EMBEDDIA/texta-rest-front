@@ -17,6 +17,9 @@ import {CreateRegexTaggerDialogComponent} from './create-regex-tagger-dialog/cre
 import {MultiTagTextDialogComponent} from './multi-tag-text-dialog/multi-tag-text-dialog.component';
 import {HttpErrorResponse} from '@angular/common/http';
 import {EditRegexTaggerDialogComponent} from './edit-regex-tagger-dialog/edit-regex-tagger-dialog.component';
+import {TagTextDialogComponent} from './tag-text-dialog/tag-text-dialog.component';
+import {TagDocDialogComponent} from './tag-doc-dialog/tag-doc-dialog.component';
+import {TagRandomDocComponent} from './tag-random-doc/tag-random-doc.component';
 
 @Component({
   selector: 'app-regex-tagger',
@@ -28,7 +31,7 @@ import {EditRegexTaggerDialogComponent} from './edit-regex-tagger-dialog/edit-re
 })
 export class RegexTaggerComponent implements OnInit, OnDestroy, AfterViewInit {
   public displayedColumns = ['select', 'id', 'description', 'operator', 'matchType', 'requiredWords', 'phraseSlop',
-    'counterSlop', 'nAllowedEdits', 'fuzzy', 'ignoreCase', 'ignorePunctuation', 'edit'];
+    'counterSlop', 'nAllowedEdits', 'fuzzy', 'ignoreCase', 'ignorePunctuation', 'actions'];
   public isLoadingResults = true;
   public tableData: MatTableDataSource<RegexTagger> = new MatTableDataSource();
 
@@ -126,7 +129,33 @@ export class RegexTaggerComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
+  onTagText(element: RegexTagger): void {
+    this.dialog.open(TagTextDialogComponent, {
+      maxHeight: '750px',
+      width: '700px',
+      disableClose: true,
+      data: {currentProjectId: this.currentProject.id, tagger: element}
+    });
+  }
 
+
+  onTagDoc(element: RegexTagger): void {
+    this.dialog.open(TagDocDialogComponent, {
+      maxHeight: '750px',
+      width: '700px',
+      disableClose: true,
+      data: {currentProjectId: this.currentProject.id, tagger: element}
+    });
+  }
+
+  onTagRandomDoc(element: RegexTagger): void {
+    this.dialog.open(TagRandomDocComponent, {
+      maxHeight: '750px',
+      width: '700px',
+      disableClose: true,
+      data: {currentProjectId: this.currentProject.id, tagger: element}
+    });
+  }
   openMultiTagDialog(): void {
     this.dialog.open(MultiTagTextDialogComponent, {
       maxHeight: '90vh',
@@ -173,6 +202,24 @@ export class RegexTaggerComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       });
     }
+  }
+
+  onDelete(cluster: RegexTagger, index: number): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {confirmText: 'Delete', mainText: 'Are you sure you want to delete this regex tagger?'}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+
+        const body = {ids: [index]};
+        this.regexTaggerService.bulkDeleteRegexTaggers(this.currentProject.id, body).subscribe(() => {
+          this.logService.snackBarMessage(`Deleted regex tagger ${cluster.description}`, 2000);
+          this.tableData.data.splice(index, 1);
+          this.tableData.data = [...this.tableData.data];
+        });
+      }
+    });
   }
 
   removeSelectedRows(): void {
