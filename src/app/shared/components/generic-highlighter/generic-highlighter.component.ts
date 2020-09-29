@@ -1,11 +1,10 @@
-import {ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import {FactConstraint} from '../../searcher-sidebar/build-search/Constraints';
+import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
 import * as LinkifyIt from 'linkify-it';
-import {UtilityFunctions} from '../../../shared/UtilityFunctions';
-import {HighlightSettings} from '../../../shared/SettingVars';
+import {UtilityFunctions} from '../../UtilityFunctions';
+import {HighlightSettings} from '../../SettingVars';
 
 // tslint:disable:no-any
-export interface HighlightSpan {
+interface HighlightSpan {
   doc_path: string;
   fact: string;
   spans: string | number[];
@@ -15,17 +14,17 @@ export interface HighlightSpan {
   searcherHighlight?: boolean;
 }
 
-export interface HighlightConfig {
+interface HighlightConfig {
   currentColumn: string;
   searcherHighlight: any;
-  onlyHighlightMatching?: FactConstraint[];
   highlightTextaFacts: boolean;
   highlightHyperlinks: boolean;
   charLimit?: number;
+  colors?: Map<string, LegibleColor>;
   data: any;
 }
 
-export interface LegibleColor {
+interface LegibleColor {
   backgroundColor: string;
   textColor: string;
 }
@@ -38,14 +37,13 @@ interface HighlightObject {
   nested?: HighlightObject;
 }
 
-
 @Component({
-  selector: 'app-highlight',
-  templateUrl: './highlight.component.html',
-  styleUrls: ['./highlight.component.scss'],
+  selector: 'app-generic-highlighter',
+  templateUrl: './generic-highlighter.component.html',
+  styleUrls: ['./generic-highlighter.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HighlightComponent {
+export class GenericHighlighterComponent {
   static colors: Map<string, LegibleColor> = new Map<string, LegibleColor>([
     ['ORG', {backgroundColor: '#9FC2BA', textColor: 'black'}],
     ['PER', {backgroundColor: '#DDB0A0', textColor: 'black'}],
@@ -88,12 +86,15 @@ export class HighlightComponent {
 
   static generateColorsForFacts(facts: { fact: string }[]): Map<string, LegibleColor> {
     facts.forEach(fact => {
-      if (!HighlightComponent.colors.has(fact.fact)) {
+      if (!GenericHighlighterComponent.colors.has(fact.fact)) {
         // tslint:disable-next-line:no-bitwise
-        HighlightComponent.colors.set(fact.fact, {backgroundColor: `hsla(${~~(360 * Math.random())},70%,70%,0.8)`, textColor: 'black'});
+        GenericHighlighterComponent.colors.set(fact.fact, {
+          backgroundColor: `hsla(${~~(360 * Math.random())},70%,70%,0.8)`,
+          textColor: 'black'
+        });
       }
     });
-    return HighlightComponent.colors;
+    return GenericHighlighterComponent.colors;
   }
 
   // convert searcher highlight into mlp fact format
@@ -156,10 +157,10 @@ export class HighlightComponent {
 
       const highlightTerms = [
         ...hyperLinks,
-        ...HighlightComponent.makeSearcherHighlights(highlightConfig.searcherHighlight, highlightConfig.currentColumn),
+        ...GenericHighlighterComponent.makeSearcherHighlights(highlightConfig.searcherHighlight, highlightConfig.currentColumn),
         ...fieldFacts
       ];
-      const colors = HighlightComponent.generateColorsForFacts(highlightTerms);
+      const colors = highlightConfig.colors || GenericHighlighterComponent.generateColorsForFacts(highlightTerms);
       this.highlightArray = this.makeHighLights(highlightConfig.data[highlightConfig.currentColumn], highlightTerms, colors);
     } else {
       this.highlightArray = [];
@@ -169,18 +170,15 @@ export class HighlightComponent {
   constructFactArray(highlightConfig: HighlightConfig): HighlightSpan[] {
     let fieldFacts: HighlightSpan[];
     fieldFacts = this.getFactsByField(highlightConfig.data, highlightConfig.currentColumn);
-    if (highlightConfig.onlyHighlightMatching && fieldFacts.length > 0) {
-      fieldFacts = this.getOnlyMatchingFacts(fieldFacts, highlightConfig);
-    }
     fieldFacts = UtilityFunctions.getDistinctByProperty<HighlightSpan>(fieldFacts, (x => x.spans));
     return fieldFacts;
   }
 
   makeHyperlinksClickable(currentColumn: string | number, colName: string): HighlightSpan[] {
     // Very quick check, that can give false positives.
-    if (isNaN(Number(currentColumn)) && HighlightComponent.linkify.pretest(currentColumn as string)) {
+    if (isNaN(Number(currentColumn)) && GenericHighlighterComponent.linkify.pretest(currentColumn as string)) {
       const highlightArray: HighlightSpan[] = [];
-      const matches = HighlightComponent.linkify.match(currentColumn as string);
+      const matches = GenericHighlighterComponent.linkify.match(currentColumn as string);
       if (matches && matches.length > 0) {
         for (const match of matches) {
           const f: HighlightSpan = {} as HighlightSpan;
@@ -195,29 +193,6 @@ export class HighlightComponent {
       return highlightArray;
     }
     return [];
-  }
-
-  getOnlyMatchingFacts(fieldFacts: HighlightSpan[], highlightConfig: HighlightConfig): HighlightSpan[] {
-    if (fieldFacts && highlightConfig?.onlyHighlightMatching && highlightConfig.onlyHighlightMatching.length > 0) {
-      // if these exist match all facts of the type, PER, LOC, ORG etc. gets all unique global fact names
-      const globalFacts = [...new Set([].concat.apply([], highlightConfig.onlyHighlightMatching.map(x => x.factNameFormControl.value)))];
-      // get all unique fact names and their values as an object
-      // @ts-ignore
-      const factValues = [...new Set([].concat.apply([], (highlightConfig.onlyHighlightMatching.map(x => x.inputGroupArray.map(y => {
-        return {value: y.factTextInputFormControl.value, name: y.factTextFactNameFormControl.value};
-      })))))] as { value: string, name: string }[];
-      return JSON.parse(JSON.stringify(fieldFacts.filter((fact: HighlightSpan) => {
-        // @ts-ignore
-        if (globalFacts.includes(fact.fact)) {
-          return fact;
-        } else if (factValues.find(x => x.name === fact.fact)) {
-          if (factValues.find(x => x.value === fact.str_val)) {
-            return fact;
-          }
-        }
-      })));
-    }
-    return fieldFacts;
   }
 
   // tslint:disable-next-line:no-any
@@ -564,4 +539,4 @@ export class HighlightComponent {
 
 }
 
-HighlightComponent.linkify.set({fuzzyLink: false, fuzzyEmail: false});
+GenericHighlighterComponent.linkify.set({fuzzyLink: false, fuzzyEmail: false});

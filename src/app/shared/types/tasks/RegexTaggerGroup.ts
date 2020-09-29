@@ -14,3 +14,20 @@ export interface RegexTaggerGroup {
   description: string;
   tagger_info: TaggerInfo[];
 }
+
+export interface Match {
+  fact: string;
+  str_val: string;
+  doc_path: string;
+  spans: string;
+  tagger_id: number;
+}
+
+export interface TagTextResult {
+  tagger_group_id: number;
+  tagger_group_tag: string;
+  result: boolean;
+  tags: unknown[];
+  matches: Match[];
+  text: string;
+}
