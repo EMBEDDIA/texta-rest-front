@@ -32,6 +32,16 @@ export interface RegexTaggerGroupTagTextResult {
   text: string;
 }
 
+
+export interface RegexTaggerTagTextResult {
+  tagger_id: number;
+  tag: string;
+  result: boolean;
+  tags: unknown[];
+  matches: Match[];
+  text: string;
+}
+
 export interface RegexTaggerGroupTagRandomDocResult {
   tagger_group_id: number;
   tagger_group_tag: string;
@@ -39,4 +49,20 @@ export interface RegexTaggerGroupTagRandomDocResult {
   tags: unknown[];
   matches: Match[];
   document: { [key: string]: unknown };
+}
+export interface RegexTaggerTagRandomDocResult {
+  tagger_id: number;
+  tag: string;
+  result: boolean;
+  tags: unknown[];
+  matches: Match[];
+  document: { [key: string]: unknown };
+}
+export interface RegexTaggerGroupMultiTagTextResult {
+  tagger_group_id: number;
+  tagger_group_tag: string;
+  result: boolean;
+  tags: unknown[];
+  matches: Match[];
+  text: string;
 }

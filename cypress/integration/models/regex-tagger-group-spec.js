@@ -160,8 +160,8 @@ describe('regex-tagger-group should work', function () {
 
     multiTagTest();
     applyTaggerGroup();
-    tagRandomDoc();
-    tagText();
+    //tagRandomDoc();
+    //tagText();
 
 
     cy.get('.cdk-column-actions:nth(1)').click('left');

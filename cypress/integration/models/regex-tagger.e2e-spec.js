@@ -105,8 +105,8 @@ describe('regex-tagger should work', function () {
     cy.get('.code-wrapper').should('be.visible');
     cy.get('[data-cy=appRegexTaggerMultiTagDialogClose]').click();
 
-    tagRandomDoc();
-    tagText();
+    //tagRandomDoc();
+    //tagText();
 
     cy.get('.cdk-column-actions:nth(1)').click('left');
     cy.get('[data-cy=appRegexTaggerMenuDelete]').click();
