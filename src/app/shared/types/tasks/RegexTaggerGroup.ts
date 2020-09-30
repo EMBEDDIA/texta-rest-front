@@ -19,15 +19,24 @@ export interface Match {
   fact: string;
   str_val: string;
   doc_path: string;
-  spans: string;
+  spans: string | number[];
   tagger_id: number;
 }
 
-export interface TagTextResult {
+export interface RegexTaggerGroupTagTextResult {
   tagger_group_id: number;
   tagger_group_tag: string;
   result: boolean;
   tags: unknown[];
   matches: Match[];
   text: string;
+}
+
+export interface RegexTaggerGroupTagRandomDocResult {
+  tagger_group_id: number;
+  tagger_group_tag: string;
+  result: boolean;
+  tags: unknown[];
+  matches: Match[];
+  document: { [key: string]: unknown };
 }

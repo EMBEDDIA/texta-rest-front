@@ -134,7 +134,7 @@ export class RegexTaggerGroupComponent implements OnInit, OnDestroy, AfterViewIn
 
   onTagRandomDoc(element: RegexTaggerGroup): void {
     this.dialog.open(TagRandomDocComponent, {
-      maxHeight: '750px',
+      maxHeight: '90vh',
       width: '700px',
       disableClose: true,
       data: {currentProjectId: this.currentProject.id, tagger: element}

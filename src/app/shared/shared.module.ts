@@ -57,6 +57,7 @@ import {OverlayModule} from '@angular/cdk/overlay';
 import {PlotlyViaCDNModule} from 'angular-plotly.js';
 import { FactChipComponent } from './components/fact-chip/fact-chip.component';
 import { GenericHighlighterComponent } from './components/generic-highlighter/generic-highlighter.component';
+import { AccessorPipe } from './pipes/accessor.pipe';
 
 
 PlotlyViaCDNModule.setPlotlyVersion('1.49.4'); // can be `latest` or any version number (i.e.: '1.40.0')
@@ -80,6 +81,7 @@ PlotlyViaCDNModule.setPlotlyBundle('gl2d'); // 'basic', 'cartesian', 'geo', 'gl3
     ScrollTopDirective,
     FactChipComponent,
     GenericHighlighterComponent,
+    AccessorPipe,
   ],
   imports: [
     RouterModule,

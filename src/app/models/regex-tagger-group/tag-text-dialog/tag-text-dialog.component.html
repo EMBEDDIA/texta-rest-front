@@ -23,6 +23,7 @@
           <div fxLayout="row wrap">
             <app-fact-chip *ngFor="let item of uniqueFacts" [backGroundColor]="item.backgroundColor"
                            [displayValue]="item.fact.fact"
+                           [hoverValue]="taggerIdAccessor(item.fact)"
                            [textColor]="item.textColor"></app-fact-chip>
           </div>
         </mat-expansion-panel>
@@ -36,6 +37,7 @@
             <app-fact-chip *ngFor="let item of distinctMatches"
                            [backGroundColor]="colorMap.get(item.fact)?.backgroundColor || ''"
                            [displayValue]="item.str_val"
+                           [hoverValue]="taggerIdAccessor(item)"
                            [textColor]="colorMap.get(item.fact)?.textColor || ''"></app-fact-chip>
           </div>
         </mat-expansion-panel>
@@ -51,6 +53,7 @@
             searcherHighlight: null,
             highlightTextaFacts: true,
             highlightHyperlinks: true,
+            titleAccessor: taggerIdAccessor,
             colors: colorMap,
             data:{text:result.text, texta_facts: result.matches}}"></app-generic-highlighter>
         </mat-expansion-panel>
