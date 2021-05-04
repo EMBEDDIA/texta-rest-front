@@ -53,6 +53,7 @@
         projectResourceCounts.num_index_splitters +
         projectResourceCounts.num_clusterings +
         projectResourceCounts.num_evaluators +
+        projectResourceCounts.num_summarizers +
         projectResourceCounts.num_lang_detectors}})
         </ng-container>
         <mat-icon>arrow_drop_down</mat-icon>
@@ -112,8 +113,8 @@
         *ngIf="projectResourceCounts?.num_evaluators">({{projectResourceCounts.num_evaluators}})</span>
       </a>
       <a [routerLink]="['summarizers']" mat-menu-item
-         routerLinkActive="is-active-menu">Summarizer <!--<span
-        *ngIf="projectResourceCounts?.num_evaluators">({{projectResourceCounts.num_evaluators}})</span>-->
+         routerLinkActive="is-active-menu">Summarizer <span
+        *ngIf="projectResourceCounts?.num_summarizers">({{projectResourceCounts.num_summarizers}})</span>
       </a>
       <a [routerLink]="['lang-detect']" mat-menu-item
          routerLinkActive="is-active-menu">Language Detection <span

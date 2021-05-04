@@ -7,7 +7,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
-import { CreateSummarizerDialogComponent } from './create-summarizer-dialog/create-summarizer-dialog.component';
+import {CreateSummarizerDialogComponent} from './create-summarizer-dialog/create-summarizer-dialog.component';
 import {ProjectStore} from '../../core/projects/project.store';
 import {SummarizerService} from '../../core/tools/summarizer/summarizer.service';
 import {Project} from '../../shared/types/Project';
@@ -15,6 +15,8 @@ import {ConfirmDialogComponent} from '../../shared/components/dialogs/confirm-di
 import {Summarizer} from '../../shared/types/tasks/Summarizer';
 import {expandRowAnimation} from '../../shared/animations';
 import {LogService} from '../../core/util/log.service';
+import {Index} from '../../shared/types/Index';
+import {QueryDialogComponent} from '../../shared/components/dialogs/query-dialog/query-dialog.component';
 
 @Component({
   selector: 'app-summarizer',
@@ -28,7 +30,7 @@ export class SummarizerComponent implements OnInit, OnDestroy, AfterViewInit {
   expandedElement: Summarizer | null;
   public tableData: MatTableDataSource<Summarizer> = new MatTableDataSource();
   selectedRows = new SelectionModel<Summarizer>(true, []);
-  public displayedColumns = ['select', 'id', 'description', 'task__time_started', 'task__time_completed', 'task__status'];
+  public displayedColumns = ['select', 'id', 'author__username', 'description', 'show_query', 'task__time_started', 'task__time_completed', 'task__status'];
   public isLoadingResults = true;
 
   @ViewChild(MatSort) sort: MatSort;
@@ -42,6 +44,8 @@ export class SummarizerComponent implements OnInit, OnDestroy, AfterViewInit {
               public dialog: MatDialog,
               private logService: LogService) {
   }
+
+  public indicesAccessor = (x: Index) => x.name;
 
   ngOnInit(): void {
 
@@ -57,6 +61,14 @@ export class SummarizerComponent implements OnInit, OnDestroy, AfterViewInit {
       } else {
         this.isLoadingResults = false;
       }
+    });
+  }
+
+  openQueryDialog(query: unknown): void {
+    this.dialog.open(QueryDialogComponent, {
+      data: {query},
+      maxHeight: '965px',
+      width: '700px',
     });
   }
 

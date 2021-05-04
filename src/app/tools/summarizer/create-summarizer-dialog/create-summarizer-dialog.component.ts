@@ -24,6 +24,8 @@ export class CreateSummarizerDialogComponent implements OnInit, OnDestroy {
     descriptionFormControl: new FormControl('', [Validators.required]),
     indicesFormControl: new FormControl([], [Validators.required]),
     fieldsFormControl: new FormControl([], [Validators.required]),
+    algorithmsFormControl: new FormControl([]),
+    ratioFormControl: new FormControl(0.2, [Validators.min(0), Validators.max(1)])
   });
 
   matcher: ErrorStateMatcher = new LiveErrorStateMatcher();
@@ -31,6 +33,10 @@ export class CreateSummarizerDialogComponent implements OnInit, OnDestroy {
   destroyed$: Subject<boolean> = new Subject<boolean>();
   projectIndices: ProjectIndex[] = [];
   projectFields: ProjectIndex[];
+  algorithms: {
+    value: string;
+    display_name: string;
+  }[];
 
   constructor(private dialogRef: MatDialogRef<CreateSummarizerDialogComponent>,
               private projectService: ProjectService,
@@ -54,23 +60,34 @@ export class CreateSummarizerDialogComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.projectStore.getCurrentProject().pipe(takeUntil(this.destroyed$)).subscribe(project => {
-      if (project) {
-        this.currentProject = project;
+    this.projectStore.getCurrentProject().pipe(takeUntil(this.destroyed$), mergeMap(currentProject => {
+      if (currentProject) {
+        this.currentProject = currentProject;
+        return this.summarizerService.getSummarizerOptions(currentProject.id);
+      } else {
+        return of(null);
+      }
+    })).subscribe(resp => {
+      if (resp && !(resp instanceof HttpErrorResponse)) {
+        this.algorithms = resp.actions.POST.algorithm.choices;
+        this.summarizerForm.get('algorithmsFormControl')?.setValue([this.algorithms.find(x => x.display_name === 'lexrank')?.value || this.algorithms[0]?.value]);
+      } else if (resp instanceof HttpErrorResponse) {
+        this.logService.snackBarError(resp, 5000);
       }
     });
   }
 
   onSubmit(formData: {
     descriptionFormControl: string;
-    indicesFormControl: ProjectIndex[]; fieldsFormControl: string[];
+    indicesFormControl: ProjectIndex[]; fieldsFormControl: string[]; ratioFormControl: number; algorithmsFormControl: string[]
   }): void {
     const body = {
       description: formData.descriptionFormControl,
       indices: formData.indicesFormControl.map(x => [{name: x.index}]).flat(),
-      fields: formData.fieldsFormControl
+      fields: formData.fieldsFormControl,
+      ratio: formData.ratioFormControl,
+      algorithm: formData.algorithmsFormControl
     };
-    console.log(body);
     this.summarizerService.createSummarizerTask(this.currentProject.id, body).subscribe(resp => {
       if (resp && !(resp instanceof HttpErrorResponse)) {
         this.logService.snackBarMessage(`Created new task: ${resp.description}`, 2000);

@@ -3,9 +3,10 @@ import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {catchError, tap} from 'rxjs/operators';
 import {environment} from '../../../../environments/environment';
-import {Summarizer} from '../../../shared/types/tasks/Summarizer';
+import {Summarizer, SummarizerOptions} from '../../../shared/types/tasks/Summarizer';
 import {ResultsWrapper} from '../../../shared/types/Generic';
 import {LogService} from '../../util/log.service';
+import {MLPOptions} from "../../../shared/types/tasks/MLPOptions";
 
 @Injectable({
   providedIn: 'root'
@@ -35,4 +36,13 @@ export class SummarizerService {
       tap(e => this.logService.logStatus(e, 'bulkDeleteSummarizerTasks')),
       catchError(this.logService.handleError<{ 'num_deleted': number, 'deleted_types': { string: number }[] }>('bulkDeleteSummarizerTasks')));
   }
+
+  getSummarizerOptions(projectId: number): Observable<SummarizerOptions | HttpErrorResponse> {
+    return this.http.options<SummarizerOptions>(
+      `${this.apiUrl}/projects/${projectId}/summarizer_index/`
+    ).pipe(
+      tap(e => this.logService.logStatus(e, 'getSummarizerOptions')),
+      catchError(this.logService.handleError<SummarizerOptions>('getSummarizerOptions')));
+  }
+
 }
