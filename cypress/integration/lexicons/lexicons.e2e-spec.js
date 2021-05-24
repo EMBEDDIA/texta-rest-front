@@ -17,6 +17,7 @@ describe('lexicons should work', function () {
       cy.intercept('DELETE', '**/lexicons/**').as('deleteLexicons');
       cy.intercept('POST', '**/lexicons/**').as('postLexicons');
       cy.intercept('PATCH', '**/lexicons/**').as('patchLexicons');
+      cy.intercept('GET', '**/embeddings/**').as('getEmbeddings');
       cy.visit('/lexicons');
 
       cy.wait('@getProjectIndices');
@@ -31,8 +32,8 @@ describe('lexicons should work', function () {
         expect(created.response.statusCode).to.eq(201);
       });
       cy.get('.element-row:first()').click();
+      cy.wait('@getEmbeddings');
       cy.get('[data-cy=appLexiconEmbedding]').click();
-      cy.wait(1000);//replace with wait embeddings if u arent lazy
       cy.get('.mat-option:first()').click();
       cy.get('[data-cy=appLexiconPositiveUsedWords]').type('pede');
       cy.intercept('POST', '**/embeddings/**').as('postEmbeddings');

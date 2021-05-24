@@ -2,7 +2,7 @@ describe('register and login workflows', function () {
   beforeEach(function () {
     cy.visit('/');
     cy.fixture('users').as('usersJSON');
-    cy.intercept('GET', '**user**').as('getUser');
+    cy.intercept('GET', `${Cypress.env('api_basePath')}/rest-auth/user/`).as('getUser');
   });
   it('Should display a popup on navigation and be able to log in and logout', function () {
     cy.get('[data-cy=appSharedLoginDialogUsername]').type(this.usersJSON.username);
@@ -82,7 +82,6 @@ describe('register and login workflows', function () {
     cy.get('[data-cy=appSharedRegisterDialogPassword1]').type('35');
     cy.get('[data-cy=appSharedRegisterDialogPassword2]').type('35');
     cy.get('[data-cy=appSharedRegisterDialogSubmit]').click();
-    cy.intercept('GET', `${Cypress.env('api_basePath')}/rest-auth/user/`).as('getUser');
     cy.intercept('POST', 'logout').as('logout');
     cy.get('[data-cy=appSharedRegisterDialogSubmit]').click();
     cy.wait('@getUser').then(x=>{
@@ -90,7 +89,9 @@ describe('register and login workflows', function () {
         cy.get('[data-cy=appNavbarLoggedInUserMenu]').should('be.visible').click();
         cy.get('[data-cy=appNavbarlogOutMenuItem]').should('be.visible').click();
         cy.wait('@logout');
+        cy.wait(5000);
         cy.login(this.usersJSON.username, this.usersJSON.password).then(b=>{
+          cy.wait(5000);
           cy.deleteUser(x.response.body.url).then(y=>{
             expect(y.status).to.eq(204);
           })
