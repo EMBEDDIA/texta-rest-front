@@ -12,6 +12,7 @@ import * as LinkifyIt from 'linkify-it';
 import {UtilityFunctions} from '../../../shared/UtilityFunctions';
 import {HighlightSettings} from '../../../shared/SettingVars';
 import {environment} from '../../../../environments/environment';
+import {AppConfigService} from '../../../core/util/app-config.service';
 
 // tslint:disable:no-any
 export interface HighlightSpan {
@@ -71,7 +72,7 @@ export class HighlightComponent {
     ['EMAIL', {backgroundColor: '#9fffe0', textColor: 'black'}],
   ]);
   static linkify = new LinkifyIt();
-  static readonly HYPERLINKS_COL = environment.fileFieldReplace; // hosted_filepath
+  static readonly HYPERLINKS_COL = AppConfigService.settings.fileFieldReplace; // hosted_filepath
   highlightArray: HighlightObject[] = [];
   textHidden = true;
   listenerList: (() => any)[] = [];
@@ -134,7 +135,7 @@ export class HighlightComponent {
   static makeHyperlinksClickable(currentColumnData: unknown, colName: string): HighlightSpan[] {
     // Very quick check, that can give false positives.
     if (colName === HighlightComponent.HYPERLINKS_COL) {
-      currentColumnData = environment.apiHost + '/' + currentColumnData;
+      currentColumnData = `${AppConfigService.settings.apiHost}/${currentColumnData}`;
     }
     if (isNaN(Number(currentColumnData)) && HighlightComponent.linkify.pretest(currentColumnData as string)) {
       const highlightArray: HighlightSpan[] = [];
