@@ -25,7 +25,7 @@ export class LogService {
 
 
   public logStatus(val: unknown, msg: string): void {
-    if (!this.logging) {
+    if (this.logging) {
       console.warn(msg, val);
     }
   }
