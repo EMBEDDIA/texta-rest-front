@@ -156,7 +156,7 @@ export class HighlightComponent {
     return [];
   }
 
-  static makeShowShortVersion(maxWordDistance: number, highlightObjects: HighlightObject[]): HighlightObject[] {
+  static makeShowShortVersion(maxWordDistance: number, highlightObjects: HighlightObject[], currentColumn: string): HighlightObject[] {
     const showShortVersionHighlightObjects: HighlightObject[] = [];
     let parentShortVersionSpan: HighlightObject | undefined;
     let colHasSearcherHighlight = false;
@@ -166,7 +166,7 @@ export class HighlightComponent {
         parentShortVersionSpan = {
           text: '',
           highlighted: false,
-          shortVersion: {spans: [highlightObject]}, isVisible: true,
+          shortVersion: {spans: [highlightObject]}, isVisible: false,
         };
       } else if (parentShortVersionSpan && HighlightComponent.highlightHasSearcherHighlight(highlightObject)) {
         parentShortVersionSpan.isVisible = false;
@@ -181,16 +181,12 @@ export class HighlightComponent {
       }
     }
     if (parentShortVersionSpan) {
-      parentShortVersionSpan.isVisible = !colHasSearcherHighlight;
       showShortVersionHighlightObjects.push(parentShortVersionSpan);
     }
 
-    if (colHasSearcherHighlight) {
-      showShortVersionHighlightObjects.forEach(x => x.shortVersion?.spans?.forEach(y => y.isVisible = false));
-      return HighlightComponent.cutShortVersionExtraText(showShortVersionHighlightObjects, maxWordDistance);
-    }
+    showShortVersionHighlightObjects.forEach(x => x.shortVersion?.spans?.forEach(y => y.isVisible = false));
+    return HighlightComponent.cutShortVersionExtraText(showShortVersionHighlightObjects, maxWordDistance) || [];
 
-    return showShortVersionHighlightObjects[0]?.shortVersion?.spans || [];
   }
 
   static cutShortVersionExtraText(highlights: HighlightObject[], maxWordDistance: number): HighlightObject[] {
@@ -413,8 +409,9 @@ export class HighlightComponent {
       ];
       const colors = HighlightComponent.generateColorsForFacts(highlightTerms);
       const highlights = this.makeHighLights(highlightConfig.data[highlightConfig.currentColumn], highlightTerms, colors);
-      if (highlightConfig.showShortVersion && highlightConfig.searcherHighlight) {
-        this.highlightArray = HighlightComponent.makeShowShortVersion(highlightConfig.showShortVersion, highlights);
+      if (highlightConfig.showShortVersion) {
+        this.highlightArray = HighlightComponent.makeShowShortVersion(highlightConfig.showShortVersion, highlights,
+          highlightConfig.data[highlightConfig.currentColumn]);
       } else {
         this.highlightArray = highlights;
       }
