@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {HttpBackend, HttpClient} from "@angular/common/http";
+import {HttpBackend, HttpClient} from '@angular/common/http';
 
 export interface UaaConf {
   uaaURL: string;
@@ -28,7 +28,22 @@ interface AppConf {
 })
 export class AppConfigService {
 
-  static settings: AppConf;
+  static settings: AppConf = {
+    apiHost: '',
+    apiBasePath: '/api/v1',
+    apiBasePath2: '/api/v2',
+    logging: true,
+    fileFieldReplace: 'texta_filepath',
+    useCloudFoundryUAA: true,
+    uaaConf: {
+      uaaURL: '',
+      redirect_uri: '',
+      client_id: 'login',
+      scope: 'openid',
+      response_type: 'code'
+    }
+  };
+
 
   // we use httpBackend instead of HttpClient here instead because we cant trigger auth interceptor
   constructor(private handler: HttpBackend) {
