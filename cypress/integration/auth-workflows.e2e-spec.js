@@ -2,11 +2,12 @@ describe('register and login workflows', function () {
   beforeEach(function () {
     cy.visit('/');
     cy.fixture('users').as('usersJSON');
-    cy.intercept('GET', `${Cypress.env('api_basePath')}/rest-auth/user/`).as('getUser');
+
   });
   it('Should display a popup on navigation and be able to log in and logout', function () {
     cy.get('[data-cy=appSharedLoginDialogUsername]').type(this.usersJSON.username);
     cy.get('[data-cy=appSharedLoginDialogPassword]').type(this.usersJSON.password);
+    cy.intercept('GET', `${Cypress.env('api_basePath')}/rest-auth/user/`).as('getUser');
     cy.get('[data-cy=appSharedLoginDialogSubmit]').click();
     cy.wait('@getUser');
     cy.get('[data-cy=appNavbarLoggedInUserMenu]').should('be.visible').click();
@@ -81,9 +82,9 @@ describe('register and login workflows', function () {
     cy.get('[data-cy=appSharedRegisterDialogError').contains('common');
     cy.get('[data-cy=appSharedRegisterDialogPassword1]').type('35');
     cy.get('[data-cy=appSharedRegisterDialogPassword2]').type('35');
+    cy.intercept('GET', `${Cypress.env('api_basePath')}/rest-auth/user/`).as('getUser');
     cy.get('[data-cy=appSharedRegisterDialogSubmit]').click();
     cy.intercept('POST', 'logout').as('logout');
-    cy.get('[data-cy=appSharedRegisterDialogSubmit]').click();
     cy.wait('@getUser').then(x=>{
       assert.isNotNull(x.response.body.url, 'is not null');
         cy.get('[data-cy=appNavbarLoggedInUserMenu]').should('be.visible').click();
