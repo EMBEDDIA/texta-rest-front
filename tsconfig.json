@@ -23,7 +23,8 @@
     "lib": [
       "es2019",
       "dom"
-    ]
+    ],
+    "allowSyntheticDefaultImports": true
   },
   "angularCompilerOptions": {
     "strictTemplates": true,
