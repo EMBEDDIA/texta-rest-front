@@ -42,6 +42,7 @@
               "src/styles.scss"
             ],
             "scripts": [
+              "node_modules/plotly.js-dist/plotly.js"
             ],
             "webWorkerTsConfig": "tsconfig.worker.json",
             "vendorChunk": true,
