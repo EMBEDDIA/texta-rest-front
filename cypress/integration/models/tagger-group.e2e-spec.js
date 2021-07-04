@@ -51,7 +51,6 @@ describe('tagger groups should work', function () {
   it('extra_actions should work', function () {
     cy.importTestTaggerGroup(this.projectId).then(x => {
       initTaggerGroupPage();
-      cy.wait('@getTaggerGroups');
       cy.wait(100);
       cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
       cy.get('[data-cy=appTaggerGroupMenuModelList]').should('be.visible').click();

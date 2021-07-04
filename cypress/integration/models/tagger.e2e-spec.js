@@ -24,7 +24,6 @@ describe('taggers should work', function () {
     cy.importTestTagger(this.projectId).then(x => {
       cy.intercept('GET', '**/taggers/**').as('getTaggers');
       initTaggersPage();
-      cy.wait('@getTaggers');
       cy.wait(100);
 
       cy.intercept('POST', '**/taggers/**').as('postTagger');
