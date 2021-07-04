@@ -19,8 +19,6 @@ describe('tagger groups should work', function () {
     cy.visit('/tagger-groups');
     cy.wait('@getProjectIndices');
     cy.wait('@getTaggerGroups');
-    cy.get('[data-cy=appNavbarProjectSelect]').click();
-    cy.get('mat-option').contains('integration_test_project').click();
   }
 
   it('should be able to create a new tagger group', function () {

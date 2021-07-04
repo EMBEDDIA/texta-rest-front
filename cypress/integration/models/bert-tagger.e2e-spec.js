@@ -18,8 +18,6 @@ describe('bert-taggers should work', function () {
     cy.visit('/bert-taggers');
     cy.wait('@getbertTaggers');
     cy.wait('@getProjectIndices');
-    cy.get('[data-cy=appNavbarProjectSelect]').click();
-    cy.get('mat-option').contains('integration_test_project').click();
   }
 
   function tagRandomDoc() {

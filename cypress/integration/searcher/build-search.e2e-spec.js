@@ -16,9 +16,6 @@ describe('searching and search related activities should be working correctly', 
       cy.wait('@getProjectIndices');
       cy.get('[data-cy=appNavbarLoggedInUserMenu]').should('be.visible');
       cy.get('[data-cy=appNavbarSearcher]').click();
-      cy.get('[data-cy=appNavbarProjectSelect]').click();
-      cy.get('mat-option').contains('integration_test_project').click();
-      cy.wait('@getProjectIndices');
     });
 
   });
