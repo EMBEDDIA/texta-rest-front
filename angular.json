@@ -159,7 +159,8 @@
             "assets": [
               "src/favicon.ico",
               "src/assets"
-            ]
+            ],
+            "webWorkerTsConfig": "tsconfig.worker.json"
           }
         },
         "lint": {
