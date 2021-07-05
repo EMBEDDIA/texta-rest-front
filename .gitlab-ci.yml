@@ -49,8 +49,8 @@ variables:
     TEXTA_UAA_CLIENT_SECRET: loginsecret
 
 stages:
-  - unit-test
   - e2e-test
+  - unit-test
   - build
 
 Karma:
