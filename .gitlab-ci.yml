@@ -54,7 +54,7 @@ stages:
   - build
 
 Karma:
-  image: cimg/node:16.4.0
+  image: cimg/node:16.4.0-browsers
   script:
     - npm ci
     - npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI
