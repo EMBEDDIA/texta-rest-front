@@ -9,7 +9,7 @@ import {Index} from '../shared/types/Index';
 import {ResultsWrapper} from '../shared/types/Generic';
 import {CoreVariables} from '../shared/types/CoreVariables';
 import {AppConfigService} from './util/app-config.service';
-import {CeleryCountTasks} from "../shared/types/Celery";
+import {CeleryCountTasks, CeleryStatus} from "../shared/types/Celery";
 
 @Injectable({
   providedIn: 'root'
@@ -105,10 +105,11 @@ export class CoreService {
       catchError(this.logService.handleError<{ message: string }>('purgeCeleryTasks')));
   }
 
-  getCeleryQueueStats(): Observable<{ message: string } | HttpErrorResponse> {
-    return this.http.post<{ message: string }>(`${this.apiUrl2}/celery/queue/stats/`, {}).pipe(
+  // tslint:disable-next-line:no-any
+  getCeleryQueueStats(): Observable<CeleryStatus | HttpErrorResponse> {
+    return this.http.post<CeleryStatus>(`${this.apiUrl2}/celery/queue/stats/`, {}).pipe(
       tap(e => this.logService.logStatus(e, 'getCeleryQueueStats')),
-      catchError(this.logService.handleError<{ message: string }>('getCeleryQueueStats')));
+      catchError(this.logService.handleError<CeleryStatus>('getCeleryQueueStats')));
   }
 
   getCeleryTaskInfo(): Observable<CeleryCountTasks | HttpErrorResponse> {
