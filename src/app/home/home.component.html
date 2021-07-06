@@ -84,12 +84,6 @@
                 class="count-text center-text block">  {{health.host.cpu.count}} </span>
           <span class="mat-hint center-text block">CPUs</span>
         </div>
-
-        <div fxFlex>
-          <span [ngClass]="health.toolkit.active_tasks > 0 ? 'accent-text' : 'primary-text'"
-                class="count-text center-text block">  {{health.toolkit.active_tasks}} </span>
-          <span class="mat-hint center-text block">Active Tasks</span>
-        </div>
       </mat-card>
 
 

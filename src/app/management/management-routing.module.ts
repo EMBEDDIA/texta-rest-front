@@ -33,8 +33,6 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         component: CoreVariablesComponent
       },
-
-
       {
         path: 'celery-tasks',
         canActivate: [AuthGuard],

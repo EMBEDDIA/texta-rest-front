@@ -14,7 +14,6 @@ export class ManagementComponent implements OnInit, OnDestroy {
   destroyed$ = new Subject();
   currentUser: UserProfile;
 
-  activeLink = 'users';
 
   constructor(private userStore: UserStore) {
   }

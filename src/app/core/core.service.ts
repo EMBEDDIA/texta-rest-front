@@ -99,10 +99,10 @@ export class CoreService {
       catchError(this.logService.handleError<{ message: string }>('patchCoreVariables')));
   }
 
-  purgeCeleryTasks(): Observable<{ message: string } | HttpErrorResponse> {
-    return this.http.post<{ message: string }>(`${this.apiUrl2}/celery/queue/purge_tasks/`, {}).pipe(
+  purgeCeleryTasks(): Observable<{ detail: string } | HttpErrorResponse> {
+    return this.http.post<{ detail: string }>(`${this.apiUrl2}/celery/queue/purge_tasks/`, {}).pipe(
       tap(e => this.logService.logStatus(e, 'purgeCeleryTasks')),
-      catchError(this.logService.handleError<{ message: string }>('purgeCeleryTasks')));
+      catchError(this.logService.handleError<{ detail: string }>('purgeCeleryTasks')));
   }
 
   // tslint:disable-next-line:no-any
