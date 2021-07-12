@@ -19,7 +19,7 @@ import {TorchTagTextDialogComponent} from '../torch-tag-text-dialog/torch-tag-te
 import {expandRowAnimation} from '../../../shared/animations';
 import {EditTorchTaggerDialogComponent} from '../edit-torch-tagger-dialog/edit-torch-tagger-dialog.component';
 import {EpochReportsDialogComponent} from '../epoch-reports-dialog/epoch-reports-dialog.component';
-import { ApplyToIndexDialogComponent } from '../apply-to-index-dialog/apply-to-index-dialog.component';
+import {ApplyToIndexDialogComponent} from '../apply-to-index-dialog/apply-to-index-dialog.component';
 
 @Component({
   selector: 'app-torch-tagger',
@@ -175,10 +175,10 @@ export class TorchTaggerComponent implements OnInit, OnDestroy, AfterViewInit {
     this.dialog.open(EditTorchTaggerDialogComponent, {
       width: '700px',
       data: torchTagger
-    }).afterClosed().subscribe((x: TorchTagger | HttpErrorResponse) => {
+    }).afterClosed().subscribe(x => {
       if (x && !(x instanceof HttpErrorResponse)) {
         torchTagger.description = x.description;
-      } else {
+      } else if (x instanceof HttpErrorResponse) {
         this.logService.snackBarError(x, 3000);
       }
     });

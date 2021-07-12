@@ -72,7 +72,7 @@ export class CreateTaggerDialogComponent implements OnInit, OnDestroy {
   });
 
   matcher: ErrorStateMatcher = new LiveErrorStateMatcher();
-  taggerOptions: TaggerOptions = TaggerOptions.createEmpty();
+  taggerOptions: TaggerOptions;
   embeddings: Embedding[];
   projectFields: ProjectIndex[];
   fieldsUnique: Field[] = [];

@@ -13,6 +13,7 @@ import {RegexTagger} from '../../../shared/types/tasks/RegexTagger';
 import {Match, RegexTaggerTagRandomDocResult} from '../../../shared/types/tasks/RegexTaggerGroup';
 import {HighlightSettings} from '../../../shared/SettingVars';
 import {SelectionModel} from '@angular/cdk/collections';
+import {of, Subject} from 'rxjs';
 
 @Component({
   selector: 'app-tag-random-doc',
@@ -20,7 +21,7 @@ import {SelectionModel} from '@angular/cdk/collections';
   styleUrls: ['./tag-random-doc.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TagRandomDocComponent implements OnInit {
+export class TagRandomDocComponent implements OnInit, OnDestroy {
   fields: string[] = [];
   result: RegexTaggerTagRandomDocResult;
   isLoading = false;
@@ -36,6 +37,9 @@ export class TagRandomDocComponent implements OnInit {
   resultFields: string[];
   firstTimeTaggingOverFields = true;
   selection = new SelectionModel<number | string>(true, [0, 1]);
+  destroyed$: Subject<boolean> = new Subject<boolean>();
+  // tslint:disable-next-line:no-any
+  regexTaggerOptions: any;
 
   constructor(private regexTaggerService: RegexTaggerService, private logService: LogService,
               private projectStore: ProjectStore,
@@ -51,7 +55,12 @@ export class TagRandomDocComponent implements OnInit {
         this.projectIndices = x;
       }
     });
-
+    this.regexTaggerService.getRDocOptions(this.data.currentProjectId, this.data.tagger.id).pipe(
+      takeUntil(this.destroyed$)).subscribe(resp => {
+      if (resp && !(resp instanceof HttpErrorResponse)) {
+        this.regexTaggerOptions = resp;
+      }
+    });
   }
 
   getFieldsForIndices(indices: ProjectIndex[]): void {
@@ -132,5 +141,10 @@ export class TagRandomDocComponent implements OnInit {
       }
     }
     return returnVal;
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed$.next(true);
+    this.destroyed$.complete();
   }
 }

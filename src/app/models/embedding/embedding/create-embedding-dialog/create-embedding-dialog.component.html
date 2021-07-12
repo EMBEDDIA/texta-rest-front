@@ -8,6 +8,7 @@
       <mat-error *ngIf="embeddingForm.get('descriptionFormControl')?.hasError('required')">
         Description is <strong>required</strong>
       </mat-error>
+      <mat-hint>{{embeddingOptions?.actions?.POST?.description?.help_text || ''}}</mat-hint>
     </mat-form-field>
     <mat-form-field>
       <mat-label>Indices</mat-label>
@@ -20,15 +21,17 @@
       <mat-error *ngIf="embeddingForm.get('indicesFormControl')?.hasError('required')">
         Need at least 1 index
       </mat-error>
+      <mat-hint>{{embeddingOptions?.actions?.POST?.indices?.help_text || ''}}</mat-hint>
     </mat-form-field>
 
     <mat-form-field class="m-bot-10" data-cy="appEmbeddingCreateDialogFields">
       <mat-label>Select Fields</mat-label>
-      <app-project-field-select formControlName="fieldsFormControl" [required]="true" [projectFields]="projectFields" ></app-project-field-select>
+      <app-project-field-select formControlName="fieldsFormControl" [required]="true"
+                                [projectFields]="projectFields"></app-project-field-select>
       <mat-error *ngIf="embeddingForm.get('fieldsFormControl')?.hasError('required')">
         Field is <strong>required</strong>
       </mat-error>
-      <mat-hint>MLP preprocessed lemma (or text) field is recommended!</mat-hint>
+      <mat-hint>{{embeddingOptions?.actions?.POST?.fields?.help_text || ''}}</mat-hint>
     </mat-form-field>
 
     <app-saved-search-autocomplete (queryChanged)="onQueryChanged($event)"></app-saved-search-autocomplete>
@@ -42,6 +45,7 @@
           </mat-option>
         </ng-container>
       </mat-select>
+      <mat-hint>{{embeddingOptions?.actions?.POST?.embedding_type?.help_text || ''}}</mat-hint>
     </mat-form-field>
 
 
@@ -49,13 +53,16 @@
       <input formControlName="dimensionsFormControl" matInput pattern="[1-9]\d*" placeholder="Number of Dimensions"
              step="50"
              type="number">
+      <mat-hint>{{embeddingOptions?.actions?.POST?.num_dimensions?.help_text || ''}}</mat-hint>
     </mat-form-field>
     <mat-form-field>
       <input formControlName="frequencyFormControl" matInput pattern="[1-9]\d*" placeholder="Minimum frequency" step="5"
              type="number">
+      <mat-hint>{{embeddingOptions?.actions?.POST?.min_freq?.help_text || ''}}</mat-hint>
     </mat-form-field>
     <mat-checkbox data-cy="appEmbeddingCreateDialogUsePhraser" formControlName="usePhraserFormControl"
-                  matTooltip="Phrase input texts" matTooltipPosition="left">Use phraser
+                  matTooltip="{{embeddingOptions?.actions?.POST?.use_phraser?.help_text || ''}}"
+                  matTooltipPosition="left">Use phraser
     </mat-checkbox>
     <div class="flex-col m-top-10">
       <div class="flex-row">
@@ -63,7 +70,8 @@
           <button class="flex-item-left" mat-button mat-dialog-close type="button">Close</button>
         </div>
         <div class="flex-item-right">
-          <button [disabled]="!embeddingForm.valid || isLoading" data-cy="appEmbeddingCreateDialogSubmit" mat-button type="submit">
+          <button [disabled]="!embeddingForm.valid || isLoading" data-cy="appEmbeddingCreateDialogSubmit" mat-button
+                  type="submit">
             Create
           </button>
         </div>

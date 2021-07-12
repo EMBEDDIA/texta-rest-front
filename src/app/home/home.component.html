@@ -58,7 +58,7 @@
             /  {{health.host.memory.total| number}} {{health.host.memory.unit}} </span>
         </div>
 
-        <div fxFlex="1 0 125px">
+        <div fxFlex="1 0 125px" matTooltip="CPUs: {{health.host.cpu.count}}">
           <h4 class="mat-h4 center-text"> CPU USAGE </h4>
           <mat-progress-spinner
             [color]="health.host.cpu.percent < 90 ? 'primary' : 'warn'"
@@ -72,21 +72,6 @@
           </div>
         </div>
       </mat-card>
-
-      <mat-card class="counts-card center-margin" fxLayout="row wrap">
-        <div fxFlex>
-          <span [ngClass]="health.host.gpu.count > 0 ? 'primary-text' : 'accent-text'"
-                class="count-text center-text block">  {{health.host.gpu.count}} </span>
-          <span class="mat-hint center-text block">GPUs</span>
-        </div>
-        <div fxFlex>
-          <span [ngClass]="health.host.cpu.count > 0 ? 'primary-text' : 'accent-text'"
-                class="count-text center-text block">  {{health.host.cpu.count}} </span>
-          <span class="mat-hint center-text block">CPUs</span>
-        </div>
-      </mat-card>
-
-
       <mat-card class="usage-card center-margin" fxLayout="row wrap"
                 style="max-height: 350px; overflow: auto;">
         <table class="simple-table">

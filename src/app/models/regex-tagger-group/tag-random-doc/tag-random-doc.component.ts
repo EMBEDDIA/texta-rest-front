@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Inject, OnDestroy, OnInit} from '@angular/core';
 import {ErrorStateMatcher} from '@angular/material/core';
 import {LiveErrorStateMatcher} from '../../../shared/CustomerErrorStateMatchers';
 import {RegexTaggerGroupService} from '../../../core/models/taggers/regex-tagger-group/regex-tagger-group.service';
@@ -9,13 +9,14 @@ import {
   RegexTaggerGroup,
   RegexTaggerGroupTagRandomDocResult, RegexTaggerGroupTagTextResult,
 } from '../../../shared/types/tasks/RegexTaggerGroup';
-import {filter, take} from 'rxjs/operators';
+import {filter, take, takeUntil} from 'rxjs/operators';
 import {HttpErrorResponse} from '@angular/common/http';
 import {Field, ProjectIndex} from '../../../shared/types/Project';
 import {UtilityFunctions} from '../../../shared/UtilityFunctions';
 import {ProjectStore} from '../../../core/projects/project.store';
 import {HighlightSettings} from '../../../shared/SettingVars';
-import {SelectionModel} from "@angular/cdk/collections";
+import {SelectionModel} from '@angular/cdk/collections';
+import {Subject} from 'rxjs';
 
 @Component({
   selector: 'app-tag-random-doc',
@@ -23,7 +24,7 @@ import {SelectionModel} from "@angular/cdk/collections";
   styleUrls: ['./tag-random-doc.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TagRandomDocComponent implements OnInit {
+export class TagRandomDocComponent implements OnInit, OnDestroy {
   fields: string[] = [];
   result: RegexTaggerGroupTagRandomDocResult;
   isLoading = false;
@@ -40,6 +41,10 @@ export class TagRandomDocComponent implements OnInit {
   firstTimeTaggingOverFields = true;
   selection = new SelectionModel<number | string>(true, [0, 1]);
 
+  destroyed$: Subject<boolean> = new Subject<boolean>();
+  // tslint:disable-next-line:no-any
+  regexTaggerOptions: any;
+
   constructor(private regexTaggerGroupService: RegexTaggerGroupService, private logService: LogService,
               private projectStore: ProjectStore,
               private changeDetectorRef: ChangeDetectorRef,
@@ -55,6 +60,12 @@ export class TagRandomDocComponent implements OnInit {
       }
     });
 
+    this.regexTaggerGroupService.getTagRdocOptions(this.data.currentProjectId, this.data.tagger.id).pipe(
+      takeUntil(this.destroyed$)).subscribe(resp => {
+      if (resp && !(resp instanceof HttpErrorResponse)) {
+        this.regexTaggerOptions = resp;
+      }
+    });
 
   }
 
@@ -168,6 +179,11 @@ export class TagRandomDocComponent implements OnInit {
       }
     }
     return UtilityFunctions.getDistinctByProperty(this.result.matches, (y => y.str_val));
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed$.next(true);
+    this.destroyed$.complete();
   }
 
   private sortByStartLowestSpan(a: Match, b: Match): -1 | 1 {
