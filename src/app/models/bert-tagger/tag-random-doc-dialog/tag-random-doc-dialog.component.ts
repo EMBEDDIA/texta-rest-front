@@ -3,11 +3,12 @@ import {Field, ProjectIndex} from '../../../shared/types/Project';
 import {LogService} from '../../../core/util/log.service';
 import {ProjectStore} from '../../../core/projects/project.store';
 import {MAT_DIALOG_DATA} from '@angular/material/dialog';
-import {filter, take} from 'rxjs/operators';
+import {filter, switchMap, take} from 'rxjs/operators';
 import {HttpErrorResponse} from '@angular/common/http';
 import {BertTaggerService} from '../../../core/models/taggers/bert-tagger/bert-tagger.service';
 import {BertTagger} from '../../../shared/types/tasks/BertTagger';
 import {UtilityFunctions} from '../../../shared/UtilityFunctions';
+import {of} from 'rxjs';
 
 @Component({
   selector: 'app-tag-random-doc-dialog',
@@ -20,6 +21,8 @@ export class TagRandomDocDialogComponent implements OnInit {
   projectIndices: ProjectIndex[];
   fieldsUnique: Field[] = [];
   model: { indices: ProjectIndex[], fields: string[] } = {indices: [], fields: []};
+  // tslint:disable-next-line:no-any
+  bertOptions: any;
 
   constructor(private bertTaggerService: BertTaggerService, private logService: LogService, private projectStore: ProjectStore,
               @Inject(MAT_DIALOG_DATA) public data: { currentProjectId: number, tagger: BertTagger; }) {
@@ -41,6 +44,16 @@ export class TagRandomDocDialogComponent implements OnInit {
         }
       });
     }
+    this.projectStore.getCurrentProject().pipe(filter(x => !!x), take(1), switchMap(proj => {
+      if (proj) {
+        return this.bertTaggerService.tagRDocOptions(proj.id, this.data.tagger.id);
+      }
+      return of(null);
+    })).subscribe(options => {
+      if (options && !(options instanceof HttpErrorResponse)) {
+        this.bertOptions = options;
+      }
+    });
   }
 
   getFieldsForIndices(indices: ProjectIndex[]): void {

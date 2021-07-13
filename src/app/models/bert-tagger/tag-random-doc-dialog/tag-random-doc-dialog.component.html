@@ -16,6 +16,7 @@
         <mat-option *ngFor="let projectIndex of projectIndices" [value]="projectIndex">
           {{projectIndex.index}}
         </mat-option>
+        <mat-hint>{{bertOptions?.actions?.POST?.indices?.help_text || ''}}</mat-hint>
       </mat-select>
       <mat-error *ngIf="indices.hasError('required')">
         Index is <strong>required</strong>
@@ -34,14 +35,13 @@
       <mat-error *ngIf="fields.hasError('required')">
         Field is <strong>required</strong>
       </mat-error>
+      <mat-hint>{{bertOptions?.actions?.POST?.fields?.help_text || ''}}</mat-hint>
     </mat-form-field>
 
     <div class="m-top-10"><span *ngIf="result" class="mat-body-strong">Result: </span>
       <div *ngIf="result" class="code-wrapper">
         <code>
-          <pre *ngIf="result">
-                    {{result.document | json}}
-                </pre>
+          <pre *ngIf="result">{{result.document | json}}</pre>
         </code>
       </div>
       <div class="loading-div">
@@ -68,7 +68,8 @@
       </div>
       <div class="flex-item-right">
 
-        <button (click)="onSubmit()" [disabled]="isLoading ||docForm.invalid" color="primary" form="docForm" data-cy="appBertTaggerTagRandomDocDialogSubmit"
+        <button (click)="onSubmit()" [disabled]="isLoading ||docForm.invalid" color="primary" form="docForm"
+                data-cy="appBertTaggerTagRandomDocDialogSubmit"
                 fxFlex="150px" mat-flat-button
                 style="margin-left: auto">New random doc
         </button>

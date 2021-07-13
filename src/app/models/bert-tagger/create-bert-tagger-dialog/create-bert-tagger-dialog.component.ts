@@ -82,6 +82,8 @@ export class CreateBertTaggerDialogComponent implements OnInit, OnDestroy {
   projectFacts: { name: string, values: string[] }[];
   bertModels: string[] = [];
   trainedModels: BertTagger[] = [];
+  // tslint:disable-next-line:no-any
+  bertOptions: any;
 
   constructor(private dialogRef: MatDialogRef<CreateBertTaggerDialogComponent>,
               private projectService: ProjectService,
@@ -137,8 +139,8 @@ export class CreateBertTaggerDialogComponent implements OnInit, OnDestroy {
         return of(null);
       }
     })).subscribe(resp => {
-      if (resp?.options) {
-        console.log(resp.options);
+      if (resp?.options && !(resp.options instanceof HttpErrorResponse)) {
+        this.bertOptions = resp.options;
       }
       if (resp?.models && !(resp.models instanceof HttpErrorResponse)) {
         this.bertModels = resp.models;
