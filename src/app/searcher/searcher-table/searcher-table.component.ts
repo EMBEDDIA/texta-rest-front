@@ -18,7 +18,7 @@ import {forkJoin, of, Subject} from 'rxjs';
 import {debounceTime, delay, distinctUntilChanged, filter, switchMap, take, takeUntil} from 'rxjs/operators';
 import {ProjectStore} from '../../core/projects/project.store';
 import {ElasticsearchQuery} from '../searcher-sidebar/build-search/Constraints';
-import {Project, ProjectIndex} from '../../shared/types/Project';
+import {Field, Project, ProjectIndex} from '../../shared/types/Project';
 import {LocalStorageService} from '../../core/util/local-storage.service';
 import {SearcherOptions} from '../SearcherOptions';
 import {HttpErrorResponse} from '@angular/common/http';
@@ -36,7 +36,7 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
   totalCountLength: number; // paginator max length with label
   // tslint:disable-next-line:no-any
   public tableData: MatTableDataSource<any> = new MatTableDataSource();
-  public displayedColumns: string[] = [];
+  public displayedColumns: Field[] = [];
   public columnsToDisplay: string[] = [];
   public columnFormControl = new FormControl([]);
   public isLoadingResults = false;
@@ -57,6 +57,8 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
               private localStorage: LocalStorageService) {
   }
 
+  pathAccessor = (x: { path: string; type: string }) => x.path;
+
   ngOnInit(): void {
     // paginator label hack
     this.paginator._intl.getRangeLabel = this.countRangeLabel;
@@ -73,11 +75,10 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
     this.projectStore.getSelectedProjectIndices().pipe(takeUntil(this.destroy$), filter(x => !!x), distinctUntilChanged(),
       switchMap(projField => {
         if (projField) {
-          this.projectFields = projField;
+          this.projectFields = ProjectIndex.sortTextaFactsAsFirstItem(ProjectIndex.cleanProjectIndicesFields(projField, ['text', 'long', 'fact', 'date'], []));
           // combine all fields of all indexes into one unique array to make columns
           // @ts-ignore
-          const cols: string[] = [...new Set([].concat.apply([], (projField.map(x => x.fields.map(y => y.path)))))];
-          cols.push(cols.splice(cols.indexOf('texta_facts'), 1)[0]);
+          const cols: Field[] = [...new Set([].concat.apply([], (this.projectFields.map(x => x.fields))))];
           this.displayedColumns = cols;
           this.setColumnsToDisplay();
           // project changed reset table
@@ -137,7 +138,7 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
     });
 
     this.sort.sortChange.pipe(takeUntil(this.destroy$)).subscribe(x => {
-      if (x && x.active && this.projectFields) {
+      if (x && x.active && this.projectFields && this.currentElasticQuery) {
         this.currentElasticQuery.elasticSearchQuery.sort = this.buildSortQuery(x);
         this.currentElasticQuery.elasticSearchQuery.from = 0; // paginator reset is done in getSearch response
         this.searchQueue$.next();
@@ -242,7 +243,7 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
     } else {
       return `${startIndex + 1} - ${endIndex} of ${length}/${this.totalDocs}`;
     }
-  }
+  };
 
   // tslint:disable-next-line:no-any
   trackByTableData: TrackByFunction<any> = (index: number, item: any) => item.doc;
@@ -260,7 +261,7 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
     if (currentProjectState?.searcher?.selectedFields && currentProjectState.searcher.selectedFields.length >= 1) {
       let fieldsExist = true;
       for (const field of currentProjectState.searcher.selectedFields) {
-        if (!this.displayedColumns.includes(field)) {
+        if (!this.displayedColumns.find(x => x.path === field)) {
           fieldsExist = false;
         }
       }
@@ -270,7 +271,7 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
         return;
       }
     }
-    this.columnsToDisplay = this.displayedColumns.slice(0, 10);
+    this.columnsToDisplay = this.displayedColumns.slice(0, 10).map(x => x.path);
     this.columnFormControl.setValue(this.columnsToDisplay);
   }
 

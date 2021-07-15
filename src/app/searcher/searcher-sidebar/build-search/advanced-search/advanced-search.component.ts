@@ -70,6 +70,8 @@ export class AdvancedSearchComponent implements OnInit, OnDestroy {
               public searchService: SearcherComponentService) {
   }
 
+  pathAccessor = (x: { path: string; type: string }) => x.path;
+
   ngOnInit(): void {
     this.projectStore.getCurrentProject().pipe(takeUntil(this.destroy$), switchMap(currentProject => {
       if (currentProject) {
@@ -86,7 +88,7 @@ export class AdvancedSearchComponent implements OnInit, OnDestroy {
     });
     this.projectStore.getSelectedProjectIndices().pipe(takeUntil(this.destroy$)).subscribe(projectFields => {
       if (projectFields) {
-        this.projectFields = ProjectIndex.sortTextaFactsAsFirstItem(projectFields);
+        this.projectFields = ProjectIndex.sortTextaFactsAsFirstItem(ProjectIndex.cleanProjectIndicesFields(projectFields, ['text', 'long', 'date', 'fact'], []));
         this.fieldIndexMap = ProjectIndex.getFieldToIndexMap(projectFields);
         this.selectedIndices = this.projectFields.map(x => x.index);
         const distinct = UtilityFunctions.getDistinctByProperty<Field>(this.projectFields.map(x => x.fields).flat(), (x => x.path));
