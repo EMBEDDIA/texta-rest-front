@@ -270,10 +270,13 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
         return;
       }
     }
-    this.columnsToDisplay = this.displayedColumns.slice(0, 10).map(x => x.path);
-    const factCol = this.displayedColumns.find(x => x.type === 'fact');
-    if (factCol) {
-      this.columnsToDisplay.splice(this.columnsToDisplay.length, 1, factCol.path);
+    if (this.displayedColumns.length > 0) {
+      this.displayedColumns.push(this.displayedColumns.splice(this.displayedColumns.findIndex(x => x.type === 'fact'), 1)[0]);
+      this.columnsToDisplay = this.displayedColumns.slice(0, 10).map(x => x.path);
+      const factCol = this.displayedColumns.find(x => x.type === 'fact');
+      if (factCol && !this.columnsToDisplay.includes(factCol.path)) {
+        this.columnsToDisplay.splice(this.columnsToDisplay.length, 0, factCol.path);
+      }
     }
     this.columnFormControl.setValue(this.columnsToDisplay);
   }

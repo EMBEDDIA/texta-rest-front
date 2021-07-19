@@ -93,7 +93,7 @@ export class AdvancedSearchComponent implements OnInit, OnDestroy {
         this.selectedIndices = this.projectFields.map(x => x.index);
         const distinct = UtilityFunctions.getDistinctByProperty<Field>(this.projectFields.map(x => x.fields).flat(), (x => x.path));
         const textaFactIndex = distinct.findIndex(item => item.type === 'fact');
-        if (textaFactIndex) {
+        if (textaFactIndex !== -1) {
           const fact = distinct.splice(textaFactIndex, 1)[0];
           distinct.unshift(fact);
           distinct.unshift({path: fact.path, type: 'factName'});

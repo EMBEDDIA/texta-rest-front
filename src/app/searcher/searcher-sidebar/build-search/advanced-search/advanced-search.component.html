@@ -39,6 +39,7 @@
   </div>
   <div class="content" *ngIf="isDateConstraint(constraint)" data-cy="appSearcherSideBarBuildSearchDateConstraint">
     <app-date-constraints [dateConstraint]="$any(constraint)" [elasticSearchQuery]="elasticQuery"
+                          [currentProject]="currentProject"
                           (constraintChanged)="searchOnChange($event)"></app-date-constraints>
   </div>
   <div class="content" *ngIf="isFactNameConstraint(constraint)" data-cy="appSearcherSideBarBuildSearchFactConstraint">
