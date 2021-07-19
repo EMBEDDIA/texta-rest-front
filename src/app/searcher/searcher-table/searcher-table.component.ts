@@ -24,6 +24,7 @@ import {SearcherOptions} from '../SearcherOptions';
 import {HttpErrorResponse} from '@angular/common/http';
 import {SearcherService} from '../../core/searcher/searcher.service';
 import {ProjectService} from '../../core/projects/project.service';
+import {UtilityFunctions} from '../../shared/UtilityFunctions';
 
 @Component({
   selector: 'app-searcher-table',
@@ -47,8 +48,8 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
   @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
   @Output() drawerToggle = new EventEmitter<boolean>();
   searchQueue$: Subject<void> = new Subject<void>();
+  public projectFields: ProjectIndex[];
   private destroy$: Subject<boolean> = new Subject();
-  private projectFields: ProjectIndex[];
   private currentProject: Project;
   private totalDocs = 0;
 
@@ -75,11 +76,9 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
     this.projectStore.getSelectedProjectIndices().pipe(takeUntil(this.destroy$), filter(x => !!x), distinctUntilChanged(),
       switchMap(projField => {
         if (projField) {
-          this.projectFields = ProjectIndex.sortTextaFactsAsFirstItem(ProjectIndex.cleanProjectIndicesFields(projField, ['text', 'long', 'fact', 'date'], []));
+          this.projectFields = ProjectIndex.cleanProjectIndicesFields(projField, ['text', 'long', 'fact', 'date'], []);
           // combine all fields of all indexes into one unique array to make columns
-          // @ts-ignore
-          const cols: Field[] = [...new Set([].concat.apply([], (this.projectFields.map(x => x.fields))))];
-          this.displayedColumns = cols;
+          this.displayedColumns = UtilityFunctions.getDistinctByProperty<Field>(this.projectFields.map(x => x.fields).flat(), (x => x.path));
           this.setColumnsToDisplay();
           // project changed reset table
           this.tableData.data = [];
@@ -209,7 +208,7 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  public onfieldSelectionChange(opened: boolean): void {
+  public onFieldSelectionChange(opened: boolean): void {
     // true is opened, false is closed, when selecting something and then deselecting it the formcontrol returns empty array
     if (!opened && (this.columnFormControl.value)) {
       this.columnsToDisplay = this.columnFormControl.value;
@@ -272,6 +271,10 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
       }
     }
     this.columnsToDisplay = this.displayedColumns.slice(0, 10).map(x => x.path);
+    const factCol = this.displayedColumns.find(x => x.type === 'fact');
+    if (factCol) {
+      this.columnsToDisplay.splice(this.columnsToDisplay.length, 1, factCol.path);
+    }
     this.columnFormControl.setValue(this.columnsToDisplay);
   }
 

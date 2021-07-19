@@ -8,32 +8,9 @@
     <div class="paginator-row">
       <mat-form-field class="margin-right">
         <mat-label>Toggle Columns</mat-label>
-        <mat-select (openedChange)="onfieldSelectionChange($event)"
-                    panelClass="select-panel-reveal-input" [disableOptionCentering]="true"
-                    [formControl]="columnFormControl"
-                    data-cy="appSearcherTableColumnSelect"
-                    multiple>
-
-          <mat-select-trigger>{{columnFormControl?.value | join: ', '}}</mat-select-trigger>
-          <app-mat-option-select-all></app-mat-option-select-all>
-          <mat-option *ngFor="let field of displayedColumns" [value]="field.path">
-            <ng-container *ngIf="field.type === 'fact'">
-              {{field.path}}
-            </ng-container>
-            <ng-container *ngIf="field.type === 'date'">
-              <mat-icon>date_range</mat-icon>
-              {{field.path}}
-            </ng-container>
-            <ng-container *ngIf="field.type === 'text'">
-              <mat-icon>text_fields</mat-icon>
-              {{field.path}}
-            </ng-container>
-            <ng-container *ngIf="field.type === 'long'">
-              <mat-icon>pin</mat-icon>
-              {{field.path}}
-            </ng-container>
-          </mat-option>
-        </mat-select>
+        <app-project-field-select
+          (openedChange)="onFieldSelectionChange($event)" data-cy="appSearcherTableColumnSelect"
+          [formControl]="columnFormControl" [multiple]="true" [projectFields]="projectFields"></app-project-field-select>
       </mat-form-field>
       <button (click)="drawerToggle.emit(true)" mat-stroked-button>Toggle drawer</button>
       <button (click)="exportSearch()" data-cy="appSearcherTableExport" mat-stroked-button style="margin-left: 5px">
@@ -51,7 +28,8 @@
 
       <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column.path">
         <th *matHeaderCellDef mat-header-cell mat-sort-header><span [title]="column.path"
-                                                                    class="column-header-text">{{column.path}}</span></th>
+                                                                    class="column-header-text">{{column.path}}</span>
+        </th>
         <td *matCellDef="let row" mat-cell>
           <ng-container *ngIf="(row.doc[column.path] | isObject)"><!--pure pipe does memoization for us-->
             <ng-container *ngIf="column.path === 'texta_facts'">
