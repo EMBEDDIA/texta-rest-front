@@ -1,4 +1,4 @@
-<h1 mat-dialog-title>New Bert Tagger</h1>
+<h1 mat-dialog-title>New BERT Tagger</h1>
 <mat-dialog-content>
   <form (ngSubmit)="onSubmit(bertTaggerForm.value)" [formGroup]="bertTaggerForm" class="flex-col" id="bertForm">
     <mat-form-field data-cy="appBertTaggerCreateDialogDesc">
@@ -16,6 +16,7 @@
       <mat-label>Indices</mat-label>
       <mat-select (openedChange)="indicesOpenedChange($event)" [disableOptionCentering]="true"
                   formControlName="indicesFormControl" multiple panelClass="select-panel-reveal-input" required>
+        <app-mat-option-select-all></app-mat-option-select-all>
         <mat-option *ngFor="let projectIndex of projectIndices" [value]="projectIndex">
           {{projectIndex.index}}
         </mat-option>
@@ -89,7 +90,7 @@
       </mat-select>
     </mat-form-field>
     <mat-form-field>
-      <mat-label>Bert model</mat-label>
+      <mat-label>BERT model</mat-label>
       <mat-select [disabled]="!!bertTaggerForm.get('checkPointModelFormControl')?.value" [disableOptionCentering]="true"
                   formControlName="bertModelFormControl"
                   panelClass="select-panel-reveal-input">

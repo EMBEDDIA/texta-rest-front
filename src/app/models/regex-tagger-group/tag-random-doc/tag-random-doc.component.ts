@@ -39,6 +39,7 @@ export class TagRandomDocComponent implements OnInit, OnDestroy {
   fieldsWithMatches: string[];
   resultFields: string[];
   firstTimeTaggingOverFields = true;
+  projectFields: ProjectIndex[] = [];
   selection = new SelectionModel<number | string>(true, [0, 1]);
 
   destroyed$: Subject<boolean> = new Subject<boolean>();
@@ -67,17 +68,19 @@ export class TagRandomDocComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.projectStore.getSelectedProjectIndices().pipe(filter(x => !!x), take(1)).subscribe(x => {
+      if (x) {
+        this.model.indices = x;
+        this.projectFields = ProjectIndex.cleanProjectIndicesFields(this.model.indices, [], ['fact'], true);
+      }
+    });
   }
 
-  getFieldsForIndices(indices: ProjectIndex[]): void {
-    indices = ProjectIndex.cleanProjectIndicesFields(indices, [], ['fact'], true);
-    this.fieldsUnique = UtilityFunctions.getDistinctByProperty<Field>(indices.map(y => y.fields).flat(), (y => y.path));
-  }
 
   public indicesOpenedChange(opened: boolean): void {
     // true is opened, false is closed, when selecting something and then deselecting it the formcontrol returns empty array
-    if (!opened && this.model.indices.length > 0) {
-      this.getFieldsForIndices(this.model.indices);
+    if (!opened && this.model.indices && !UtilityFunctions.arrayValuesEqual(this.model.indices, this.projectFields, (x => x.index))) {
+      this.projectFields = ProjectIndex.cleanProjectIndicesFields(this.model.indices, [], ['fact'], true);
     }
   }
 

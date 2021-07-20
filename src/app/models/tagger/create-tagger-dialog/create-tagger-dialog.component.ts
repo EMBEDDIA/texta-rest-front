@@ -98,6 +98,7 @@ export class CreateTaggerDialogComponent implements OnInit, OnDestroy {
         this.taggerForm.get('maxBalanceFormControl')?.enable({emitEvent: false});
       } else {
         this.taggerForm.get('maxBalanceFormControl')?.disable({emitEvent: false});
+        this.taggerForm.get('maxBalanceFormControl')?.setValue(false, {emitEvent: false});
       }
     });
 

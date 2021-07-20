@@ -19,7 +19,7 @@ export class TagRandomDocDialogComponent implements OnInit {
   result: { document: unknown, prediction: { result: boolean, probability: number } };
   isLoading = false;
   projectIndices: ProjectIndex[];
-  fieldsUnique: Field[] = [];
+  projectFields: ProjectIndex[] = [];
   model: { indices: ProjectIndex[], fields: string[] } = {indices: [], fields: []};
   // tslint:disable-next-line:no-any
   bertOptions: any;
@@ -34,9 +34,9 @@ export class TagRandomDocDialogComponent implements OnInit {
         if (x) {
           this.projectIndices = x;
           this.model.indices = x.filter(index => this.data.tagger.indices.map(y => y.name).includes(index.index));
-          this.getFieldsForIndices(this.model.indices);
-          this.model.indices.forEach(y => {
-            const field = this.fieldsUnique.find(c => this.data.tagger.fields.includes(c.path));
+          this.projectFields = ProjectIndex.cleanProjectIndicesFields(this.model.indices, [], ['fact'], true);
+          this.projectFields.forEach(y => {
+            const field = y.fields.find(h => this.data.tagger.fields.includes(h.path));
             if (field) {
               this.model.fields.push(field.path);
             }
@@ -56,15 +56,10 @@ export class TagRandomDocDialogComponent implements OnInit {
     });
   }
 
-  getFieldsForIndices(indices: ProjectIndex[]): void {
-    indices = ProjectIndex.cleanProjectIndicesFields(indices, [], ['fact'], true);
-    this.fieldsUnique = UtilityFunctions.getDistinctByProperty<Field>(indices.map(y => y.fields).flat(), (y => y.path));
-  }
-
   public indicesOpenedChange(opened: boolean): void {
     // true is opened, false is closed, when selecting something and then deselecting it the formcontrol returns empty array
-    if (!opened && this.model.indices.length > 0) {
-      this.getFieldsForIndices(this.model.indices);
+    if (!opened && this.model.indices && !UtilityFunctions.arrayValuesEqual(this.model.indices, this.projectFields, (x => x.index))) {
+      this.projectFields = ProjectIndex.cleanProjectIndicesFields(this.model.indices, [], ['fact'], true);
     }
   }
 

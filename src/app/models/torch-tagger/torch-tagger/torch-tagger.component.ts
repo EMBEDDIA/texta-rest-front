@@ -20,6 +20,7 @@ import {expandRowAnimation} from '../../../shared/animations';
 import {EditTorchTaggerDialogComponent} from '../edit-torch-tagger-dialog/edit-torch-tagger-dialog.component';
 import {EpochReportsDialogComponent} from '../epoch-reports-dialog/epoch-reports-dialog.component';
 import {ApplyToIndexDialogComponent} from '../apply-to-index-dialog/apply-to-index-dialog.component';
+import {MatSelectChange} from '@angular/material/select';
 
 @Component({
   selector: 'app-torch-tagger',
@@ -261,7 +262,7 @@ export class TorchTaggerComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  applyFilter(filterValue: EventTarget | null, field: string): void {
+  applyFilter(filterValue: MatSelectChange | EventTarget | null, field: string): void {
     this.filteringValues[field] = (filterValue as HTMLInputElement).value ? (filterValue as HTMLInputElement).value : '';
     this.filterQueriesToString();
     this.filteredSubject.next();

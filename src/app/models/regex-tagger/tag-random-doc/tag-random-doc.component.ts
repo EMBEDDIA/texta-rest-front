@@ -28,7 +28,7 @@ export class TagRandomDocComponent implements OnInit, OnDestroy {
   matcher: ErrorStateMatcher = new LiveErrorStateMatcher();
   model: { indices: ProjectIndex[], fields: string[] } = {indices: [], fields: []};
   projectIndices: ProjectIndex[];
-  fieldsUnique: Field[] = [];
+  projectFields: ProjectIndex[] = [];
   defaultColors = HighlightSettings.legibleColors;
   uniqueFacts: { fact: Match, textColor: string, backgroundColor: string }[] = [];
   colorMap: Map<string, { backgroundColor: string, textColor: string }> = new Map();
@@ -61,17 +61,18 @@ export class TagRandomDocComponent implements OnInit, OnDestroy {
         this.regexTaggerOptions = resp;
       }
     });
-  }
-
-  getFieldsForIndices(indices: ProjectIndex[]): void {
-    indices = ProjectIndex.cleanProjectIndicesFields(indices, [], ['fact'], true);
-    this.fieldsUnique = UtilityFunctions.getDistinctByProperty<Field>(indices.map(y => y.fields).flat(), (y => y.path));
+    this.projectStore.getSelectedProjectIndices().pipe(filter(x => !!x), take(1)).subscribe(x => {
+      if (x) {
+        this.model.indices = x;
+        this.projectFields = ProjectIndex.cleanProjectIndicesFields(this.model.indices, [], ['fact'], true);
+      }
+    });
   }
 
   public indicesOpenedChange(opened: boolean): void {
     // true is opened, false is closed, when selecting something and then deselecting it the formcontrol returns empty array
-    if (!opened && this.model.indices.length > 0) {
-      this.getFieldsForIndices(this.model.indices);
+    if (!opened && this.model.indices && !UtilityFunctions.arrayValuesEqual(this.model.indices, this.projectFields, (x => x.index))) {
+      this.projectFields = ProjectIndex.cleanProjectIndicesFields(this.model.indices, [], ['fact'], true);
     }
   }
 

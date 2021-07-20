@@ -81,6 +81,7 @@ export class CreateTaggerGroupDialogComponent implements OnInit, OnDestroy, Afte
         this.taggerGroupForm.get('taggerForm')?.get('maxBalanceFormControl')?.enable({emitEvent: false});
       } else {
         this.taggerGroupForm.get('taggerForm')?.get('maxBalanceFormControl')?.disable({emitEvent: false});
+        this.taggerGroupForm.get('taggerForm')?.get('maxBalanceFormControl')?.setValue(false, {emitEvent: false});
       }
     });
 

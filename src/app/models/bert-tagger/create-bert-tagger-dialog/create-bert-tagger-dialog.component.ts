@@ -76,7 +76,6 @@ export class CreateBertTaggerDialogComponent implements OnInit, OnDestroy {
   matcher: ErrorStateMatcher = new LiveErrorStateMatcher();
   currentProject: Project;
   destroyed$: Subject<boolean> = new Subject<boolean>();
-  fieldsUnique: Field[] = [];
   projectIndices: ProjectIndex[] = [];
   projectFields: ProjectIndex[];
   projectFacts: { name: string, values: string[] }[];
@@ -101,6 +100,8 @@ export class CreateBertTaggerDialogComponent implements OnInit, OnDestroy {
       } else {
         this.bertTaggerForm.get('maxBalanceFormControl')?.disable({emitEvent: false});
         this.bertTaggerForm.get('sentenceShuffleFormControl')?.disable({emitEvent: false});
+        this.bertTaggerForm.get('maxBalanceFormControl')?.setValue(false, {emitEvent: false});
+        this.bertTaggerForm.get('sentenceShuffleFormControl')?.setValue(false, {emitEvent: false});
       }
     });
     this.bertTaggerForm.get('factNameFormControl')?.valueChanges.pipe(takeUntil(this.destroyed$)).subscribe(val => {

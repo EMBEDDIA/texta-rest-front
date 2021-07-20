@@ -83,6 +83,10 @@ export class ProjectFieldSelectComponent implements OnInit, OnDestroy, ControlVa
     if (value && value.length > 0) {
       this._projectFields = value;
       this.fieldsUnique = UtilityFunctions.getDistinctByProperty<Field>(this._projectFields.map(x => x.fields).flat(), (x => x.path));
+      // when changing indices remember selected fields only if they also exist in the new indices
+      if (this.value) {
+        this.value = this.value.filter(val => this.fieldsUnique.find(x => x.path === val));
+      }
       this.fieldsUnique.push(this.fieldsUnique.splice(this.fieldsUnique.findIndex(x => x.type === 'fact'), 1)[0]);
       this.fieldIndexMap = ProjectIndex.getFieldToIndexMap(value);
       this.disabled = false;
