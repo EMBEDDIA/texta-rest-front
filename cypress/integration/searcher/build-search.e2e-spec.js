@@ -123,10 +123,11 @@ describe('searching and search related activities should be working correctly', 
     cy.get('mat-option').contains('and').click();
     cy.get('[data-cy=appSearcherBuildSearchSubmit]').click();
     cy.wait('@searcherQuery');
+    cy.wait(5000);
     cy.get('.cdk-column-texta_facts > app-texta-facts-chips > span').should('exist');
 
     // fact values
-    cy.get(':nth-child(1) > .cdk-column-texta_facts > app-texta-facts-chips > span').contains(/foo|bar|FUBAR|test2/g).first().scrollIntoView().click()
+    cy.get(':nth-child(1) > .cdk-column-texta_facts > app-texta-facts-chips > span').contains(/foo|bar|FUBAR/g).first().scrollIntoView().click()
       .then(span => {
         const text = span.text();
         cy.get('[data-cy=appSearcherSideBarBuildSearchFactValueInputGroupOperator]').click();
