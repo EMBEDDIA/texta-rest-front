@@ -57,7 +57,13 @@ export class SearcherService {
       catchError(this.logService.handleError<unknown>('bulkDeleteSavedSearches')));
   }
 
-  editSavedSearch(projectId: number, searchId: number, body: unknown): Observable<SavedSearch | HttpErrorResponse> {
+  editSavedSearch(projectId: number, searchId: number, constraintList: Constraint[],
+                  elasticQuery: ElasticsearchQueryStructure): Observable<SavedSearch | HttpErrorResponse> {
+    const body = {
+      query_constraints: JSON.stringify(UtilityFunctions.convertConstraintListToJson(constraintList)),
+      query: JSON.stringify(elasticQuery)
+    };
+
     return this.http.patch<SavedSearch | HttpErrorResponse>
     (`${this.apiUrl}/projects/${projectId}/searches/${searchId}/`, body).pipe(
       tap(e => this.logService.logStatus(e, 'editSavedSearch')),
