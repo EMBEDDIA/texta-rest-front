@@ -165,6 +165,7 @@ describe('searching and search related activities should be working correctly', 
         cy.get('.mat-option-text').contains(foobar).click();
         cy.get('[data-cy=appSearcherBuildSearchSubmit]').click();
         cy.wait('@searcherQuery');
+        cy.wait(1000);
         cy.get('.cdk-column-texta_facts > app-texta-facts-chips > span').contains(foobar).should('exist');
       });
 
