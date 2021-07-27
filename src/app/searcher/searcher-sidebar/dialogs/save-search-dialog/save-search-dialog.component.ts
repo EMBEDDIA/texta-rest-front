@@ -11,9 +11,9 @@ import {switchMap, takeUntil} from 'rxjs/operators';
 import {SavedSearch} from '../../../../shared/types/SavedSearch';
 import {HttpErrorResponse} from '@angular/common/http';
 import {LogService} from '../../../../core/util/log.service';
-import {SearcherComponentService} from "../../../services/searcher-component.service";
-import {Constraint, ElasticsearchQuery} from "../../build-search/Constraints";
-import {Search} from "../../../../shared/types/Search";
+import {SearcherComponentService} from '../../../services/searcher-component.service';
+import {Constraint, ElasticsearchQuery} from '../../build-search/Constraints';
+import {Search} from '../../../../shared/types/Search';
 
 @Component({
   selector: 'app-save-search-dialog',

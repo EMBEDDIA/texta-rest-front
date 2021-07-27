@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {Subject} from 'rxjs';
-import {BuildSearchComponent} from './build-search/build-search.component';
 import {take, takeUntil} from 'rxjs/operators';
 import {SaveSearchDialogComponent} from './dialogs/save-search-dialog/save-search-dialog.component';
 import {MatDialog} from '@angular/material/dialog';
@@ -28,8 +27,6 @@ export class SearcherSidebarComponent implements OnInit, OnDestroy {
   aggregationsExpanded = false;
   currentProject: Project;
   localStorageState: ProjectState | null;
-  @ViewChild(BuildSearchComponent)
-  private buildSearchComponent: BuildSearchComponent;
   @ViewChild(SavedSearchesComponent)
   private savedSearchesComponent: SavedSearchesComponent;
 
