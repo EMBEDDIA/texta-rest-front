@@ -16,7 +16,7 @@
     </mat-select>
     <mat-error>This field is <strong>required</strong></mat-error>
   </mat-form-field>
-  <mat-form-field *ngIf="method === 'new'" class="max-width">
+  <mat-form-field *ngIf="method === 'new'" class="max-width" data-cy="appSearcherSidebarSaveSearchDesc">
     <input #ctrl="ngModel" [(ngModel)]="newDesc" [errorStateMatcher]="matcher" autocomplete="off"
            matInput placeholder="Description" required>
     <mat-error *ngIf="ctrl?.hasError('required')">
