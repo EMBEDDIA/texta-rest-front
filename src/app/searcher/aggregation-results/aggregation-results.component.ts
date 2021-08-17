@@ -40,6 +40,7 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
   destroy$: Subject<boolean> = new Subject();
   aggregation: unknown;
   aggregationData: AggregationData;
+  fieldPathList: string[] = [];
   timeLineYLabel = 'number of hits';
 
   constructor(public searchService: SearcherComponentService, public dialog: MatDialog) {
@@ -85,6 +86,7 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.searchService.getAggregation().pipe(takeUntil(this.destroy$)).subscribe((aggregation) => {
       if (aggregation && aggregation.agg && aggregation.agg.aggs) {
+        this.fieldPathList = aggregation.aggregationForm;
         this.aggregationData = {
           treeData: [],
           tableData: [],

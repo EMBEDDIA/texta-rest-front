@@ -7,7 +7,7 @@
     <mat-tab-group *ngIf="aggregationData.tableData !== undefined && aggregationData.tableData.length > 0"
                    mat-stretch-tabs>
       <mat-tab *ngFor="let tableAggregation of aggregationData.tableData" [label]="tableAggregation.name">
-        <app-aggregation-result-table *ngIf="tableAggregation.tableData !== undefined"
+        <app-aggregation-result-table *ngIf="tableAggregation.tableData !== undefined" [docPath]="fieldPathList[0]"
                                       [tableData]="tableAggregation.tableData"></app-aggregation-result-table>
       </mat-tab>
     </mat-tab-group>

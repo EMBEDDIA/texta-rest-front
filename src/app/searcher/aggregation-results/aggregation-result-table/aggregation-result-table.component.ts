@@ -5,6 +5,7 @@ import {MatTableDataSource} from '@angular/material/table';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatDialog} from '@angular/material/dialog';
 import {AddLexiconDialogComponent} from '../../../shared/components/dialogs/add-lexicon-dialog/add-lexicon-dialog.component';
+import {SearcherComponentService} from "../../services/searcher-component.service";
 
 interface TableElement {
   doc_count: number;
@@ -24,9 +25,10 @@ export class AggregationResultTableComponent {
   @ViewChild(MatSort, {static: true}) sort: MatSort;
   @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
   selection = new SelectionModel<TableElement>(true, []);
+  @Input() docPath: string;
 
   constructor(
-    public dialog: MatDialog) {
+    public dialog: MatDialog, private searcherComponentService: SearcherComponentService) {
   }
 
   @Input()
@@ -61,5 +63,9 @@ export class AggregationResultTableComponent {
       width: '800px',
       data: selected.map(x => x.key)
     });
+  }
+
+  createConstraint(key: string): void {
+    this.searcherComponentService.createTextConstraint(this.docPath, key);
   }
 }
