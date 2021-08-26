@@ -63,8 +63,8 @@ describe('Topic Analyzer should work', function () {
     cy.get('.cdk-column-significant_words:nth(1)').click();
     cy.get('.cdk-column-comment_content').should('be.visible');
     cy.get('[data-cy=appClusterDocumentsMLTBtn]').click();
-    cy.wait('@postClustering').its('response.body')
-      .should('have.length.gte', 1);
+
+    cy.wait('@postClustering').its('response.body').should('have.length.gte', 1);
     cy.get('app-similar-cluster-dialog .mat-header-cell.mat-column-select').should('be.visible').click();
     cy.get('[data-cy=appClusterSimilarTableAddToCluster]').should('be.visible').click();
     cy.get('[type="submit"]').click();

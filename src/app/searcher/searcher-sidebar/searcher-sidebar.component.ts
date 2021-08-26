@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import {Subject} from 'rxjs';
 import {take, takeUntil} from 'rxjs/operators';
 import {SaveSearchDialogComponent} from './dialogs/save-search-dialog/save-search-dialog.component';
@@ -26,9 +34,10 @@ export class SearcherSidebarComponent implements OnInit, OnDestroy {
   savedSearchesExpanded = false;
   aggregationsExpanded = false;
   currentProject: Project;
-  localStorageState: ProjectState | null;
   @ViewChild(SavedSearchesComponent)
   private savedSearchesComponent: SavedSearchesComponent;
+  @ViewChild('buildSearchPanel', {read: ElementRef})
+  private buildSearchComponent: ElementRef;
 
   constructor(public dialog: MatDialog,
               private changeDetectorRef: ChangeDetectorRef,
@@ -43,21 +52,26 @@ export class SearcherSidebarComponent implements OnInit, OnDestroy {
     this.projectStore.getCurrentProject().pipe(takeUntil(this.destroy$)).subscribe(proj => {
       if (proj) {
         this.currentProject = proj;
-        this.localStorageState = this.localStorageService.getProjectState(proj);
+        const localStorageState = this.localStorageService.getProjectState(proj);
         // compatibility for when searcher localstorage didnt have this yet
-        if (this.localStorageState?.searcher) {
-          if (!this.localStorageState.searcher.sidePanelsState) {
-            this.localStorageState.searcher.sidePanelsState = {
+        if (localStorageState?.searcher) {
+          if (!localStorageState.searcher.sidePanelsState) {
+            localStorageState.searcher.sidePanelsState = {
               savedSearch: true,
               buildSearch: true,
               aggregations: false
             };
           }
-          this.buildSearchExpanded = this.localStorageState.searcher.sidePanelsState.buildSearch;
-          this.savedSearchesExpanded = this.localStorageState.searcher.sidePanelsState.savedSearch;
-          this.aggregationsExpanded = this.localStorageState.searcher.sidePanelsState.aggregations;
+          this.buildSearchExpanded = localStorageState.searcher.sidePanelsState.buildSearch;
+          this.savedSearchesExpanded = localStorageState.searcher.sidePanelsState.savedSearch;
+          this.aggregationsExpanded = localStorageState.searcher.sidePanelsState.aggregations;
         }
         this.changeDetectorRef.markForCheck();
+      }
+    });
+    this.searchComponentService.getSavedSearch().pipe(takeUntil(this.destroy$)).subscribe(search => {
+      if (search) {
+        this.buildSearchComponent.nativeElement.scrollIntoView();
       }
     });
   }
@@ -69,25 +83,28 @@ export class SearcherSidebarComponent implements OnInit, OnDestroy {
 
   expandBuildSearchPanel(): void {
     this.buildSearchExpanded = !this.buildSearchExpanded;
-    if (this.localStorageState) {
-      this.localStorageState.searcher.sidePanelsState.buildSearch = this.buildSearchExpanded;
-      this.localStorageService.updateProjectState(this.currentProject, this.localStorageState);
+    const localStorageState = this.localStorageService.getProjectState(this.currentProject);
+    if (localStorageState) {
+      localStorageState.searcher.sidePanelsState.buildSearch = this.buildSearchExpanded;
+      this.localStorageService.updateProjectState(this.currentProject, localStorageState);
     }
   }
 
   expandSavedSearchesPanel(): void {
     this.savedSearchesExpanded = !this.savedSearchesExpanded;
-    if (this.localStorageState) {
-      this.localStorageState.searcher.sidePanelsState.savedSearch = this.savedSearchesExpanded;
-      this.localStorageService.updateProjectState(this.currentProject, this.localStorageState);
+    const localStorageState = this.localStorageService.getProjectState(this.currentProject);
+    if (localStorageState) {
+      localStorageState.searcher.sidePanelsState.savedSearch = this.savedSearchesExpanded;
+      this.localStorageService.updateProjectState(this.currentProject, localStorageState);
     }
   }
 
   expandAggregationsPanel(): void {
     this.aggregationsExpanded = !this.aggregationsExpanded;
-    if (this.localStorageState) {
-      this.localStorageState.searcher.sidePanelsState.aggregations = this.aggregationsExpanded;
-      this.localStorageService.updateProjectState(this.currentProject, this.localStorageState);
+    const localStorageState = this.localStorageService.getProjectState(this.currentProject);
+    if (localStorageState) {
+      localStorageState.searcher.sidePanelsState.aggregations = this.aggregationsExpanded;
+      this.localStorageService.updateProjectState(this.currentProject, localStorageState);
     }
   }
 
