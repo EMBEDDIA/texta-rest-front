@@ -1,5 +1,6 @@
 import {TaskStatus} from './TaskStatus';
 import {Index} from '../Index';
+import {UserProfile} from '../UserProfile';
 
 
 // tslint:disable:variable-name
@@ -8,7 +9,7 @@ export class Tagger {
   id: number;
   description: string;
   project: number;
-  author: number;
+  author: UserProfile;
   query: string;
   fields: string[];
   embedding: number;
