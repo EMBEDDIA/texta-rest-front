@@ -63,24 +63,12 @@ export class ProjectComponent implements OnInit, OnDestroy {
     this.tableData.sort = this.sort;
     this.tableData.paginator = this.paginator;
     this.tableData.filterPredicate = (data, element) => {
-      return data.id === +element;
-    };
-    this.userService.getAllUsers().subscribe(users => {
-      if (users && !(users instanceof HttpErrorResponse)) {
-        this.filteredUsers = this.authorFilterControl.valueChanges
-          .pipe(
-            startWith(''),
-            takeUntil(this.destroyed$),
-            map(value => {
-              const filterVal = value.toLowerCase();
-              if (value === '') {
-                this.applyFilter({value: {id: -1}});
-              }
-              return users.filter(option => option.username.toLowerCase().includes(filterVal));
-            })
-          );
+      if(element === '-1'){
+	      return true;
       }
-    });
+      return data.author.id === +element;
+    };
+    this.filteredUsers = this.userService.getAllUsers().pipe(filter(x=> !(x instanceof HttpErrorResponse))) as Observable<UserProfile[]>;
 
     this.titleFilterControl.valueChanges.pipe(takeUntil(this.destroyed$), debounceTime(200)).subscribe(x => {
       this.isLoadingResults = true;
