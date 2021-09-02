@@ -229,7 +229,12 @@ export class EditProjectDialogComponent implements OnInit, AfterViewInit {
           }
         }
         if (!errors) {
-          this.projectStore.refreshProjects(this.currentProject.id === this.data.id);
+          if (this.currentProject && this.currentProject.id === this.data.id) {
+            // when im editing a project that is currently selected, refresh it
+            this.projectStore.refreshProjects(true);
+          } else {
+            this.projectStore.refreshProjects(false);
+          }
           this.dialogRef.close(true);
         }
       }
@@ -245,13 +250,13 @@ export class EditProjectDialogComponent implements OnInit, AfterViewInit {
   updateProjectUsers(oldUsers: UserProfile[], newUsers: UserProfile[] | string[], projectId: number): Observable<{ addObs: HttpErrorResponse | { message: string }, deleteObs: HttpErrorResponse | { message: string } }> {
     // tslint:disable-next-line:no-any
     const forkObject: { addObs: Observable<any>, deleteObs: Observable<any> } = {addObs: of(null), deleteObs: of(null)};
-    let usersToDelete: string[] | number[] = [];
-    let usersToAdd: string[] | number[] = [];
+    let usersToDelete: string[] = [];
+    let usersToAdd: string[]  = [];
     if (this.currentUser.is_superuser) {
-      usersToDelete = oldUsers.filter(oldUser => !(newUsers as UserProfile[]).find(x => x.url === oldUser.url)).map(x => x.id);
-      usersToAdd = (newUsers as UserProfile[]).filter((newUser: UserProfile) => !oldUsers.find(x => x.url === newUser.url)).map(x => x.id);
+      usersToDelete = oldUsers.filter(oldUser => !(newUsers as UserProfile[]).find(x => x.url === oldUser.url)).map(x => x.username);
+      usersToAdd = (newUsers as UserProfile[]).filter((newUser: UserProfile) => !oldUsers.find(x => x.url === newUser.url)).map(x => x.username);
     } else {
-      usersToDelete = oldUsers.filter(oldUser => !(newUsers as string[]).find(x => x === oldUser.username)).map(x => x.id);
+      usersToDelete = oldUsers.filter(oldUser => !(newUsers as string[]).find(x => x === oldUser.username)).map(x => x.username);
       usersToAdd = (newUsers as string[]).filter((newUser: string) => !oldUsers.find(x => x.username === newUser));
     }
     if (usersToAdd.length > 0) {
@@ -297,13 +302,13 @@ export class EditProjectDialogComponent implements OnInit, AfterViewInit {
     // tslint:disable-next-line:no-any
     const forkObject: { addObs: Observable<any>, deleteObs: Observable<any> } = {addObs: of(null), deleteObs: of(null)};
 
-    let usersToDelete: string[] | number[] = [];
-    let usersToAdd: string[] | number[] = [];
+    let usersToDelete: string[] = [];
+    let usersToAdd: string[] = [];
     if (this.currentUser.is_superuser) {
-      usersToDelete = oldUsers.filter(oldUser => !(newUsers as UserProfile[]).find(x => x.url === oldUser.url)).map(x => x.id);
-      usersToAdd = (newUsers as UserProfile[]).filter((newUser: UserProfile) => !oldUsers.find(x => x.url === newUser.url)).map(x => x.id);
+      usersToDelete = oldUsers.filter(oldUser => !(newUsers as UserProfile[]).find(x => x.url === oldUser.url)).map(x => x.username);
+      usersToAdd = (newUsers as UserProfile[]).filter((newUser: UserProfile) => !oldUsers.find(x => x.url === newUser.url)).map(x => x.username);
     } else {
-      usersToDelete = oldUsers.filter(oldUser => !(newUsers as string[]).find(x => x === oldUser.username)).map(x => x.id);
+      usersToDelete = oldUsers.filter(oldUser => !(newUsers as string[]).find(x => x === oldUser.username)).map(x => x.username);
       usersToAdd = (newUsers as string[]).filter((newUser: string) => !oldUsers.find(x => x.username === newUser));
     }
 
