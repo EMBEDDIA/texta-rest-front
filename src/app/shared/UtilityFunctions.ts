@@ -102,6 +102,7 @@ export class UtilityFunctions {
           slop: constraint.slopFormControl.value,
           text: constraint.textAreaFormControl.value,
           operator: constraint.operatorFormControl.value,
+          ignoreCase: constraint.ignoreCaseFormControl.value,
           fuzziness: constraint.fuzzinessFormControl.value,
           prefix_length: constraint.prefixLengthFormControl.value
         });
