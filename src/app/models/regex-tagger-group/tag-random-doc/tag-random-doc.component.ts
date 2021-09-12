@@ -36,7 +36,6 @@ export class TagRandomDocComponent implements OnInit, OnDestroy {
   uniqueFacts: { fact: Match, textColor: string, backgroundColor: string }[] = [];
   colorMap: Map<string, { backgroundColor: string, textColor: string }> = new Map();
   distinctMatches: Match[];
-  fieldsWithMatches: string[];
   resultFields: string[];
   firstTimeTaggingOverFields = true;
   projectFields: ProjectIndex[] = [];
@@ -103,8 +102,7 @@ export class TagRandomDocComponent implements OnInit, OnDestroy {
           this.result.document[textaFacts] = this.result.matches;
           this.resultFields = Object.keys(x.document);
           this.distinctMatches = this.getDistinctMatches(this.result);
-          this.fieldsWithMatches = UtilityFunctions.getDistinctByProperty(this.result.matches, (y => y.doc_path)).map(y => y.doc_path);
-          this.resultFields.sort((a, b) => this.fieldsWithMatches.includes(a) ? -1 : 0);
+          this.resultFields.sort((a, b) => this.model.fields.includes(a) ? -1 : 0);
 
           if (this.firstTimeTaggingOverFields) {
             this.firstTimeTaggingOverFields = false;

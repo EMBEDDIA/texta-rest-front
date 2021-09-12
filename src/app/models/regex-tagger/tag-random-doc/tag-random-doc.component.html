@@ -26,7 +26,7 @@
     </mat-form-field>
     <mat-form-field class="max-width" data-cy="appRegexTaggerTagRandomDocDialogfields">
       <mat-label>Select Fields</mat-label>
-      <app-project-field-select #fields="ngModel" (ngModelChange)="this.firstTimeTaggingOverFields = false;" [projectFields]="projectFields" [required]="true" name="fields"
+      <app-project-field-select #fields="ngModel" (ngModelChange)="this.firstTimeTaggingOverFields = true;" [projectFields]="projectFields" [required]="true" name="fields"
                                 [(ngModel)]="model.fields" [multiple]="true"></app-project-field-select>
 
       <mat-error *ngIf="fields?.hasError('required')">
