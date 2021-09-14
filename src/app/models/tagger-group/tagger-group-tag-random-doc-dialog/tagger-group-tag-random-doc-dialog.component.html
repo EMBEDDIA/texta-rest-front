@@ -23,7 +23,7 @@
         Index is <strong>required</strong>
       </mat-error>
     </mat-form-field>
-    <mat-form-field class="max-width" data-cy="appTaggerGroupTaggerTagRandomDocDialogFields">
+    <mat-form-field class="max-width" data-cy="appTaggerGroupTagRandomDocDialogFields">
       <mat-label>Select Fields</mat-label>
       <app-project-field-select #fields="ngModel" [projectFields]="projectFields" [required]="true" name="fields"
                                 [(ngModel)]="model.fields" [multiple]="true"></app-project-field-select>
@@ -42,10 +42,10 @@
   <div class="flex-col max-width">
     <div class="flex-row">
       <div class="flex-item-left">
-        <button data-cy="appTaggerGroupTaggerTagRandomDocDialogCloses" mat-dialog-close="" mat-stroked-button>Close</button>
+        <button data-cy="appTaggerGroupTagRandomDocDialogClose" mat-dialog-close="" mat-stroked-button>Close</button>
       </div>
       <div class="flex-item-right">
-        <button [disabled]="docForm.invalid" data-cy="appTaggerGroupTaggerTagRandomDocDialogSubmit" form="docForm" mat-stroked-button type="submit">Tag</button>
+        <button [disabled]="docForm.invalid" data-cy="appTaggerGroupTagRandomDocDialogSubmit" form="docForm" mat-stroked-button type="submit">Tag</button>
       </div>
     </div>
   </div>
