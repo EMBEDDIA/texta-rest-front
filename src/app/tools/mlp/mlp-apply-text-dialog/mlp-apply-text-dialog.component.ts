@@ -27,9 +27,10 @@ export class MLPApplyTextDialogComponent implements OnInit, OnDestroy {
     analyzersFormControl: new FormControl([], [Validators.required]),
   });
   currentProject: Project;
-  result: unknown;
+  result: any;
   isLoading: boolean;
   matcher: ErrorStateMatcher = new LiveErrorStateMatcher();
+  resultFields: string[];
 
   // tslint:disable-next-line:no-any
   mlpOptions: any;
@@ -40,6 +41,9 @@ export class MLPApplyTextDialogComponent implements OnInit, OnDestroy {
               private logService: LogService,
               private projectStore: ProjectStore) {
   }
+
+  // tslint:disable-next-line:no-any
+  idAccessor = (x: any) => x.fact;
 
   ngOnInit(): void {
     this.projectStore.getCurrentProject().pipe(takeUntil(this.destroyed$), switchMap(currentProject => {
@@ -64,9 +68,12 @@ export class MLPApplyTextDialogComponent implements OnInit, OnDestroy {
     this.mlpService.applyMLPText({
       analyzers: formGroup.analyzersFormControl,
       texts: [formGroup.textFormControl]
-    }).subscribe(x => {
+    }).subscribe((x) => {
       if (x && !(x instanceof HttpErrorResponse)) {
         this.result = x;
+        this.result[0].text.texta_facts = x[0].texta_facts;
+        this.result[0].text.texta_facts.forEach((y: { doc_path: string; }) => y.doc_path = 'text');
+        this.resultFields = Object.keys(x[0].text).filter(y => y !== 'language');
       } else if (x instanceof HttpErrorResponse) {
         this.logService.snackBarError(x, 2000);
       }
