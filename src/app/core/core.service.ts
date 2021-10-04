@@ -17,7 +17,6 @@ import {CeleryCountTasks, CeleryStatus} from "../shared/types/Celery";
 export class CoreService {
 
   apiUrl = AppConfigService.settings.apiHost + AppConfigService.settings.apiBasePath;
-  apiUrl2 = AppConfigService.settings.apiHost + AppConfigService.settings.apiBasePath2;
 
   constructor(private http: HttpClient,
               private logService: LogService) {
@@ -100,20 +99,20 @@ export class CoreService {
   }
 
   purgeCeleryTasks(): Observable<{ detail: string } | HttpErrorResponse> {
-    return this.http.post<{ detail: string }>(`${this.apiUrl2}/celery/queue/purge_tasks/`, {}).pipe(
+    return this.http.post<{ detail: string }>(`${this.apiUrl}/celery/queue/purge_tasks/`, {}).pipe(
       tap(e => this.logService.logStatus(e, 'purgeCeleryTasks')),
       catchError(this.logService.handleError<{ detail: string }>('purgeCeleryTasks')));
   }
 
   // tslint:disable-next-line:no-any
   getCeleryQueueStats(): Observable<CeleryStatus | HttpErrorResponse> {
-    return this.http.post<CeleryStatus>(`${this.apiUrl2}/celery/queue/stats/`, {}).pipe(
+    return this.http.post<CeleryStatus>(`${this.apiUrl}/celery/queue/stats/`, {}).pipe(
       tap(e => this.logService.logStatus(e, 'getCeleryQueueStats')),
       catchError(this.logService.handleError<CeleryStatus>('getCeleryQueueStats')));
   }
 
   getCeleryTaskInfo(): Observable<CeleryCountTasks | HttpErrorResponse> {
-    return this.http.post<CeleryCountTasks>(`${this.apiUrl2}/celery/queue/count_tasks/`, {}).pipe(
+    return this.http.post<CeleryCountTasks>(`${this.apiUrl}/celery/queue/count_tasks/`, {}).pipe(
       tap(e => this.logService.logStatus(e, 'getCeleryTaskInfo')),
       catchError(this.logService.handleError<CeleryCountTasks>('getCeleryTaskInfo')));
   }
