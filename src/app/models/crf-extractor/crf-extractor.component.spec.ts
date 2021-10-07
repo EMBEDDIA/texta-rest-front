@@ -1,17 +1,18 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
-import { <%= classify(name) %>Component } from './<%= dasherize(name) %>.component';
+import { CRFExtractorComponent } from './crf-extractor.component';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {RouterTestingModule} from '@angular/router/testing';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {SharedModule} from '../../shared/shared.module';
 
-describe('<%= classify(name) %>Component', () => {
-  let component: <%= classify(name) %>Component;
-  let fixture: ComponentFixture<<%= classify(name) %>Component>;
+describe('CRFExtractorComponent', () => {
+  let component: CRFExtractorComponent;
+  let fixture: ComponentFixture<CRFExtractorComponent>;
 
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
-      declarations: [ <%= classify(name) %>Component ],
+      declarations: [ CRFExtractorComponent ],
       imports: [
         SharedModule, HttpClientTestingModule, RouterTestingModule, BrowserAnimationsModule
       ],
@@ -20,7 +21,7 @@ describe('<%= classify(name) %>Component', () => {
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(<%= classify(name) %>Component);
+    fixture = TestBed.createComponent(CRFExtractorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

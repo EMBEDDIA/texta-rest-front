@@ -1,14 +1,15 @@
-import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed, waitForAsync} from '@angular/core/testing';
 
-import { Create<%= classify(name) %>DialogComponent } from './create-<%= dasherize(name) %>-dialog.component';
+import { CreateCRFExtractorDialogComponent } from './create-crf-extractor-dialog.component';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {RouterTestingModule} from '@angular/router/testing';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatDialogRef} from '@angular/material/dialog';
+import {SharedModule} from '../../../shared/shared.module';
 
-describe('Create<%= classify(name) %>DialogComponent', () => {
-  let component: Create<%= classify(name) %>DialogComponent;
-  let fixture: ComponentFixture<Create<%= classify(name) %>DialogComponent>;
+describe('CreateCRFExtractorDialogComponent', () => {
+  let component: CreateCRFExtractorDialogComponent;
+  let fixture: ComponentFixture<CreateCRFExtractorDialogComponent>;
   const mockDialogRef = {
     close: jasmine.createSpy('close')
   };
@@ -22,13 +23,13 @@ describe('Create<%= classify(name) %>DialogComponent', () => {
           provide: MatDialogRef,
           useValue: mockDialogRef
         }],
-      declarations: [ Create<%= classify(name) %>DialogComponent ]
+      declarations: [ CreateCRFExtractorDialogComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(Create<%= classify(name) %>DialogComponent);
+    fixture = TestBed.createComponent(CreateCRFExtractorDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

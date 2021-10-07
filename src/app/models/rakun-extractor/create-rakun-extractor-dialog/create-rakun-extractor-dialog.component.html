@@ -19,7 +19,7 @@
       </mat-select>
       <mat-hint>{{rakunOptions?.actions?.POST?.distance_method?.help_text || ''}}</mat-hint>
       <mat-error *ngIf="rakunExtractorForm.get('distanceMethodFormControl')?.hasError('noEmbeddings')">
-        fastText embedding missing from the project
+        fastText embedding missing from current project
       </mat-error>
     </mat-form-field>
 
