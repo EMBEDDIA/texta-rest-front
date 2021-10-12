@@ -4,7 +4,7 @@ import { CreateCRFExtractorDialogComponent } from './create-crf-extractor-dialog
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {RouterTestingModule} from '@angular/router/testing';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MatDialogRef} from '@angular/material/dialog';
+import {MAT_DIALOG_DATA, MatDialogRef} from '@angular/material/dialog';
 import {SharedModule} from '../../../shared/shared.module';
 
 describe('CreateCRFExtractorDialogComponent', () => {
@@ -13,6 +13,7 @@ describe('CreateCRFExtractorDialogComponent', () => {
   const mockDialogRef = {
     close: jasmine.createSpy('close')
   };
+  const data = {};
   beforeEach(waitForAsync(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -22,6 +23,10 @@ describe('CreateCRFExtractorDialogComponent', () => {
         {
           provide: MatDialogRef,
           useValue: mockDialogRef
+        },
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: data
         }],
       declarations: [ CreateCRFExtractorDialogComponent ]
     })
