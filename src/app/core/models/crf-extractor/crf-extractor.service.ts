@@ -72,13 +72,21 @@ export class CRFExtractorService {
       catchError(this.logService.handleError('getCRFExtractorTagTextOptions')));
   }
 
-  tagText(projectId: number, taggerId: number, body: unknown): Observable<unknown | HttpErrorResponse> {
-    return this.http.post<unknown>(
+  // tslint:disable-next-line:no-any
+  tagText(projectId: number, taggerId: number, body: unknown): Observable<{ text_mlp: any; texta_facts: any; } | HttpErrorResponse> {
+    return this.http.post<{ text_mlp: any; texta_facts: any; }>(
       `${this.apiUrl}/projects/${projectId}/crf_extractors/${taggerId}/tag_text/`,
       body
     ).pipe(
       tap(e => this.logService.logStatus(e, 'tagTextCRF')),
-      catchError(this.logService.handleError<unknown>('tagTextCRF')));
+      catchError(this.logService.handleError<{ text_mlp: any; texta_facts: any; }>('tagTextCRF')));
+  }
+
+  retrainCRF(projectId: number, id: number): Observable<unknown> {
+    return this.http.post<unknown>(`${this.apiUrl}/projects/${projectId}/crf_extractors/${id}/retrain_extractor/`, {}
+    ).pipe(
+      tap(e => this.logService.logStatus(e, 'retrainCRF')),
+      catchError(this.logService.handleError<unknown>('retrainCRF')));
   }
 
 }

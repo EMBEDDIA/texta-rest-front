@@ -42,9 +42,26 @@
         <th *matHeaderCellDef mat-header-cell mat-sort-header> Description</th>
         <td *matCellDef="let element" mat-cell> {{element.description}}</td>
       </ng-container>
+      <ng-container matColumnDef="author__username">
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> Author</th>
+        <td *matCellDef="let element" mat-cell
+            [matTooltip]="element?.author?.username"> {{element?.author?.display_name}}</td>
+      </ng-container>
       <ng-container matColumnDef="mlp_field">
         <th *matHeaderCellDef mat-header-cell mat-sort-header> MLP field</th>
         <td *matCellDef="let element" mat-cell> {{element.mlp_field}}</td>
+      </ng-container>
+      <ng-container matColumnDef="f1_score">
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> F1 score</th>
+        <td *matCellDef="let element" mat-cell> {{element.f1_score | number:'0.2-2'}}</td>
+      </ng-container>
+      <ng-container matColumnDef="precision">
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> Precision</th>
+        <td *matCellDef="let element" mat-cell> {{element.precision | number:'0.2-2'}}</td>
+      </ng-container>
+      <ng-container matColumnDef="recall">
+        <th *matHeaderCellDef mat-header-cell mat-sort-header> Recall</th>
+        <td *matCellDef="let element" mat-cell> {{element.recall | number:'0.2-2' }}</td>
       </ng-container>
       <ng-container matColumnDef="task__time_started">
         <th *matHeaderCellDef mat-header-cell mat-sort-header> Time started</th>
@@ -188,7 +205,8 @@
       </ng-container>
 
       <tr *matHeaderRowDef="displayedColumns; sticky: true" mat-header-row></tr>
-      <tr (click)="expandedElement = expandedElement === element ? null : element" *matRowDef="let element; columns: displayedColumns;"
+      <tr (click)="expandedElement = expandedElement === element ? null : element"
+          *matRowDef="let element; columns: displayedColumns;"
           [class.expanded-row]="expandedElement === element"
           class="element-row"
           mat-row></tr>
@@ -203,14 +221,20 @@
 
 <mat-menu #editMenu="matMenu">
   <ng-template let-element="element" let-i="i" matMenuContent>
-    <button (click)="applyToIndexDialog(element)" data-cy="appCRFExtractorMenuApplyToIndices" mat-menu-item>
-      Apply to indices
-    </button>
-    <button (click)="tagTextDialog(element)" data-cy="appCRFExtractorMenuExtractText" mat-menu-item>
-      Extract from text
-    </button>
-    <button (click)="openCreateDialog(element)" data-cy="appCRFExtractorMenuRetrain" mat-menu-item matTooltip="Fill a new create window with the same parameters">
+    <ng-container *ngIf="element.task && element.task.status === 'completed'">
+      <button (click)="applyToIndexDialog(element)" data-cy="appCRFExtractorMenuApplyToIndices" mat-menu-item>
+        Apply to indices
+      </button>
+      <button (click)="tagTextDialog(element)" data-cy="appCRFExtractorMenuTagText" mat-menu-item>
+        Tag text
+      </button>
+    </ng-container>
+    <button (click)="openCreateDialog(element)" data-cy="appCRFExtractorMenuClone" mat-menu-item
+            matTooltip="Fill a new create window with the same parameters">
       Clone & Edit
+    </button>
+    <button (click)="retrainCRF(element)" data-cy="appCRFExtractorMenuRetrain" mat-menu-item>
+      Retrain
     </button>
     <mat-divider></mat-divider>
     <button (click)="onDelete(element, i)" data-cy="appCRFExtractorMenuDelete" mat-menu-item>

@@ -31,7 +31,7 @@ export class CRFExtractorComponent implements OnInit, OnDestroy, AfterViewInit {
   expandedElement: CRFExtractor | null;
   public tableData: MatTableDataSource<CRFExtractor> = new MatTableDataSource();
   selectedRows = new SelectionModel<CRFExtractor>(true, []);
-  public displayedColumns = ['select', 'id', 'description', 'mlp_field', 'task__time_started', 'task__time_completed', 'task__status', 'actions'];
+  public displayedColumns = ['select', 'author__username', 'description', 'mlp_field', 'task__time_started', 'task__time_completed', 'f1_score', 'precision', 'recall', 'task__status', 'actions'];
   public isLoadingResults = true;
 
   @ViewChild(MatSort) sort: MatSort;
@@ -100,6 +100,7 @@ export class CRFExtractorComponent implements OnInit, OnDestroy, AfterViewInit {
       maxHeight: '90vh',
       width: '700px',
       data: {cloneElement: cloneElement ? cloneElement : undefined},
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe(resp => {
       if (resp && !(resp instanceof HttpErrorResponse)) {
@@ -111,7 +112,7 @@ export class CRFExtractorComponent implements OnInit, OnDestroy, AfterViewInit {
 
   onDelete(element: CRFExtractor, index: number): void {
     const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-      data: {confirmText: 'Delete', mainText: 'Are you sure you want to delete this Tagger?'}
+      data: {confirmText: 'Delete', mainText: 'Are you sure you want to delete this task?'}
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -202,6 +203,27 @@ export class CRFExtractorComponent implements OnInit, OnDestroy, AfterViewInit {
       data: {crfExtractor: element, currentProjectId: this.currentProject.id},
       maxHeight: '90vh',
       width: '700px',
+    });
+  }
+
+  retrainCRF(element: CRFExtractor): void {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      data: {
+        confirmText: 'Retrain',
+        mainText: `Are you sure you want to retrain: ${element.description}`
+      }
+    });
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.cRFExtractorService.retrainCRF(this.currentProject.id, element.id).subscribe(resp => {
+          if (resp && !(resp instanceof HttpErrorResponse)) {
+            this.logService.snackBarMessage('Successfully started retraining', 4000);
+            this.updateTable.next(true);
+          } else if (resp instanceof HttpErrorResponse) {
+            this.logService.snackBarError(resp, 5000);
+          }
+        });
+      }
     });
   }
 }

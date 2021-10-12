@@ -29,9 +29,9 @@ interface OnSubmitParams {
   biasFormControl: boolean;
   suffixLenFormControl: string;
   labelsFormControl: string[];
-  featureFieldsFormControl: string;
-  contextFeatureFieldsFormControl: string;
-  featureExtractorsFormControl: string;
+  featureFieldsFormControl: { value: string; display_value: string }[];
+  contextFeatureFieldsFormControl: { value: string; display_value: string }[];
+  featureExtractorsFormControl: { value: string; display_value: string }[];
   embeddingFormControl: Embedding;
 }
 
@@ -44,7 +44,7 @@ export class CreateCRFExtractorDialogComponent implements OnInit, OnDestroy {
 
   defaultQuery = '{"query": {"match_all": {}}}';
   query = this.data?.cloneElement?.query || this.defaultQuery;
-
+  labelDefaults = ['GPE', 'ORG', 'PER', 'LOC'];
   CRFExtractorForm = new FormGroup({
     descriptionFormControl: new FormControl(this.data?.cloneElement?.description || '', [Validators.required]),
     indicesFormControl: new FormControl([], [Validators.required]),
@@ -55,12 +55,12 @@ export class CreateCRFExtractorDialogComponent implements OnInit, OnDestroy {
     c1FormControl: new FormControl(this.data?.cloneElement?.c1 || 1.0),
     c2FormControl: new FormControl(this.data?.cloneElement?.c2 || 1.0),
     biasFormControl: new FormControl(this.data?.cloneElement?.bias !== undefined ? this.data?.cloneElement?.bias : true),
-    suffixLenFormControl: new FormControl(), // todo this.data?.cloneElement?.suffix_len || [2, 2]
-    labelsFormControl: new FormControl(), // todo this.data?.cloneElement?.labels || ['GPE', 'ORG', 'PER', 'LOC']
+    suffixLenFormControl: new FormControl(this.data?.cloneElement?.suffix_len.toString() || '2,2'),
+    labelsFormControl: new FormControl(),
     featureFieldsFormControl: new FormControl(),
     contextFeatureFieldsFormControl: new FormControl(),
     featureExtractorsFormControl: new FormControl(),
-    embeddingFormControl: new FormControl(''), // todo add this
+    embeddingFormControl: new FormControl(),
   });
 
   matcher: ErrorStateMatcher = new LiveErrorStateMatcher();
@@ -100,6 +100,12 @@ export class CreateCRFExtractorDialogComponent implements OnInit, OnDestroy {
       }
       if (resp?.embeddings && !(resp.embeddings instanceof HttpErrorResponse)) {
         this.embeddings = resp.embeddings.results;
+        if (this.data?.cloneElement?.embedding) {
+          const foundEmbedding = this.embeddings.find(x => x.id === this.data.cloneElement.embedding);
+          if (foundEmbedding) {
+            this.CRFExtractorForm.get('embeddingFormControl')?.setValue(foundEmbedding);
+          }
+        }
       }
 
       if (resp?.projectIndices && !(resp.projectIndices instanceof HttpErrorResponse)) {
@@ -120,7 +126,7 @@ export class CreateCRFExtractorDialogComponent implements OnInit, OnDestroy {
       if (this.currentProject?.id && currentProjIndices && !this.data.cloneElement) {
         const indicesForm = this.CRFExtractorForm.get('indicesFormControl');
         indicesForm?.setValue(currentProjIndices);
-        this.projectFields = ProjectIndex.cleanProjectIndicesFields(currentProjIndices, ['text'], []);
+        this.projectFields = ProjectIndex.cleanProjectIndicesFields(currentProjIndices, ['mlp'], []);
       }
     });
   }
@@ -130,6 +136,19 @@ export class CreateCRFExtractorDialogComponent implements OnInit, OnDestroy {
       description: formData.descriptionFormControl,
       indices: formData.indicesFormControl.map(x => [{name: x.index}]).flat(),
       mlp_field: formData.mlpFieldsFormControl,
+      ...this.query ? {query: this.query} : {},
+      window_size: formData.windowSizeFormControl,
+      test_size: formData.testSizeFormControl,
+      num_iter: formData.numIterFormControl,
+      c1: formData.c1FormControl,
+      c2: formData.c2FormControl,
+      bias: formData.biasFormControl,
+      suffix_len: formData.suffixLenFormControl.split(',').map(x => +x),
+      ...formData.labelsFormControl ? {labels: formData.labelsFormControl} : {},
+      ...formData.featureFieldsFormControl ? {feature_fields: formData.featureFieldsFormControl.map(x => x.value)} : {},
+      ...formData.contextFeatureFieldsFormControl ? {context_feature_fields: formData.contextFeatureFieldsFormControl.map(x => x.value)} : {},
+      ...formData.featureExtractorsFormControl ? {feature_extractors: formData.featureExtractorsFormControl.map(x => x.value)} : {},
+      embedding: formData.embeddingFormControl ? formData.embeddingFormControl.id : null,
     };
 
     this.cRFExtractorService.createCRFExtractorTask(this.currentProject.id, body).subscribe(resp => {
@@ -146,7 +165,7 @@ export class CreateCRFExtractorDialogComponent implements OnInit, OnDestroy {
     const indicesForm = this.CRFExtractorForm.get('indicesFormControl');
     // true is opened, false is closed, when selecting something and then deselecting it the formcontrol returns empty array
     if (!opened && indicesForm?.value && !UtilityFunctions.arrayValuesEqual(indicesForm?.value, this.projectFields, (x => x.index))) {
-      this.projectFields = ProjectIndex.cleanProjectIndicesFields(indicesForm.value, ['text'], []);
+      this.projectFields = ProjectIndex.cleanProjectIndicesFields(indicesForm.value, ['mlp'], []);
     }
   }
 
@@ -165,7 +184,7 @@ export class CreateCRFExtractorDialogComponent implements OnInit, OnDestroy {
     const featureFields = this.CRFExtractorForm.get('featureFieldsFormControl');
     if (featureFields) {
       if (this.data?.cloneElement?.feature_fields) {
-        const val = options.actions.POST.feature_fields.choices.find((x: { display_name: string[]; }) => x.display_name === this.data.cloneElement.feature_fields);
+        const val = options.actions.POST.feature_fields.choices.filter((x: { display_name: string; }) => this.data.cloneElement.feature_fields.includes(x.display_name));
         featureFields.setValue(val);
       } else {
         featureFields.setValue(options.actions.POST.feature_fields.choices);
@@ -174,7 +193,7 @@ export class CreateCRFExtractorDialogComponent implements OnInit, OnDestroy {
     const contextFeatureFields = this.CRFExtractorForm.get('contextFeatureFieldsFormControl');
     if (contextFeatureFields) {
       if (this.data?.cloneElement?.context_feature_fields) {
-        const val = options.actions.POST.context_feature_fields.choices.find((x: { display_name: string[]; }) => x.display_name === this.data.cloneElement.context_feature_fields);
+        const val = options.actions.POST.context_feature_fields.choices.filter((x: { display_name: string; }) => this.data.cloneElement.context_feature_fields.includes(x.display_name));
         contextFeatureFields.setValue(val);
       } else {
         contextFeatureFields.setValue(options.actions.POST.context_feature_fields.choices);
@@ -183,12 +202,22 @@ export class CreateCRFExtractorDialogComponent implements OnInit, OnDestroy {
     const featureExtractors = this.CRFExtractorForm.get('featureExtractorsFormControl');
     if (featureExtractors) {
       if (this.data?.cloneElement?.feature_extractors) {
-        const val = options.actions.POST.feature_extractors.choices.find((x: { display_name: string[]; }) => x.display_name === this.data.cloneElement.feature_extractors);
+        const val = options.actions.POST.feature_extractors.choices.filter((x: { display_name: string; }) => this.data.cloneElement.feature_extractors.includes(x.display_name));
         featureExtractors.setValue(val);
       } else {
         featureExtractors.setValue(options.actions.POST.feature_extractors.choices);
       }
     }
+
+    const labelForm = this.CRFExtractorForm.get('labelsFormControl');
+    if (labelForm) {
+      if (this.data?.cloneElement?.labels) {
+        labelForm.setValue(this.data?.cloneElement?.labels);
+      } else {
+        labelForm.setValue(['GPE', 'ORG', 'PER', 'LOC']);
+      }
+    }
+
   }
 
 }

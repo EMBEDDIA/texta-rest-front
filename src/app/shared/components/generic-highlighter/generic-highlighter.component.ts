@@ -11,6 +11,7 @@ export interface HighlightSpan {
   str_val: string;
   id?: number;
   urlSpan?: boolean;
+  sent_index?: number;
   searcherHighlight?: boolean;
 }
 
@@ -212,65 +213,66 @@ export class GenericHighlighterComponent<T extends HighlightSpan> {
     // column content can be number, convert to string
     originalText = originalText.toString();
     if (facts.length === 0) {
-      if (originalText.length < 400) {
-        return [{text: originalText, highlighted: false}];
-      } else { // chrome cant handle rendering large chunks of text, 90% perf improvement on large texts
-        const numChunks = Math.ceil(originalText.length / 400);
-        const chunks = new Array(numChunks);
-
-        for (let i = 0, o = 0; i < numChunks; ++i, o += 400) {
-          chunks[i] = {text: originalText.substr(o, 400), highlighted: false};
-        }
-        return chunks;
-      }
-
+      return [{text: originalText, highlighted: false}];
     }
-
+    debugger
     // need this sort for fact priority
     facts.sort(this.sortByStartLowestSpan);
+
 
     const highlightArray: HighlightObject<T>[] = [];
     const overLappingFacts = this.detectOverlappingFacts(facts);
     let factText = '';
-    let lowestSpanNumber: number | null = facts[0].spans[0] as number;
-    for (let i = 0; i <= originalText.length; i++) {
-      let fact: T | undefined;
-      // get next span position when needed
-      if (lowestSpanNumber !== null && i >= lowestSpanNumber) {
-        fact = this.getFactByStartSpan(i, facts);
-        lowestSpanNumber = this.getFactWithStartSpanHigherThan(i, facts);
-      }
-
-      if (fact !== undefined && fact.spans[0] !== fact.spans[1]) {
-        if (this.isOverLappingFact(overLappingFacts, fact)) {
-          // push old non fact text into array
-          highlightArray.push({text: factText, highlighted: false});
-          factText = '';
-          // highlightarray is updated inside this function, return new loop index (where to resume from)
-          i = this.makeFactNested(highlightArray, fact, overLappingFacts, i, originalText, factColors);
-        } else {
-          // push old non fact text into array
-          highlightArray.push({text: factText, highlighted: false});
-          factText = '';
-          // make a regular fact, highlightarray updated inside function, return new loop index
-          i = this.makeFact(highlightArray, fact, i, originalText, factColors);
-        }
-      } else {
-        if (!lowestSpanNumber) {
-          factText += originalText.slice(i, originalText.length);
-          i = originalText.length;
-        } else {
-          factText += originalText.slice(i, lowestSpanNumber);
-          i = lowestSpanNumber - 1;
-        }
-      }
+    let sentenceSplit = [];
+    if (facts.some(x => x.sent_index && x.sent_index > 0)) {
+      sentenceSplit = originalText.split(' \n ');
+    } else {
+      sentenceSplit[0] = originalText;
     }
+    for (let sentenceIndex = 0; sentenceIndex <= sentenceSplit.length - 1; sentenceIndex++) {
+      const sentenceText = sentenceSplit[sentenceIndex];
+      const sentenceIndexFacts = facts.filter(x => x.sent_index === sentenceIndex);
+      let lowestSpanNumber: number | null = sentenceIndexFacts.length > 0 ? sentenceIndexFacts[0]?.spans[0] as number : null;
+      for (let i = 0; i <= sentenceText.length; i++) {
+        let fact: T | undefined;
+        // get next span position when needed
+        if (lowestSpanNumber !== null && i >= lowestSpanNumber) {
+          fact = this.getFactByStartSpan(i, sentenceIndexFacts);
+          lowestSpanNumber = this.getFactWithStartSpanHigherThan(i, sentenceIndexFacts);
+        }
 
-    if (factText !== '') {
-      // if the last substring in the whole string wasnt a fact
-      // that means there was no way for it to be added into the highlightarray,
-      // push non fact text into array
-      highlightArray.push({text: factText, highlighted: false});
+        if (fact !== undefined && fact.spans[0] !== fact.spans[1]) {
+          if (this.isOverLappingFact(overLappingFacts, fact)) {
+            // push old non fact text into array
+            highlightArray.push({text: factText, highlighted: false});
+            factText = '';
+            // highlightarray is updated inside this function, return new loop index (where to resume from)
+            i = this.makeFactNested(highlightArray, fact, overLappingFacts, i, sentenceText, factColors);
+          } else {
+            // push old non fact text into array
+            highlightArray.push({text: factText, highlighted: false});
+            factText = '';
+            // make a regular fact, highlightarray updated inside function, return new loop index
+            i = this.makeFact(highlightArray, fact, i, sentenceText, factColors);
+          }
+        } else {
+          if (!lowestSpanNumber) {
+            factText += sentenceText.slice(i, sentenceText.length);
+            i = sentenceText.length;
+          } else {
+            factText += sentenceText.slice(i, lowestSpanNumber);
+            i = lowestSpanNumber - 1;
+          }
+        }
+      }
+
+      if (factText !== '') {
+        // if the last substring in the whole string wasnt a fact
+        // that means there was no way for it to be added into the highlightarray,
+        // push non fact text into array
+        highlightArray.push({text: factText, highlighted: false});
+        factText = '';
+      }
     }
 
     return highlightArray;
@@ -487,7 +489,7 @@ export class GenericHighlighterComponent<T extends HighlightSpan> {
                                       nestedArray: Map<T, T[]>): Map<T, T[]> {
     // endSpan = previous facts span ending so we can make long chains of nested facts
     if (index < facts.length) {
-      if (facts[index].spans[0] < endSpan) {
+      if (facts[index].spans[0] < endSpan && facts[index].sent_index === factRoot.sent_index) {
         endSpan = facts[index].spans[1] as number > endSpan ? facts[index].spans[1] as number : endSpan;
         // keep iterating with current fact till it finds one who isnt nested into this fact
         // todo fix in TS 3.7
@@ -524,7 +526,18 @@ export class GenericHighlighterComponent<T extends HighlightSpan> {
   }
 
   private sortByStartLowestSpan(a: T, b: T): -1 | 1 {
-    if (a.spans[0] === b.spans[0]) {
+    if (a.sent_index !== undefined && b.sent_index !== undefined) {
+      if (a.sent_index === b.sent_index) {
+        if (a.spans[0] === b.spans[0]) {
+          return (a.spans[1] < b.spans[1]) ? -1 : 1; // sort by last span instead (need this for nested facts order)
+        } else {
+          return (a.spans[0] < b.spans[0]) ? -1 : 1;
+        }
+      } else {
+        return (a.sent_index < b.sent_index) ? -1 : 1;
+      }
+
+    } else if (a.spans[0] === b.spans[0]) {
       return (a.spans[1] < b.spans[1]) ? -1 : 1; // sort by last span instead (need this for nested facts order)
     } else {
       return (a.spans[0] < b.spans[0]) ? -1 : 1;

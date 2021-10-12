@@ -58,8 +58,11 @@ export class TagTextDialogComponent implements OnInit {
         if (x && !(x instanceof HttpErrorResponse)) {
           this.colorMap = new Map();
           this.result = x;
-          this.distinctMatches = UtilityFunctions.getDistinctByProperty(this.result.keywords, (y => y.str_val));
-          this.uniqueFacts = this.getUniqueFacts(this.result.keywords);
+          this.result.texta_facts.map((y: { doc_path: string; }) => y.doc_path = 'text');
+          // @ts-ignore
+          this.distinctMatches = UtilityFunctions.getDistinctByProperty(x.texta_facts, (y => y.str_val));
+          // @ts-ignore
+          this.uniqueFacts = this.getUniqueFacts(x.texta_facts);
         } else if (x instanceof HttpErrorResponse) {
           this.logService.snackBarError(x);
         }
@@ -70,7 +73,7 @@ export class TagTextDialogComponent implements OnInit {
 
   getUniqueFacts(matches: Match[]): { fact: Match; textColor: string; backgroundColor: string }[] {
     const returnVal: { fact: Match, textColor: string, backgroundColor: string }[] = [];
-    const uniques = UtilityFunctions.getDistinctByProperty(matches, (y => y.tagger_id));
+    const uniques = UtilityFunctions.getDistinctByProperty(matches, (y => y.fact));
     for (let i = 0; i < uniques.length; i++) {
       if (i < this.defaultColors.length) {
         const color = this.defaultColors[i];

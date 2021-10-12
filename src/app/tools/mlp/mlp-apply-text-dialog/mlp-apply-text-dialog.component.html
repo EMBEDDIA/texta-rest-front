@@ -25,7 +25,7 @@
   </form>
 
   <mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
-  <p style="display: inline-block;" *ngIf="result" title="{{result[0].text.language | json}}">Language: {{result[0].text.language.detected}}</p>
+  <p style="display: inline-block;" *ngIf="result" title="{{result[0].text_mlp.language | json}}">Language: {{result[0].text_mlp.language.detected}}</p>
   <div *ngIf="result" class="m-bot-10">
     <mat-accordion displayMode="flat" multi>
       <ng-container *ngFor="let field of resultFields; let i = index">
@@ -41,9 +41,10 @@
                 currentColumn: field,
                 searcherHighlight: null,
                 highlightTextaFacts: true,
+                colors: colorMap,
                 highlightHyperlinks: true,
                 titleAccessor: idAccessor,
-                data:result[0].text}"></app-generic-highlighter>
+                data:result[0].text_mlp}"></app-generic-highlighter>
           </ng-template>
         </mat-expansion-panel>
       </ng-container>
