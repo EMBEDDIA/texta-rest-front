@@ -3,7 +3,7 @@ describe('Crf-extractor should work', function () {
     cy.wait(100);
     cy.fixture('users').then((user) => {
       cy.login(user.username, user.password);
-      cy.createTestProject().then(x => {
+      cy.createTestProject(["texta_crf_test_index"]).then(x => {
         assert.isNotNull(x.body.id, 'should have project id');
         cy.wrap(x.body.id).as('projectId');
         cy.intercept('GET', '**user**').as('getUser');
