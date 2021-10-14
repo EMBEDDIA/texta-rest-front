@@ -16,14 +16,14 @@ describe('Crf-extractor should work', function () {
 
   function initPage() {
     cy.visit('/crf-extractors');
-    cy.wait('@getCrfExtractors');
     cy.wait('@getProjectIndices');
+    cy.wait('@getCrfExtractors');
   }
 
 
 
   function extractText() {
-    cy.get('.cdk-column-actions:nth(1)').should('be.visible').click('left');
+    cy.get('.cdk-column-actions:nth(1)').should('be.visible').click();
     cy.get('[data-cy=appCRFExtractorMenuTagText]').should('be.visible').click();
     cy.get('[data-cy=appCRFExtractorTextDialogText] input:first()').should('be.visible').click()
       .clear().invoke('val', 'Russia, one of Europe\'s biggest natural gas providers, has been accused of intentionally withholding supplies.').trigger('change');
@@ -34,16 +34,13 @@ describe('Crf-extractor should work', function () {
 
     cy.wait('@postCrfExtractor').then(intercepted => {
       cy.wrap(intercepted).its('response.statusCode').should('eq', 200);
-      if (intercepted?.response?.body?.result) {
-        cy.get('app-fact-chip').should('be.visible');
-      }
     })
     cy.get('[data-cy=appCRFExtractorTextDialogClose]').click();
   }
 
   function applyToIndex() {
-    cy.get('.cdk-column-actions:nth(1)').should('be.visible').click('left');
-    cy.get('[data-cy=appCRFExtractorApplyDialogIndices]').click();
+    cy.get('.cdk-column-actions:nth(1)').should('be.visible').click();
+    cy.get('[data-cy=appCRFExtractorMenuApplyToIndices]').should('be.visible').click();
 
     cy.get('[data-cy=appCRFExtractorApplyDialogFields]').click().then((fields => {
       cy.wrap(fields).should('have.class', 'mat-focused');
@@ -59,7 +56,6 @@ describe('Crf-extractor should work', function () {
     cy.wait(['@postCrfExtractor',]).then(resp => {
       expect(resp.response.statusCode).to.eq(201);
     });
-    cy.wait('@getCrfExtractors');
 
   }
 
@@ -101,7 +97,7 @@ describe('Crf-extractor should work', function () {
     extractText();
     applyToIndex();
 
-    cy.get('.cdk-column-actions:nth(1)').click('left');
+    cy.get('.cdk-column-actions:nth(1)').click();
     cy.get('[data-cy=appCRFExtractorMenuDelete]').click();
     cy.get('.mat-dialog-container [type="submit"]').should('be.visible').click();
     cy.get('.cdk-column-actions').should('have.length', 1);
