@@ -5,11 +5,14 @@ import {RegexTaggerService} from '../../../core/models/taggers/regex-tagger.serv
 import {LogService} from '../../../core/util/log.service';
 import {LexiconService} from '../../../core/lexicon/lexicon.service';
 import {ProjectStore} from '../../../core/projects/project.store';
-import {switchMap, takeUntil} from 'rxjs/operators';
+import {debounceTime, distinctUntilChanged, switchMap, takeUntil} from 'rxjs/operators';
 import {Project} from '../../../shared/types/Project';
-import {forkJoin, of, Subject} from 'rxjs';
+import {forkJoin, Observable, of, Subject} from 'rxjs';
 import {HttpErrorResponse} from '@angular/common/http';
 import {UtilityFunctions} from "../../../shared/UtilityFunctions";
+import {ScrollableDataSource} from "../../../shared/ScrollableDataSource";
+import {ResultsWrapper} from "../../../shared/types/Generic";
+import {FormControl} from "@angular/forms";
 
 @Component({
   selector: 'app-multi-tag-text-dialog',
@@ -18,7 +21,7 @@ import {UtilityFunctions} from "../../../shared/UtilityFunctions";
 })
 export class MultiTagTextDialogComponent implements OnInit, OnDestroy {
   text = '';
-  taggers: RegexTagger[];
+  taggers: ScrollableDataSource<RegexTagger>;
   selectedTaggers: RegexTagger[];
 
   currentProject: Project;
@@ -28,6 +31,7 @@ export class MultiTagTextDialogComponent implements OnInit, OnDestroy {
   isLoading: boolean;
   // tslint:disable-next-line:no-any
   regexTaggerOptions: any;
+  descriptionFilterControl: FormControl = new FormControl();
 
   constructor(private dialogRef: MatDialogRef<MultiTagTextDialogComponent>,
               private regexTaggerService: RegexTaggerService,
@@ -36,13 +40,15 @@ export class MultiTagTextDialogComponent implements OnInit, OnDestroy {
               private projectStore: ProjectStore) {
   }
 
+  idCompare = (o1: { id: number }, o2: { id: number }) => o1?.id === o2?.id;
+
   ngOnInit(): void {
     this.projectStore.getCurrentProject().pipe(takeUntil(this.destroyed$), switchMap((currentProject => {
       if (currentProject) {
         this.currentProject = currentProject;
+        this.taggers = new ScrollableDataSource(this.fetchFn, this);
         return forkJoin({
           options: this.regexTaggerService.getMultiTagTextOptions(currentProject.id),
-          taggers: this.regexTaggerService.getRegexTaggers(this.currentProject.id, '&page_size=999')
         });
       }
       return of(null);
@@ -50,13 +56,20 @@ export class MultiTagTextDialogComponent implements OnInit, OnDestroy {
       if (resp?.options && !(resp.options instanceof HttpErrorResponse)) {
         this.regexTaggerOptions = resp.options;
       }
-      if (resp?.taggers && !(resp.taggers instanceof HttpErrorResponse)) {
-        this.taggers = resp.taggers.results;
-      }
-
-        UtilityFunctions.logForkJoinErrors(resp, HttpErrorResponse, this.logService.snackBarError);
+      UtilityFunctions.logForkJoinErrors(resp, HttpErrorResponse, this.logService.snackBarError);
     });
 
+    this.descriptionFilterControl.valueChanges
+      .pipe(takeUntil(this.destroyed$), debounceTime(300), distinctUntilChanged())
+      .subscribe((val) => {
+        console.log(this.selectedTaggers);
+        this.taggers.filter(`&description=${val}`);
+      });
+  }
+
+  fetchFn(pageNr: number, pageSize: number,
+          filterParam: string, context: this): Observable<ResultsWrapper<RegexTagger> | HttpErrorResponse> {
+    return context.regexTaggerService.getRegexTaggers(context.currentProject.id, `${filterParam}&page=${pageNr + 1}&page_size=${pageSize}`);
   }
 
   onSubmit(text: string, selectedTaggers: RegexTagger[]): void {
@@ -79,5 +92,9 @@ export class MultiTagTextDialogComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroyed$.next(true);
     this.destroyed$.complete();
+  }
+
+  taggerSelected($event: any): void {
+    console.log($event);
   }
 }

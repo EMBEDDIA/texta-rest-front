@@ -8,12 +8,21 @@
   </mat-form-field>
   <mat-form-field class="max-width" data-cy="appRegexTaggerMultiTagDialogTaggers">
     <mat-label>Regex Taggers</mat-label>
-    <mat-select [(ngModel)]="selectedTaggers"
-                [disableOptionCentering]="true" [ngModelOptions]="{standalone: true}" multiple
-                panelClass="select-panel-reveal-input">
-      <mat-option *ngFor="let tagger of taggers" [value]="tagger">
-        {{tagger.description}}
+    <mat-select [(ngModel)]="selectedTaggers" [compareWith]="idCompare" (ngModelChange)="taggerSelected($event)"
+                (openedChange)="this.cdkVirtualScrollViewport.setRenderedContentOffset(0);
+      this.cdkVirtualScrollViewport.setRenderedRange({start: 0, end: 9})"
+                [disableOptionCentering]="true" [ngModelOptions]="{standalone: true}" multiple>
+      <mat-option>
+        <ngx-mat-select-search [formControl]="descriptionFilterControl"
+                               noEntriesFoundLabel="No entries"
+                               placeholderLabel="Search"></ngx-mat-select-search>
       </mat-option>
+      <cdk-virtual-scroll-viewport #cdkVirtualScrollViewport itemSize="48" [style.height.px]=9*48 [minBufferPx]="10*48"
+                                   [maxBufferPx]="20*48"
+                                   class="example-viewport">
+        <mat-option *cdkVirtualFor="let item of taggers"
+                    [value]="item">{{item?.description || 'Loading...'}}</mat-option>
+      </cdk-virtual-scroll-viewport>
     </mat-select>
     <mat-hint>{{regexTaggerOptions?.actions?.POST?.taggers?.help_text || ''}}</mat-hint>
   </mat-form-field>
