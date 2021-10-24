@@ -7,6 +7,10 @@ import {debounceTime} from 'rxjs/operators';
 // tslint:disable:variable-name
 export class ScrollableDataSource<T> extends DataSource<T> {
   private _length = 0;
+  get length(): number {
+    return this._length;
+  }
+
   private _pageSize = 20;
   private _cachedData: T[] = Array.from<T>({length: this._length});
   private _fetchedPages = new Set<number>();
