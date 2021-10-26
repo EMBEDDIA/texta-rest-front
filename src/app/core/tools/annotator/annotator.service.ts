@@ -35,4 +35,11 @@ export class AnnotatorService {
       tap(e => this.logService.logStatus(e, 'bulkDeleteAnnotatorTasks')),
       catchError(this.logService.handleError<{ 'num_deleted': number, 'deleted_types': { string: number }[] }>('bulkDeleteAnnotatorTasks')));
   }
+
+  // tslint:disable-next-line:no-any
+  getAnnotatorOptions(projectId: number): Observable<any | HttpErrorResponse> {
+    return this.http.options(`${this.apiUrl}/projects/${projectId}/annotator/`).pipe(
+      tap(e => this.logService.logStatus(e, 'getAnnotatorOptions')),
+      catchError(this.logService.handleError('getAnnotatorOptions')));
+  }
 }

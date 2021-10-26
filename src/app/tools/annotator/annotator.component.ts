@@ -96,6 +96,7 @@ export class AnnotatorComponent implements OnInit, OnDestroy, AfterViewInit {
     const dialogRef = this.dialog.open(CreateAnnotatorDialogComponent, {
       maxHeight: '650px',
       width: '700px',
+      disableClose: true,
     });
     dialogRef.afterClosed().subscribe(resp => {
       if (resp && !(resp instanceof HttpErrorResponse)) {
