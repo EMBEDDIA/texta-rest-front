@@ -1,8 +1,8 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {MatDialogRef} from '@angular/material/dialog';
-import {of, Subject} from 'rxjs';
+import {forkJoin, Observable, of, Subject} from 'rxjs';
 import {ErrorStateMatcher} from '@angular/material/core';
-import {mergeMap, switchMap, take, takeUntil} from 'rxjs/operators';
+import {filter, map, mergeMap, startWith, switchMap, take, takeUntil} from 'rxjs/operators';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {HttpErrorResponse} from '@angular/common/http';
 import {LiveErrorStateMatcher} from '../../../shared/CustomerErrorStateMatchers';
@@ -14,12 +14,26 @@ import {ProjectStore} from '../../../core/projects/project.store';
 import {UtilityFunctions} from '../../../shared/UtilityFunctions';
 import {Choice} from '../../../shared/types/tasks/Embedding';
 
+interface OnSubmitParams {
+  descriptionFormControl: string;
+  indicesFormControl: ProjectIndex[];
+  fieldsFormControl: string;
+  annotationTypeFormControl: 'binary' | 'multilabel' | 'a';
+  binaryFormGroup: {
+    factNameFormControl: string;
+    posValFormControl: string;
+    negValFormControl: string;
+  };
+}
+
 @Component({
   selector: 'app-create-annotator-dialog',
   templateUrl: './create-annotator-dialog.component.html',
   styleUrls: ['./create-annotator-dialog.component.scss']
 })
 export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
+  defaultQuery = '{"query": {"match_all": {}}}';
+  query: unknown = this.defaultQuery;
 
   annotatorForm = new FormGroup({
     descriptionFormControl: new FormControl('', [Validators.required]),
@@ -41,7 +55,8 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
   // tslint:disable-next-line:no-any
   annotatorOptions: any;
   annotatorTypes: Choice[];
-  projectFacts: Subject<{ name: string, values: string[] }[]> = new Subject();
+  projectFacts: string[] = [];
+  filteredProjectFacts: Observable<string[]>;
 
   constructor(private dialogRef: MatDialogRef<CreateAnnotatorDialogComponent>,
               private projectService: ProjectService,
@@ -51,36 +66,27 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.projectStore.getSelectedProjectIndices().pipe(takeUntil(this.destroyed$), switchMap(currentProjIndices => {
-      if (this.currentProject?.id && currentProjIndices) {
-        const indicesForm = this.annotatorForm.get('indicesFormControl');
-        indicesForm?.setValue(currentProjIndices);
-        this.projectFields = ProjectIndex.cleanProjectIndicesFields(currentProjIndices, ['text'], []);
-        this.projectFacts.next([{name: 'Loading...', values: []}]);
-        return this.projectService.getProjectFacts(this.currentProject.id, currentProjIndices.map(x => [{name: x.index}]).flat(), true);
-      } else {
-        return of(null);
-      }
-    })).subscribe(resp => {
-      if (resp && !(resp instanceof HttpErrorResponse)) {
-        this.projectFacts.next(resp);
-      } else if (resp) {
-        this.logService.snackBarError(resp, 4000);
-      }
-    });
     this.projectStore.getCurrentProject().pipe(take(1), switchMap(proj => {
       if (proj) {
         this.currentProject = proj;
-        return this.annotatorService.getAnnotatorOptions(proj.id);
+        return forkJoin({
+          annotatorOptions: this.annotatorService.getAnnotatorOptions(proj.id),
+          selectedIndices: this.projectStore.getSelectedProjectIndices().pipe(filter(x => !!x), take(1))
+        });
       }
       return of(null);
     })).subscribe(resp => {
-      if (resp && !(resp instanceof HttpErrorResponse)) {
-        this.annotatorOptions = resp;
-        this.annotatorTypes = resp.actions.POST.annotation_type.choices;
-      } else if (resp) {
-        this.logService.snackBarError(resp);
+      if (resp?.annotatorOptions && !(resp.annotatorOptions instanceof HttpErrorResponse)) {
+        this.annotatorOptions = resp.annotatorOptions;
+        this.annotatorTypes = resp.annotatorOptions.actions.POST.annotation_type.choices;
       }
+      if (resp?.selectedIndices && !(resp.selectedIndices instanceof HttpErrorResponse)) {
+        const indicesForm = this.annotatorForm.get('indicesFormControl');
+        indicesForm?.setValue(resp.selectedIndices);
+        this.projectFields = ProjectIndex.cleanProjectIndicesFields(resp.selectedIndices, ['text'], []);
+        this.getFactsForIndices(indicesForm?.value);
+      }
+      UtilityFunctions.logForkJoinErrors(resp, HttpErrorResponse, this.logService.snackBarError);
     });
 
     this.projectStore.getProjectIndices().pipe(takeUntil(this.destroyed$)).subscribe(projIndices => {
@@ -88,18 +94,30 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
         this.projectIndices = projIndices;
       }
     });
+
+    this.filteredProjectFacts = this.annotatorForm?.get('binaryFormGroup')?.get('factNameFormControl')?.valueChanges
+        .pipe(takeUntil(this.destroyed$),
+            startWith(''),
+            map(val => this.filter(val))
+        ) || of([]);
   }
 
-  onSubmit(formData: {
-    descriptionFormControl: string;
-    indicesFormControl: ProjectIndex[]; fieldsFormControl: string[];
-  }): void {
+  onSubmit(formData: OnSubmitParams): void {
     const body = {
       description: formData.descriptionFormControl,
       indices: formData.indicesFormControl.map(x => [{name: x.index}]).flat(),
-      fields: formData.fieldsFormControl
+      fields: formData.fieldsFormControl,
+      ...this.query ? {query: this.query} : {},
+      annotation_type: formData.annotationTypeFormControl,
+      ...formData.annotationTypeFormControl === 'binary' ?
+          {
+            binary_configuration: {
+              fact_name: formData.binaryFormGroup.factNameFormControl,
+              pos_value: formData.binaryFormGroup.posValFormControl,
+              neg_value: formData.binaryFormGroup.factNameFormControl
+            }
+          } : {},
     };
-
     this.annotatorService.createAnnotatorTask(this.currentProject.id, body).subscribe(resp => {
       if (resp && !(resp instanceof HttpErrorResponse)) {
         this.logService.snackBarMessage(`Created new task: ${resp.description}`, 2000);
@@ -112,16 +130,16 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
 
   getFactsForIndices(val: ProjectIndex[]): void {
     if (val.length > 0) {
-      this.projectFacts.next([{name: 'Loading...', values: []}]);
-      this.projectService.getProjectFacts(this.currentProject.id, val.map((x: ProjectIndex) => [{name: x.index}]).flat(), true).pipe(takeUntil(this.projectFacts)).subscribe(resp => {
+      this.projectFacts = [];
+      this.projectService.getProjectFacts(this.currentProject.id, val.map((x: ProjectIndex) => [{name: x.index}]).flat()).pipe(takeUntil(this.destroyed$)).subscribe(resp => {
         if (resp && !(resp instanceof HttpErrorResponse)) {
-          this.projectFacts.next(resp);
+          this.projectFacts = resp;
         } else {
           this.logService.snackBarError(resp);
         }
       });
     } else {
-      this.projectFacts.next([]);
+      this.projectFacts = [];
     }
   }
 
@@ -134,9 +152,17 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
     }
   }
 
+  onQueryChanged(query: unknown): void {
+    this.query = query ? query : this.defaultQuery;
+  }
+
   ngOnDestroy(): void {
     this.destroyed$.next(true);
     this.destroyed$.complete();
   }
 
+  filter(val: string): string[] {
+    return this.projectFacts.filter(option =>
+        option.toLowerCase().indexOf(val.toLowerCase()) === 0);
+  }
 }

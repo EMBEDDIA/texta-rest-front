@@ -1,6 +1,6 @@
 <h1 mat-dialog-title>New Annotator task</h1>
 <mat-dialog-content>
-  <form (ngSubmit)="onSubmit(annotatorForm.value)" [formGroup]="annotatorForm" class="flex-col">
+  <form (ngSubmit)="onSubmit(annotatorForm.value)" [formGroup]="annotatorForm" class="flex-col" id="annotatorForm">
     <mat-form-field data-cy="appAnnotatorCreateDialogDesc">
       <input [errorStateMatcher]="matcher" autocomplete="off" formControlName="descriptionFormControl" matInput
              placeholder="Description" required>
@@ -28,19 +28,21 @@
     </mat-form-field>
 
     <mat-form-field>
-          <mat-label>Select Fields</mat-label>
-          <app-project-field-select [projectFields]="projectFields" [required]="true"
-                                    formControlName="fieldsFormControl"></app-project-field-select>
+      <mat-label>Select Fields</mat-label>
+      <app-project-field-select [projectFields]="projectFields" [required]="true"
+                                formControlName="fieldsFormControl"></app-project-field-select>
       <mat-error *ngIf="annotatorForm.get('fieldsFormControl')?.hasError('required')">
         Field is <strong>required</strong>
       </mat-error>
       <mat-hint>{{annotatorOptions?.actions?.POST?.fields?.help_text || ''}}</mat-hint>
     </mat-form-field>
-
+    <app-saved-search-autocomplete (queryChanged)="onQueryChanged($event)"
+                                   data-cy="appMLPCreateDialogQuery">
+    </app-saved-search-autocomplete>
     <mat-form-field data-cy="appAnnotatorCreateDialogType">
       <mat-label>Annotation type</mat-label>
       <mat-select [disableOptionCentering]="true" formControlName="annotationTypeFormControl"
-                   panelClass="select-panel-reveal-input" required>
+                  panelClass="select-panel-reveal-input" required>
         <ng-container *ngIf="annotatorTypes">
           <mat-option *ngFor="let item of annotatorTypes" [value]="item.value">
             {{item.display_name}}
@@ -63,9 +65,8 @@
                  placeholder="Fact name"
                  required
                  type="text">
-          <mat-autocomplete #autoName="matAutocomplete"
-                            panelWidth="auto">
-            <mat-option *ngFor="let option of projectFacts | async"
+          <mat-autocomplete #autoName="matAutocomplete">
+            <mat-option *ngFor="let option of filteredProjectFacts | async"
                         [value]="option">
               {{option}}
             </mat-option>
@@ -96,7 +97,8 @@
       </form>
     </ng-container>
     <ng-container *ngIf="annotatorForm.get('annotationTypeFormControl')?.value === 'entity'">entity</ng-container>
-    <ng-container *ngIf="annotatorForm.get('annotationTypeFormControl')?.value === 'multilabel'">multilabel</ng-container>
+    <ng-container *ngIf="annotatorForm.get('annotationTypeFormControl')?.value === 'multilabel'">multilabel
+    </ng-container>
 
   </form>
 </mat-dialog-content>
@@ -106,7 +108,8 @@
       <button class="flex-item-left" mat-button mat-dialog-close type="button">Close</button>
     </div>
     <div class="flex-item-right">
-      <button [disabled]="!annotatorForm.valid" data-cy="appAnnotatorCreateDialogSubmit" mat-button type="submit">
+      <button [disabled]="!annotatorForm.valid" form="annotatorForm" data-cy="appAnnotatorCreateDialogSubmit" mat-button
+              type="submit">
         Create
       </button>
     </div>
