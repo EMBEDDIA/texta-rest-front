@@ -114,7 +114,7 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
             binary_configuration: {
               fact_name: formData.binaryFormGroup.factNameFormControl,
               pos_value: formData.binaryFormGroup.posValFormControl,
-              neg_value: formData.binaryFormGroup.factNameFormControl
+              neg_value: formData.binaryFormGroup.negValFormControl
             }
           } : {},
     };
