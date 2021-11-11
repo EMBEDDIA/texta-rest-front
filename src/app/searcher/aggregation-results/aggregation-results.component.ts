@@ -20,7 +20,10 @@ export interface AggregationData {
     tableData?: MatTableDataSource<any>,
     name: string
   }[];
+  // tslint:disable-next-line:max-line-length
   dateData?: { series: { value: number; name: string; epoch: number; extra?: { buckets: { key: string; doc_count: number }[] } }[], name: string }[];
+  // tslint:disable-next-line:no-any
+  numberData?: any[];
   // only used when aggregating over texta_facts only
   textaFactsTableData?: {
     // tslint:disable-next-line:no-any
@@ -110,6 +113,7 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
       tableData: [],
       dateData: [],
       textaFactsTableData: [],
+      numberData: [],
     };
     if (aggregation && aggregation.aggs) {
       for (const aggKey of Object.keys(aggregation.aggs)) {
@@ -128,6 +132,9 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
         } else if (rootAggPropKeys.includes('agg_fact')) {
           rootAggObj = this.navNestedAggByKey(rootAggObj, 'agg_fact');
           this.populateAggData(rootAggObj, aggKey, (x => x.treeData), 'agg_fact', aggData);
+        } else if (rootAggPropKeys.includes('agg_number') || aggKey === 'agg_number') {
+          rootAggObj = this.navNestedAggByKey(rootAggObj, 'agg_number');
+          this.populateAggData(rootAggObj, aggKey, (x => x.numberData), 'agg_number', aggData);
         }
       }
       this.aggregationData = aggData;
@@ -138,37 +145,39 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
   // gives us nested buckets->buckets->buckets, so i can build tree view
   // tslint:disable-next-line:no-any max-line-length
   formatAggDataStructure(rootAgg: { histoBuckets: { name: any; series: { value: number; name: string; }[]; }[]; nested: boolean; }, aggregation: any, aggKeys: string[]): any {
-    for (const bucket of this.bucketAccessor(aggregation)) {
-      for (const key of aggKeys) {
-        const innerBuckets = this.navNestedAggByKey(bucket, key);
-        if (this.bucketAccessor(innerBuckets)) {
-          if (bucket.hasOwnProperty('agg_histo') && key === 'agg_histo') {
-            if (!rootAgg.histoBuckets) {
-              rootAgg.histoBuckets = [];
-            }
-            rootAgg.histoBuckets.push({
-              name: bucket.key,
-              series: this.formatDateData(this.bucketAccessor(innerBuckets))
-            });
-          }
-          // dont delete original data to avoid major GC, (takes a while)
-          rootAgg.nested = true;
-          bucket.buckets = this.formatAggDataStructure(rootAgg, innerBuckets, aggKeys).buckets;
-        } else if (innerBuckets !== bucket && key === 'fact_val_reverse') {
-          for (const innerBucketKey of aggKeys) {
-            const nestedContent = this.navNestedAggByKey(innerBuckets, innerBucketKey);
-            if (this.bucketAccessor(nestedContent)) {
-              if (innerBuckets.hasOwnProperty('agg_histo') && innerBucketKey === 'agg_histo') {
-                if (!rootAgg.histoBuckets) {
-                  rootAgg.histoBuckets = [];
-                }
-                rootAgg.histoBuckets.push({
-                  name: innerBuckets.key,
-                  series: this.formatDateData(this.bucketAccessor(nestedContent))
-                });
+    if (this.bucketAccessor(aggregation)) {
+      for (const bucket of this.bucketAccessor(aggregation)) {
+        for (const key of aggKeys) {
+          const innerBuckets = this.navNestedAggByKey(bucket, key);
+          if (this.bucketAccessor(innerBuckets)) {
+            if (bucket.hasOwnProperty('agg_histo') && key === 'agg_histo') {
+              if (!rootAgg.histoBuckets) {
+                rootAgg.histoBuckets = [];
               }
-              rootAgg.nested = true;
-              bucket.buckets = this.formatAggDataStructure(rootAgg, nestedContent, aggKeys).buckets;
+              rootAgg.histoBuckets.push({
+                name: bucket.key,
+                series: this.formatDateData(this.bucketAccessor(innerBuckets))
+              });
+            }
+            // dont delete original data to avoid major GC, (takes a while)
+            rootAgg.nested = true;
+            bucket.buckets = this.formatAggDataStructure(rootAgg, innerBuckets, aggKeys).buckets;
+          } else if (innerBuckets !== bucket && key === 'fact_val_reverse') {
+            for (const innerBucketKey of aggKeys) {
+              const nestedContent = this.navNestedAggByKey(innerBuckets, innerBucketKey);
+              if (this.bucketAccessor(nestedContent)) {
+                if (innerBuckets.hasOwnProperty('agg_histo') && innerBucketKey === 'agg_histo') {
+                  if (!rootAgg.histoBuckets) {
+                    rootAgg.histoBuckets = [];
+                  }
+                  rootAgg.histoBuckets.push({
+                    name: innerBuckets.key,
+                    series: this.formatDateData(this.bucketAccessor(nestedContent))
+                  });
+                }
+                rootAgg.nested = true;
+                bucket.buckets = this.formatAggDataStructure(rootAgg, nestedContent, aggKeys).buckets;
+              }
             }
           }
         }
@@ -194,7 +203,7 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
   // aggData because we can have multiple aggs so we need to push instead of returning new object
   // @ts-ignore
   // tslint:disable-next-line:no-any max-line-length
-  populateAggData(rootAggObj, aggName, aggDataAccessor: (x: any) => any, aggregationType: 'agg_histo' | 'agg_fact' | 'agg_term', aggData: AggregationData): void {
+  populateAggData(rootAggObj, aggName, aggDataAccessor: (x: any) => any, aggregationType: 'agg_histo' | 'agg_fact' | 'agg_term' | 'agg_number', aggData: AggregationData): void {
     const formattedData = this.formatAggDataStructure(rootAggObj, rootAggObj,
       ['agg_histo', 'agg_fact', 'agg_fact_val', 'agg_term', 'fact_val_reverse']);
     const MAIN_AGG_NAME = 'Aggregation results';
@@ -237,6 +246,11 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
       aggDataAccessor(aggData).push({
         name: aggName === 'agg_histo' ? MAIN_AGG_NAME : aggName,
         series: this.formatDateData(this.bucketAccessor(formattedData))
+      });
+    } else if (aggregationType === 'agg_number') {
+      aggDataAccessor(aggData).push({
+        tableData: new MatTableDataSource(formattedData.values),
+        name: aggName === aggregationType ? MAIN_AGG_NAME : aggName
       });
     }
   }

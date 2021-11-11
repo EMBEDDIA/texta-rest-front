@@ -27,6 +27,10 @@
             <mat-icon>text_fields</mat-icon>
             {{fields.path}}
           </ng-container>
+          <ng-container *ngIf="fields.type === 'long' || fields.type === 'float'">
+            <mat-icon>pin</mat-icon>
+            {{fields.path}}
+          </ng-container>
         </mat-option>
       </mat-select>
     </mat-form-field>
@@ -44,6 +48,13 @@
         [fieldsFormControl]="aggregation.formControl"
         [aggregationObj]="aggregation" (relativeFrequency)="onRelativeFrequency($event)">
       </app-date-aggregation>
+    </ng-container>
+    <ng-container *ngIf="fieldTypeNumber(aggregation.formControl.value)">
+      <app-number-aggregation
+        [fieldsFormControl]="aggregation.formControl"
+        [aggregationObj]="aggregation"
+        [isLastAgg]="(i+1) === aggregationList.length">
+      </app-number-aggregation>
     </ng-container>
   </div>
   <button class="flex-item-center" mat-icon-button aria-label="add sub aggregation"
