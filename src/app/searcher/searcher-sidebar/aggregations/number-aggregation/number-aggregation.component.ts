@@ -17,8 +17,7 @@ export class NumberAggregationComponent implements OnInit {
   aggregationSize = 20;
   destroy$: Subject<boolean> = new Subject();
 
-  constructor(
-    private searchService: SearcherComponentService) {
+  constructor() {
   }
 
   @Input() set notSubAgg(val: boolean) {
@@ -29,7 +28,7 @@ export class NumberAggregationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.fieldsFormControl.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(val => {
+    this.fieldsFormControl?.valueChanges?.pipe(takeUntil(this.destroy$)).subscribe(val => {
       // need to check type, because if we are currently on a fact constraint and switch to a date constraint, then this valuechanges
       // still fires, so we would get val.type === 'date' and after that the component will destroy itself
       if (val && val.type === 'long' || val.type === 'float') {
