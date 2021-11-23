@@ -30,8 +30,9 @@ export interface AggregationData {
     data?: any,
     name: string,
   }[];
-
 }
+
+type AggregationTypes = 'agg_histo' | 'agg_fact' | 'agg_term' | 'agg_number_percentiles' | 'agg_number_extended_stats' | 'agg_string_stats';
 
 @Component({
   selector: 'app-aggregation-results',
@@ -132,9 +133,15 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
         } else if (rootAggPropKeys.includes('agg_fact')) {
           rootAggObj = this.navNestedAggByKey(rootAggObj, 'agg_fact');
           this.populateAggData(rootAggObj, aggKey, (x => x.treeData), 'agg_fact', aggData);
-        } else if (rootAggPropKeys.includes('agg_number') || aggKey === 'agg_number') {
-          rootAggObj = this.navNestedAggByKey(rootAggObj, 'agg_number');
-          this.populateAggData(rootAggObj, aggKey, (x => x.numberData), 'agg_number', aggData);
+        } else if (rootAggPropKeys.includes('agg_number_percentiles') || aggKey === 'agg_number_percentiles') {
+          rootAggObj = this.navNestedAggByKey(rootAggObj, 'agg_number_percentiles');
+          this.populateAggData(rootAggObj, aggKey, (x => x.numberData), 'agg_number_percentiles', aggData);
+        } else if (rootAggPropKeys.includes('agg_number_extended_stats') || aggKey === 'agg_number_extended_stats') {
+          rootAggObj = this.navNestedAggByKey(rootAggObj, 'agg_number_extended_stats');
+          this.populateAggData(rootAggObj, aggKey, (x => x.numberData), 'agg_number_extended_stats', aggData);
+        }else if (rootAggPropKeys.includes('agg_string_stats') || aggKey === 'agg_string_stats') {
+          rootAggObj = this.navNestedAggByKey(rootAggObj, 'agg_string_stats');
+          this.populateAggData(rootAggObj, aggKey, (x => x.numberData), 'agg_string_stats', aggData);
         }
       }
       this.aggregationData = aggData;
@@ -182,9 +189,10 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
           }
         }
       }
-    }
-    if (!rootAgg.nested) {
-      rootAgg.nested = false;
+
+      if (!rootAgg.nested) {
+        rootAgg.nested = false;
+      }
     }
 
     return aggregation;
@@ -203,7 +211,7 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
   // aggData because we can have multiple aggs so we need to push instead of returning new object
   // @ts-ignore
   // tslint:disable-next-line:no-any max-line-length
-  populateAggData(rootAggObj, aggName, aggDataAccessor: (x: any) => any, aggregationType: 'agg_histo' | 'agg_fact' | 'agg_term' | 'agg_number', aggData: AggregationData): void {
+  populateAggData(rootAggObj, aggName, aggDataAccessor: (x: any) => any, aggregationType: AggregationTypes, aggData: AggregationData): void {
     const formattedData = this.formatAggDataStructure(rootAggObj, rootAggObj,
       ['agg_histo', 'agg_fact', 'agg_fact_val', 'agg_term', 'fact_val_reverse']);
     const MAIN_AGG_NAME = 'Aggregation results';
@@ -247,9 +255,31 @@ export class AggregationResultsComponent implements OnInit, OnDestroy {
         name: aggName === 'agg_histo' ? MAIN_AGG_NAME : aggName,
         series: this.formatDateData(this.bucketAccessor(formattedData))
       });
-    } else if (aggregationType === 'agg_number') {
+    } else if (aggregationType === 'agg_number_percentiles') {
+      console.log(formattedData.values);
       aggDataAccessor(aggData).push({
-        tableData: new MatTableDataSource(formattedData.values),
+        tableData: new MatTableDataSource(formattedData.values.map((x: { percent: number; key: number; }) => {
+          x.percent = x.key;
+          return x;
+        })),
+        name: aggName === aggregationType ? MAIN_AGG_NAME : aggName
+      });
+    } else if (aggregationType === 'agg_number_extended_stats') {
+      const values: { key: string; value: number }[] = [];
+      for (const property in formattedData) {
+        values.push({key: property, value: formattedData[property]});
+      }
+      aggDataAccessor(aggData).push({
+        tableData: new MatTableDataSource(values),
+        name: aggName === aggregationType ? MAIN_AGG_NAME : aggName
+      });
+    }else if (aggregationType === 'agg_string_stats') {
+      const values: { key: string; value: number }[] = [];
+      for (const property in formattedData) {
+        values.push({key: property, value: formattedData[property]});
+      }
+      aggDataAccessor(aggData).push({
+        tableData: new MatTableDataSource(values),
         name: aggName === aggregationType ? MAIN_AGG_NAME : aggName
       });
     }

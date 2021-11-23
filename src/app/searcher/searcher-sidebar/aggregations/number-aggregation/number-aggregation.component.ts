@@ -13,7 +13,7 @@ export class NumberAggregationComponent implements OnInit {
   @Input() aggregationObj: { aggregation: any };
   @Input() fieldsFormControl: FormControl;
   isMainAgg: boolean;
-  aggregationType: 'percentiles' | 'weighted_avg' | 'stats' = 'percentiles';
+  aggregationType: 'percentiles' | 'extended_stats' | 'boxplot' = 'percentiles';
   aggregationSize = 20;
   destroy$: Subject<boolean> = new Subject();
 
@@ -21,7 +21,7 @@ export class NumberAggregationComponent implements OnInit {
     private searchService: SearcherComponentService) {
   }
 
-  @Input() set isLastAgg(val: boolean) {
+  @Input() set notSubAgg(val: boolean) {
     this.isMainAgg = val;
     if (this.isMainAgg) {
       this.updateAggregations();
@@ -42,10 +42,10 @@ export class NumberAggregationComponent implements OnInit {
     // tslint:disable-next-line:no-any
     let returnquery: { [key: string]: any };
     returnquery = {
-      agg_number: {
+      [`agg_number_${this.aggregationType}`]: {
         [this.aggregationType]: {
           field: `${this.fieldsFormControl.value.path}`,
-          keyed: false
+          ...this.aggregationType === 'percentiles' ? {keyed: false} : {},
         }
       }
     };

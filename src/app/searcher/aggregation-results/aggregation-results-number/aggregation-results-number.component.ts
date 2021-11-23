@@ -19,7 +19,7 @@ interface TableElement {
 export class AggregationResultsNumberComponent {
   tableDataSource: MatTableDataSource<TableElement>;
   expandedElement: TableElement | null;
-  displayedColumns = ['key', 'value'];
+  displayedColumns = ['value'];
   @ViewChild(MatSort, {static: true}) sort: MatSort;
   @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
   selection = new SelectionModel<TableElement>(true, []);
@@ -35,6 +35,11 @@ export class AggregationResultsNumberComponent {
       this.tableDataSource = value;
       this.tableDataSource.paginator = this.paginator;
       this.tableDataSource.sort = this.sort;
+      if (value.data.length > 0 && Object.keys(value.data[0]).includes('percent')) {
+        this.displayedColumns.unshift('percentile');
+      }else{
+        this.displayedColumns.unshift('key');
+      }
     }
   }
 
