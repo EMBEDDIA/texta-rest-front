@@ -32,6 +32,7 @@ speed-measure-plugin.json
 .history/*
 
 # misc
+/.angular/cache
 /.sass-cache
 /connect.lock
 /coverage
@@ -49,3 +50,4 @@ data-volumes/*
 cypress/fixtures/users.json
 cypress/videos/*
 cypress/screenshots/*
+.vscode/settings.json

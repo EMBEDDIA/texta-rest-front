@@ -3,7 +3,7 @@ import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import {Observable} from 'rxjs';
 import {catchError, tap} from 'rxjs/operators';
 import {
-  RegexTaggerGroup,
+  RegexTaggerGroup, RegexTaggerGroupMultiTagTextResult,
   RegexTaggerGroupTagRandomDocResult,
   RegexTaggerGroupTagTextResult
 } from '../../../../shared/types/tasks/RegexTaggerGroup';
@@ -74,13 +74,13 @@ export class RegexTaggerGroupService {
       catchError(this.logService.handleError<RegexTaggerGroup>('patchRegexTaggerGroup')));
   }
 
-  multiTagText(projectId: number, body: unknown): Observable<unknown | HttpErrorResponse> {
-    return this.http.post<unknown>(
+  multiTagText(projectId: number, body: unknown): Observable<RegexTaggerGroupMultiTagTextResult[] | HttpErrorResponse> {
+    return this.http.post<RegexTaggerGroupMultiTagTextResult[]>(
       `${this.apiUrl}/projects/${projectId}/regex_tagger_groups/multitag_text/`,
       body
     ).pipe(
       tap(e => this.logService.logStatus(e, 'multiTagText')),
-      catchError(this.logService.handleError<unknown>('multiTagText')));
+      catchError(this.logService.handleError<RegexTaggerGroupMultiTagTextResult[]>('multiTagText')));
   }
 
   // tslint:disable-next-line:no-any
@@ -90,6 +90,12 @@ export class RegexTaggerGroupService {
       catchError(this.logService.handleError('applyRegexTaggerGroupOptions')));
   }
 
+  // tslint:disable-next-line:no-any
+  getRegexTaggerGroupOptions(projectId: number): Observable<any | HttpErrorResponse> {
+    return this.http.options(`${this.apiUrl}/projects/${projectId}/regex_tagger_groups/`).pipe(
+      tap(e => this.logService.logStatus(e, 'getRegexTaggerGroupOptions')),
+      catchError(this.logService.handleError('getRegexTaggerGroupOptions')));
+  }
   // tslint:disable-next-line:no-any
   getTagRdocOptions(projectId: number, taggerId: number): Observable<any | HttpErrorResponse> {
     return this.http.options(`${this.apiUrl}/projects/${projectId}/regex_tagger_groups/${taggerId}/tag_random_doc/`).pipe(
