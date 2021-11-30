@@ -42,4 +42,24 @@ export class AnnotatorService {
       tap(e => this.logService.logStatus(e, 'getAnnotatorOptions')),
       catchError(this.logService.handleError('getAnnotatorOptions')));
   }
+
+  getLabelSets(projectId: number, params = ''): Observable<ResultsWrapper<{ category: string; values: string[] }> | HttpErrorResponse> {
+    return this.http.get<ResultsWrapper<{ category: string; values: string[] }>>(`${this.apiUrl}/projects/${projectId}/labelset/?${params}`).pipe(
+      tap(e => this.logService.logStatus(e, 'getLabelSets')),
+      catchError(this.logService.handleError<ResultsWrapper<{ category: string; values: string[] }>>('getLabelSets')));
+  }
+
+  bulkDeleteLabelSets(projectId: number, body: unknown): Observable<{ 'num_deleted': number, 'deleted_types': { string: number }[] } | HttpErrorResponse> {
+    return this.http.post<{ 'num_deleted': number, 'deleted_types': { string: number }[] }>
+    (`${this.apiUrl}/projects/${projectId}/labelset/bulk_delete/`, body).pipe(
+      tap(e => this.logService.logStatus(e, 'bulkDeleteLabelSets')),
+      catchError(this.logService.handleError<{ 'num_deleted': number, 'deleted_types': { string: number }[] }>('bulkDeleteLabelSets')));
+  }
+
+  createLabelSet(projectId: number, body: unknown): Observable<{ category: string; values: string[] } | HttpErrorResponse> {
+    return this.http.post<{ category: string; values: string[] }>(`${this.apiUrl}/projects/${projectId}/labelset/`, body).pipe(
+      tap(e => this.logService.logStatus(e, 'createLabelSet')),
+      catchError(this.logService.handleError<{ category: string; values: string[] }>('createLabelSet')));
+  }
+
 }

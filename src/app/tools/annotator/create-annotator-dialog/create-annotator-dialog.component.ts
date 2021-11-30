@@ -44,7 +44,9 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
       factNameFormControl: new FormControl('', [Validators.required]),
       posValFormControl: new FormControl('', [Validators.required]),
       negValFormControl: new FormControl('', [Validators.required])
-    })
+    }),
+    multiLabelFormGroup: new FormGroup({}),
+    entityFormGroup: new FormGroup({}),
   });
 
   matcher: ErrorStateMatcher = new LiveErrorStateMatcher();
@@ -95,11 +97,23 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
       }
     });
 
+    this.annotatorForm?.get('annotationTypeFormControl')?.valueChanges.pipe(takeUntil(this.destroyed$)).subscribe(val => {
+      if (val === 'binary') {
+        this.annotatorForm.get('binaryFormGroup')?.enable();
+        this.annotatorForm.get('multiLabelFormGroup')?.disable();
+        this.annotatorForm.get('entityFormGroup')?.disable();
+      } else if (val === 'multilabel') {
+        this.annotatorForm.get('binaryFormGroup')?.disable();
+        this.annotatorForm.get('multiLabelFormGroup')?.enable();
+        this.annotatorForm.get('entityFormGroup')?.disable();
+      }
+    })
+
     this.filteredProjectFacts = this.annotatorForm?.get('binaryFormGroup')?.get('factNameFormControl')?.valueChanges
-        .pipe(takeUntil(this.destroyed$),
-            startWith(''),
-            map(val => this.filter(val))
-        ) || of([]);
+      .pipe(takeUntil(this.destroyed$),
+        startWith(''),
+        map(val => this.filter(val))
+      ) || of([]);
   }
 
   onSubmit(formData: OnSubmitParams): void {
@@ -110,13 +124,19 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
       ...this.query ? {query: this.query} : {},
       annotation_type: formData.annotationTypeFormControl,
       ...formData.annotationTypeFormControl === 'binary' ?
-          {
-            binary_configuration: {
-              fact_name: formData.binaryFormGroup.factNameFormControl,
-              pos_value: formData.binaryFormGroup.posValFormControl,
-              neg_value: formData.binaryFormGroup.negValFormControl
-            }
-          } : {},
+        {
+          binary_configuration: {
+            fact_name: formData.binaryFormGroup.factNameFormControl,
+            pos_value: formData.binaryFormGroup.posValFormControl,
+            neg_value: formData.binaryFormGroup.negValFormControl
+          }
+        } : {},
+      ...formData.annotationTypeFormControl === 'multilabel' ?
+        {
+          multilabel_configuration: {
+            labelset: 1
+          }
+        } : {},
     };
     this.annotatorService.createAnnotatorTask(this.currentProject.id, body).subscribe(resp => {
       if (resp && !(resp instanceof HttpErrorResponse)) {
@@ -163,6 +183,6 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
 
   filter(val: string): string[] {
     return this.projectFacts.filter(option =>
-        option.toLowerCase().indexOf(val.toLowerCase()) === 0);
+      option.toLowerCase().indexOf(val.toLowerCase()) === 0);
   }
 }

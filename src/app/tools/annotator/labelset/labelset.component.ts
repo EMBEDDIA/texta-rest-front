@@ -1,34 +1,29 @@
 import {AfterViewInit, Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {MatDialog} from '@angular/material/dialog';
-import {HttpErrorResponse} from '@angular/common/http';
-import {merge, of, Subject} from 'rxjs';
-import {debounceTime, startWith, switchMap, takeUntil} from 'rxjs/operators';
+import {Annotator} from '../../../shared/types/tasks/Annotator';
 import {MatTableDataSource} from '@angular/material/table';
 import {SelectionModel} from '@angular/cdk/collections';
 import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
-import {CreateAnnotatorDialogComponent} from './create-annotator-dialog/create-annotator-dialog.component';
-import {expandRowAnimation} from '../../shared/animations';
-import {Annotator} from '../../shared/types/tasks/Annotator';
-import {Project} from '../../shared/types/Project';
-import {ProjectStore} from '../../core/projects/project.store';
-import {AnnotatorService} from '../../core/tools/annotator/annotator.service';
-import {LogService} from '../../core/util/log.service';
-import {ConfirmDialogComponent} from '../../shared/components/dialogs/confirm-dialog/confirm-dialog.component';
+import {merge, of, Subject} from 'rxjs';
+import {Project} from '../../../shared/types/Project';
+import {ConfirmDialogComponent} from '../../../shared/components/dialogs/confirm-dialog/confirm-dialog.component';
+import {ProjectStore} from '../../../core/projects/project.store';
+import {AnnotatorService} from '../../../core/tools/annotator/annotator.service';
+import {MatDialog} from '@angular/material/dialog';
+import {LogService} from '../../../core/util/log.service';
+import {debounceTime, startWith, switchMap, takeUntil} from 'rxjs/operators';
+import {HttpErrorResponse} from '@angular/common/http';
 
 @Component({
-  selector: 'app-annotator',
-  templateUrl: './annotator.component.html',
-  styleUrls: ['./annotator.component.scss'],
-  animations: [
-    expandRowAnimation
-  ]
+  selector: 'app-labelset',
+  templateUrl: './labelset.component.html',
+  styleUrls: ['./labelset.component.scss']
 })
-export class AnnotatorComponent implements OnInit, OnDestroy, AfterViewInit {
-  expandedElement: Annotator | null;
-  public tableData: MatTableDataSource<Annotator> = new MatTableDataSource();
-  selectedRows = new SelectionModel<Annotator>(true, []);
-  public displayedColumns = ['select', 'id', 'description', 'task__time_started', 'task__time_completed', 'task__status'];
+export class LabelsetComponent implements OnInit, OnDestroy, AfterViewInit {
+  expandedElement: { category: string; values: string[] } | null;
+  public tableData: MatTableDataSource<{ category: string; values: string[] }> = new MatTableDataSource();
+  selectedRows = new SelectionModel<{ category: string; values: string[] }>(true, []);
+  public displayedColumns = ['select',  'category'];
   public isLoadingResults = true;
 
   @ViewChild(MatSort) sort: MatSort;
@@ -75,7 +70,7 @@ export class AnnotatorComponent implements OnInit, OnDestroy, AfterViewInit {
         switchMap(proj => {
           if (proj) {
             const sortDirection = this.sort.direction === 'desc' ? '-' : '';
-            return this.annotatorService.getAnnotatorTasks(
+            return this.annotatorService.getLabelSets(
               this.currentProject.id,
               // Add 1 to to index because Material paginator starts from 0 and DRF paginator from 1
               `ordering=${sortDirection}${this.sort.active}&page=${this.paginator.pageIndex + 1}&page_size=${this.paginator.pageSize}`);
@@ -93,17 +88,7 @@ export class AnnotatorComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openCreateDialog(): void {
-    const dialogRef = this.dialog.open(CreateAnnotatorDialogComponent, {
-      maxHeight: '90vh',
-      width: '700px',
-      disableClose: true,
-    });
-    dialogRef.afterClosed().subscribe(resp => {
-      if (resp && !(resp instanceof HttpErrorResponse)) {
-        this.updateTable.next(true);
-        this.projectStore.refreshSelectedProjectResourceCounts();
-      }
-    });
+
   }
 
 
@@ -118,7 +103,7 @@ export class AnnotatorComponent implements OnInit, OnDestroy, AfterViewInit {
   masterToggle(): void {
     this.isAllSelected() ?
       this.selectedRows.clear() :
-      (this.tableData.data as Annotator[]).forEach(row => this.selectedRows.select(row));
+      this.tableData.data.forEach(row => this.selectedRows.select(row));
   }
 
 
@@ -127,19 +112,19 @@ export class AnnotatorComponent implements OnInit, OnDestroy, AfterViewInit {
       const dialogRef = this.dialog.open(ConfirmDialogComponent, {
         data: {
           confirmText: 'Delete',
-          mainText: `Are you sure you want to delete ${this.selectedRows.selected.length} Tasks?`
+          mainText: `Are you sure you want to delete ${this.selectedRows.selected.length} label sets?`
         }
       });
 
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
 
-          const idsToDelete = this.selectedRows.selected.map((annotator: Annotator) => annotator.id);
+          const idsToDelete = this.selectedRows.selected.map((labelset) => labelset.category);
           const body = {ids: idsToDelete};
           this.isLoadingResults = true;
 
-          this.annotatorService.bulkDeleteAnnotatorTasks(this.currentProject.id, body).subscribe(() => {
-            this.logService.snackBarMessage(`Deleted ${this.selectedRows.selected.length} Tasks.`, 2000);
+          this.annotatorService.bulkDeleteLabelSets(this.currentProject.id, body).subscribe(() => {
+            this.logService.snackBarMessage(`Deleted ${this.selectedRows.selected.length} label sets.`, 2000);
             this.selectedRows.clear();
             this.updateTable.next(true);
             this.projectStore.refreshSelectedProjectResourceCounts();
