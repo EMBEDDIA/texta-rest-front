@@ -96,10 +96,51 @@
         </mat-form-field>
       </form>
     </ng-container>
-    <ng-container *ngIf="annotatorForm.get('annotationTypeFormControl')?.value === 'entity'">entity</ng-container>
-    <ng-container *ngIf="annotatorForm.get('annotationTypeFormControl')?.value === 'multilabel'">multilabel
+    <ng-container *ngIf="annotatorForm.get('annotationTypeFormControl')?.value === 'multilabel'">
+      <form formGroupName="multiLabelFormGroup" class="max-width flex-col">
+        <mat-form-field class="max-width" data-cy="appRegexTaggerGroupCreateDialogRegexTaggerGroups">
+          <mat-label>Labelset</mat-label>
+          <app-virtual-scroll-select [scrollableDataSource]="projectLabelSets" formControlName="labelSetFormControl" [multiple]="false"
+                                     required></app-virtual-scroll-select>
+          <mat-error>
+            Labelset is <strong>required</strong>
+          </mat-error>
+          <mat-hint>{{annotatorOptions?.actions?.POST?.multilabel_configuration?.children?.labelset?.help_text || ''}}</mat-hint>
+        </mat-form-field>
+      </form>
     </ng-container>
-
+    <ng-container *ngIf="annotatorForm.get('annotationTypeFormControl')?.value === 'entity'">
+      <form formGroupName="entityFormGroup" class="max-width flex-col">
+        <mat-form-field data-cy="appAnnotatorCreateDialogEntityFactName">
+          <input [matAutocomplete]="autoName" aria-label="Fact name"
+                 formControlName="factNameFormControl"
+                 matInput
+                 placeholder="Fact name"
+                 required
+                 type="text">
+          <mat-autocomplete #autoName="matAutocomplete">
+            <mat-option *ngFor="let option of filteredProjectFacts | async"
+                        [value]="option">
+              {{option}}
+            </mat-option>
+          </mat-autocomplete>
+          <mat-error *ngIf="annotatorForm.get('entityFormGroup')?.get('factNameFormControl')?.hasError('required')">
+            Fact name is <strong>required</strong>
+          </mat-error>
+          <mat-hint>{{annotatorOptions?.actions?.POST?.binary_configuration?.children?.fact_name?.help_text || ''}}</mat-hint>
+        </mat-form-field>
+      </form>
+    </ng-container>
+    <mat-form-field>
+      <input formControlName="bulkSizeFormControl" matInput placeholder="Bulk size"
+             type="number">
+      <mat-hint>{{annotatorOptions?.actions?.POST?.bulk_size?.help_text || ''}}</mat-hint>
+    </mat-form-field>
+    <mat-form-field>
+      <input formControlName="esTimeoutFormControl" matInput placeholder="Elasticsearch timeout"
+             type="number">
+      <mat-hint>{{annotatorOptions?.actions?.POST?.es_timeout?.help_text || ''}}</mat-hint>
+    </mat-form-field>
   </form>
 </mat-dialog-content>
 <mat-dialog-actions>

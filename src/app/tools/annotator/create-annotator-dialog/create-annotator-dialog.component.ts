@@ -13,17 +13,28 @@ import {LogService} from '../../../core/util/log.service';
 import {ProjectStore} from '../../../core/projects/project.store';
 import {UtilityFunctions} from '../../../shared/UtilityFunctions';
 import {Choice} from '../../../shared/types/tasks/Embedding';
+import {LabelSet} from "../../../shared/types/tasks/LabelSet";
+import {ResultsWrapper} from "../../../shared/types/Generic";
+import {ScrollableDataSource} from "../../../shared/ScrollableDataSource";
 
 interface OnSubmitParams {
   descriptionFormControl: string;
   indicesFormControl: ProjectIndex[];
   fieldsFormControl: string;
-  annotationTypeFormControl: 'binary' | 'multilabel' | 'a';
+  annotationTypeFormControl: 'binary' | 'multilabel' | 'entity';
   binaryFormGroup: {
     factNameFormControl: string;
     posValFormControl: string;
     negValFormControl: string;
   };
+  multiLabelFormGroup: {
+    labelSetFormControl: LabelSet;
+  };
+  entityFormGroup: {
+    factNameFormControl: string;
+  };
+  esTimeoutFormControl: number;
+  bulkSizeFormControl: number;
 }
 
 @Component({
@@ -45,8 +56,15 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
       posValFormControl: new FormControl('', [Validators.required]),
       negValFormControl: new FormControl('', [Validators.required])
     }),
-    multiLabelFormGroup: new FormGroup({}),
-    entityFormGroup: new FormGroup({}),
+    multiLabelFormGroup: new FormGroup({
+      labelSetFormControl: new FormControl('', [Validators.required]),
+    }),
+    entityFormGroup: new FormGroup({
+      factNameFormControl: new FormControl('', [Validators.required])
+    }),
+
+    esTimeoutFormControl: new FormControl(100),
+    bulkSizeFormControl: new FormControl(10),
   });
 
   matcher: ErrorStateMatcher = new LiveErrorStateMatcher();
@@ -59,6 +77,7 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
   annotatorTypes: Choice[];
   projectFacts: string[] = [];
   filteredProjectFacts: Observable<string[]>;
+  projectLabelSets: ScrollableDataSource<{ id: number; description: string; values: string[] }>;
 
   constructor(private dialogRef: MatDialogRef<CreateAnnotatorDialogComponent>,
               private projectService: ProjectService,
@@ -71,9 +90,10 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
     this.projectStore.getCurrentProject().pipe(take(1), switchMap(proj => {
       if (proj) {
         this.currentProject = proj;
+        this.projectLabelSets = new ScrollableDataSource(this.fetchFn, this);
         return forkJoin({
           annotatorOptions: this.annotatorService.getAnnotatorOptions(proj.id),
-          selectedIndices: this.projectStore.getSelectedProjectIndices().pipe(filter(x => !!x), take(1))
+          selectedIndices: this.projectStore.getSelectedProjectIndices().pipe(filter(x => !!x), take(1)),
         });
       }
       return of(null);
@@ -88,8 +108,9 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
         this.projectFields = ProjectIndex.cleanProjectIndicesFields(resp.selectedIndices, ['text'], []);
         this.getFactsForIndices(indicesForm?.value);
       }
-      UtilityFunctions.logForkJoinErrors(resp, HttpErrorResponse, this.logService.snackBarError);
+      UtilityFunctions.logForkJoinErrors(resp, HttpErrorResponse, this.logService.snackBarError.bind(this.logService));
     });
+
 
     this.projectStore.getProjectIndices().pipe(takeUntil(this.destroyed$)).subscribe(projIndices => {
       if (projIndices) {
@@ -106,14 +127,33 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
         this.annotatorForm.get('binaryFormGroup')?.disable();
         this.annotatorForm.get('multiLabelFormGroup')?.enable();
         this.annotatorForm.get('entityFormGroup')?.disable();
+      } else if (val === 'entity') {
+        this.annotatorForm.get('binaryFormGroup')?.disable();
+        this.annotatorForm.get('multiLabelFormGroup')?.disable();
+        this.annotatorForm.get('entityFormGroup')?.enable();
       }
-    })
+    });
 
     this.filteredProjectFacts = this.annotatorForm?.get('binaryFormGroup')?.get('factNameFormControl')?.valueChanges
       .pipe(takeUntil(this.destroyed$),
         startWith(''),
         map(val => this.filter(val))
       ) || of([]);
+  }
+
+
+  fetchFn(pageNr: number, pageSize: number,
+          filterParam: string, context: this): Observable<ResultsWrapper<{ id: number; description: string; values: string[] }> | HttpErrorResponse> {
+    return context.annotatorService.getLabelSets(context.currentProject.id, `${filterParam}&page=${pageNr + 1}&page_size=${pageSize}`).pipe(
+      map((resp) => {
+        if (!(resp instanceof HttpErrorResponse)) {
+          return {
+            count: resp.count,
+            results: resp.results.flatMap(x => [{id: x.id, description: x.category, values: x.values}])
+          };
+        }
+        return resp;
+      })) as Observable<ResultsWrapper<{ id: number; description: string; values: string[] }> | HttpErrorResponse>;
   }
 
   onSubmit(formData: OnSubmitParams): void {
@@ -134,7 +174,13 @@ export class CreateAnnotatorDialogComponent implements OnInit, OnDestroy {
       ...formData.annotationTypeFormControl === 'multilabel' ?
         {
           multilabel_configuration: {
-            labelset: 1
+            labelset: formData.multiLabelFormGroup.labelSetFormControl.id
+          }
+        } : {},
+      ...formData.annotationTypeFormControl === 'entity' ?
+        {
+          entity_configuration: {
+            fact_name: formData.entityFormGroup.factNameFormControl
           }
         } : {},
     };

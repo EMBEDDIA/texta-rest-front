@@ -14,7 +14,7 @@ import {Project} from '../../shared/types/Project';
 import {ProjectStore} from '../../core/projects/project.store';
 import {AnnotatorService} from '../../core/tools/annotator/annotator.service';
 import {LogService} from '../../core/util/log.service';
-import {ConfirmDialogComponent} from '../../shared/components/dialogs/confirm-dialog/confirm-dialog.component';
+import {ConfirmDialogComponent} from "../../shared/shared-module/components/dialogs/confirm-dialog/confirm-dialog.component";
 
 @Component({
   selector: 'app-annotator',

@@ -1,20 +1,20 @@
-import { waitForAsync, ComponentFixture, TestBed } from '@angular/core/testing';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
-import { CreateAnnotatorDialogComponent } from './create-annotator-dialog.component';
+import {CreateLabelsetDialogComponent} from './create-labelset-dialog.component';
 import {HttpClientTestingModule} from '@angular/common/http/testing';
 import {RouterTestingModule} from '@angular/router/testing';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {MatDialogRef} from '@angular/material/dialog';
-import {SharedModule} from '../../../shared/shared-module/shared.module';
+import {SharedModule} from '../../../../shared/shared-module/shared.module';
 
-describe('CreateAnnotatorDialogComponent', () => {
-  let component: CreateAnnotatorDialogComponent;
-  let fixture: ComponentFixture<CreateAnnotatorDialogComponent>;
+describe('CreateLabelsetDialogComponent', () => {
+  let component: CreateLabelsetDialogComponent;
+  let fixture: ComponentFixture<CreateLabelsetDialogComponent>;
   const mockDialogRef = {
     close: jasmine.createSpy('close')
   };
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         SharedModule, HttpClientTestingModule, RouterTestingModule, BrowserAnimationsModule
       ],
@@ -23,13 +23,13 @@ describe('CreateAnnotatorDialogComponent', () => {
           provide: MatDialogRef,
           useValue: mockDialogRef
         }],
-      declarations: [ CreateAnnotatorDialogComponent ]
+      declarations: [CreateLabelsetDialogComponent]
     })
-    .compileComponents();
-  }));
+      .compileComponents();
+  });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(CreateAnnotatorDialogComponent);
+    fixture = TestBed.createComponent(CreateLabelsetDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

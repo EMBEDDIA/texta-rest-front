@@ -6,6 +6,7 @@ import {AppConfigService} from '../../util/app-config.service';
 import {LogService} from '../../util/log.service';
 import {ResultsWrapper} from '../../../shared/types/Generic';
 import {Annotator} from '../../../shared/types/tasks/Annotator';
+import {LabelSet} from "../../../shared/types/tasks/LabelSet";
 
 @Injectable({
   providedIn: 'root'
@@ -43,10 +44,17 @@ export class AnnotatorService {
       catchError(this.logService.handleError('getAnnotatorOptions')));
   }
 
-  getLabelSets(projectId: number, params = ''): Observable<ResultsWrapper<{ category: string; values: string[] }> | HttpErrorResponse> {
-    return this.http.get<ResultsWrapper<{ category: string; values: string[] }>>(`${this.apiUrl}/projects/${projectId}/labelset/?${params}`).pipe(
+  // tslint:disable-next-line:no-any
+  getLabelSetOptions(projectId: number): Observable<any | HttpErrorResponse> {
+    return this.http.options(`${this.apiUrl}/projects/${projectId}/labelset/`).pipe(
+      tap(e => this.logService.logStatus(e, 'getLabelSetOptions')),
+      catchError(this.logService.handleError('getLabelSetOptions')));
+  }
+
+  getLabelSets(projectId: number, params = ''): Observable<ResultsWrapper<LabelSet> | HttpErrorResponse> {
+    return this.http.get<ResultsWrapper<LabelSet>>(`${this.apiUrl}/projects/${projectId}/labelset/?${params}`).pipe(
       tap(e => this.logService.logStatus(e, 'getLabelSets')),
-      catchError(this.logService.handleError<ResultsWrapper<{ category: string; values: string[] }>>('getLabelSets')));
+      catchError(this.logService.handleError<ResultsWrapper<LabelSet>>('getLabelSets')));
   }
 
   bulkDeleteLabelSets(projectId: number, body: unknown): Observable<{ 'num_deleted': number, 'deleted_types': { string: number }[] } | HttpErrorResponse> {

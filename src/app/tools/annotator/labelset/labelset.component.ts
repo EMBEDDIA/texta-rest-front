@@ -6,24 +6,31 @@ import {MatSort} from '@angular/material/sort';
 import {MatPaginator} from '@angular/material/paginator';
 import {merge, of, Subject} from 'rxjs';
 import {Project} from '../../../shared/types/Project';
-import {ConfirmDialogComponent} from '../../../shared/components/dialogs/confirm-dialog/confirm-dialog.component';
 import {ProjectStore} from '../../../core/projects/project.store';
 import {AnnotatorService} from '../../../core/tools/annotator/annotator.service';
 import {MatDialog} from '@angular/material/dialog';
 import {LogService} from '../../../core/util/log.service';
 import {debounceTime, startWith, switchMap, takeUntil} from 'rxjs/operators';
 import {HttpErrorResponse} from '@angular/common/http';
+import {LabelSet} from '../../../shared/types/tasks/LabelSet';
+import {ConfirmDialogComponent} from '../../../shared/shared-module/components/dialogs/confirm-dialog/confirm-dialog.component';
+import {CreateAnnotatorDialogComponent} from '../create-annotator-dialog/create-annotator-dialog.component';
+import {CreateLabelsetDialogComponent} from './create-labelset-dialog/create-labelset-dialog.component';
+import {expandRowAnimation} from '../../../shared/animations';
 
 @Component({
   selector: 'app-labelset',
   templateUrl: './labelset.component.html',
-  styleUrls: ['./labelset.component.scss']
+  styleUrls: ['./labelset.component.scss'],
+  animations: [
+    expandRowAnimation
+  ]
 })
 export class LabelsetComponent implements OnInit, OnDestroy, AfterViewInit {
-  expandedElement: { category: string; values: string[] } | null;
-  public tableData: MatTableDataSource<{ category: string; values: string[] }> = new MatTableDataSource();
-  selectedRows = new SelectionModel<{ category: string; values: string[] }>(true, []);
-  public displayedColumns = ['select',  'category'];
+  expandedElement: LabelSet | null;
+  public tableData: MatTableDataSource<LabelSet> = new MatTableDataSource();
+  selectedRows = new SelectionModel<LabelSet>(true, []);
+  public displayedColumns = ['select', 'category'];
   public isLoadingResults = true;
 
   @ViewChild(MatSort) sort: MatSort;
@@ -88,7 +95,17 @@ export class LabelsetComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   openCreateDialog(): void {
-
+    const dialogRef = this.dialog.open(CreateLabelsetDialogComponent, {
+      maxHeight: '90vh',
+      width: '700px',
+      disableClose: true,
+    });
+    dialogRef.afterClosed().subscribe(resp => {
+      if (resp && !(resp instanceof HttpErrorResponse)) {
+        this.updateTable.next(true);
+        this.projectStore.refreshSelectedProjectResourceCounts();
+      }
+    });
   }
 
 
@@ -119,7 +136,7 @@ export class LabelsetComponent implements OnInit, OnDestroy, AfterViewInit {
       dialogRef.afterClosed().subscribe(result => {
         if (result) {
 
-          const idsToDelete = this.selectedRows.selected.map((labelset) => labelset.category);
+          const idsToDelete = this.selectedRows.selected.map((labelset) => labelset.id);
           const body = {ids: idsToDelete};
           this.isLoadingResults = true;
 
