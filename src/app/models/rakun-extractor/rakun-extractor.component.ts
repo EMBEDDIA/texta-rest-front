@@ -11,7 +11,7 @@ import {CreateRakunExtractorDialogComponent} from './create-rakun-extractor-dial
 import {RakunExtractor} from '../../shared/types/tasks/RakunExtractor';
 import {expandRowAnimation} from '../../shared/animations';
 import {Project} from '../../shared/types/Project';
-import {ConfirmDialogComponent} from '../../shared/components/dialogs/confirm-dialog/confirm-dialog.component';
+import {ConfirmDialogComponent} from '../../shared/shared-module/components/dialogs/confirm-dialog/confirm-dialog.component';
 import {ProjectStore} from '../../core/projects/project.store';
 import {RakunExtractorService} from '../../core/models/rakun-extractor/rakun-extractor.service';
 import {LogService} from '../../core/util/log.service';
@@ -19,6 +19,7 @@ import {ApplyToIndexDialogComponent} from './apply-to-index-dialog/apply-to-inde
 import {ExtractFromTextDialogComponent} from './extract-from-text-dialog/extract-from-text-dialog.component';
 import {ExtractFromRandomDocDialogComponent} from './extract-from-random-doc-dialog/extract-from-random-doc-dialog.component';
 import {EditStopwordsDialogComponent} from './edit-stopwords-dialog/edit-stopwords-dialog.component';
+import {EditRakunExtractorDialogComponent} from "./edit-rakun-extractor-dialog/edit-rakun-extractor-dialog.component";
 
 @Component({
   selector: 'app-rakun-extractor',
@@ -225,6 +226,18 @@ export class RakunExtractorComponent implements OnInit, OnDestroy, AfterViewInit
           this.tableData.data = [...this.tableData.data];
           this.projectStore.refreshSelectedProjectResourceCounts();
         });
+      }
+    });
+  }
+
+  editRakun(element: RakunExtractor): void {
+    this.dialog.open(EditRakunExtractorDialogComponent, {
+      data: {element, currentProjectId: this.currentProject.id},
+      maxHeight: '90vh',
+      width: '700px',
+    }).afterClosed().subscribe(resp => {
+      if (resp) {
+        this.updateTable.next();
       }
     });
   }

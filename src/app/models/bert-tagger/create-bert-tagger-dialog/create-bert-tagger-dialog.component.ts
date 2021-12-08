@@ -199,7 +199,7 @@ export class CreateBertTaggerDialogComponent implements OnInit, OnDestroy {
           fieldsForm?.setValue(this.data.cloneElement.fields);
         }
       }
-      UtilityFunctions.logForkJoinErrors(resp, HttpErrorResponse, this.logService.snackBarError);
+      UtilityFunctions.logForkJoinErrors(resp, HttpErrorResponse, this.logService.snackBarError.bind(this.logService));
     });
 
     this.projectStore.getSelectedProjectIndices().pipe(takeUntil(this.destroyed$), switchMap(currentProjIndices => {
@@ -247,7 +247,10 @@ export class CreateBertTaggerDialogComponent implements OnInit, OnDestroy {
       ...formData.maxBalanceFormControl ? {balance_to_max_limit: formData.maxBalanceFormControl} : {},
       ...(formData.posLabelFormControl && formData.factNameFormControl.values.length === 2) ?
         {pos_label: formData.posLabelFormControl} : {},
-      ...formData.checkPointModelFormControl ? {checkpoint_model: formData.checkPointModelFormControl.id} : {},
+      ...formData.checkPointModelFormControl ? {
+        checkpoint_model: formData.checkPointModelFormControl.id,
+        bert_model: formData.checkPointModelFormControl.bert_model
+      } : {},
       ...this.query ? {query: this.query} : {},
     };
     this.bertTaggerService.createBertTaggerTask(this.currentProject.id, body).subscribe(resp => {
