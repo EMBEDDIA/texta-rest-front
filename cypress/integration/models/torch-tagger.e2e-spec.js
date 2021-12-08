@@ -76,6 +76,7 @@ describe('Torch Taggers should work', function () {
     cy.intercept('POST', '**/import_model/**').as('importModel');
     cy.importTestTorchTagger(this.projectId)
     cy.wait('@importModel', {timeout: 50000})
+    cy.wait(5000);
     initTorchTagger();
     cy.intercept('POST', '**/torchtaggers/**').as('postTorchTaggers');
     // tag text
