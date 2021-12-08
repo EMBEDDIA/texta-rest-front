@@ -79,6 +79,8 @@ describe('Torch Taggers should work', function () {
     cy.wait(5000);
     initTorchTagger();
     cy.intercept('POST', '**/torchtaggers/**').as('postTorchTaggers');
+    
+    cy.wait(35000);
     // tag text
     cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
     cy.get('[data-cy=appTorchTaggerMenuTagText]').should('be.visible').click();
