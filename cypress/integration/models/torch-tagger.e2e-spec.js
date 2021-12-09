@@ -22,61 +22,7 @@ describe('Torch Taggers should work', function () {
     cy.get('mat-option').contains('integration_test_project').click();
   }
 
-  it('extra_actions should work', function () {
 
-    cy.importTestTorchTagger(this.projectId)
-    cy.wait('@importModel', {timeout: 50000})
-    cy.wait(5000);
-    initTorchTagger();
-    cy.intercept('POST', '**/torchtaggers/**').as('postTorchTaggers');
-
-    cy.wait('@getTorchTaggers', {timeout: 50000});
-    // tag text
-    cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
-    cy.get('[data-cy=appTorchTaggerMenuTagText]').should('be.visible').click();
-    cy.get('app-torch-tag-text-dialog input:first()').should('be.visible').click()
-      .clear()
-      .type('Kinnipeetavate arvu vähenedes nende ülalpidamiskulud suurenevad. ');
-    cy.get('.mat-dialog-container [type="submit"]').should('be.visible').click();
-    cy.wait('@postTorchTaggers').its('response.statusCode').should('eq', 200);
-    cy.closeCurrentCdkOverlay();
-    // tag random doc
-    cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
-    cy.get('[data-cy=appTorchTaggerMenuTagRandomDoc]').should('be.visible').click();
-    cy.get('[data-cy=appTorchTaggerTagRandomDocDialogFields]').click().then((fields => {
-      cy.wrap(fields).should('have.class', 'mat-focused');
-      cy.closeCurrentCdkOverlay();
-      cy.matFormFieldShouldHaveError(fields, 'required');
-      cy.wrap(fields).click();
-      cy.get('.mat-option-text').contains('comment_content').should('be.visible').click();
-      cy.closeCurrentCdkOverlay();
-      cy.wrap(fields).find('mat-error').should('have.length', 0)
-    }));
-    cy.get('[data-cy=appTorchTaggerTagRandomDocDialogSubmit]').should('be.visible').click();
-    cy.wait('@postTorchTaggers').then(resp => {
-      cy.wrap(resp).its('response.statusCode').should('eq', 200);
-      cy.get('[data-cy=appTorchTaggerTagRandomDocDialogClose]').click();
-    });
-    // edit
-    cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
-    cy.get('[data-cy=appTorchTaggerMenuEdit]').should('be.visible').click();
-    cy.get('app-edit-torch-tagger-dialog input:first()').should('be.visible').click()
-      .clear()
-      .type('newName');
-
-    cy.intercept('PATCH', '**/torchtaggers/**').as('patchTorchTaggers');
-    cy.get('.mat-dialog-container [type="submit"]').should('be.visible').click();
-    cy.wait('@patchTorchTaggers');
-    cy.closeCurrentCdkOverlay();
-
-    cy.intercept('DELETE', '**/torchtaggers/*/').as('deleteTorchTaggers');
-    // delete torchtagger
-    cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
-    cy.get('[data-cy=appTorchTaggerMenuDelete]').should('be.visible').click();
-    cy.get('[data-cy=appConfirmDialogSubmit]').should('be.visible').click();
-    cy.wait('@deleteTorchTaggers');
-  });
-  
   it('should be able to create a new tagger', function () {
     cy.importTestEmbedding(this.projectId)
     cy.wait('@importModel', {timeout: 50000})
@@ -92,7 +38,7 @@ describe('Torch Taggers should work', function () {
       cy.closeCurrentCdkOverlay();
       cy.matFormFieldShouldHaveError(fields, 'required');
       cy.wrap(fields).click();
-      cy.get('.mat-option-text:nth(1)').should('be.visible').click();
+      cy.get('.mat-option-text').contains('comment_content').should('be.visible').click();
       cy.closeCurrentCdkOverlay();
       cy.wrap(fields).find('mat-error').should('have.length', 0)
     }));
@@ -124,6 +70,59 @@ describe('Torch Taggers should work', function () {
       expect(created.response.statusCode).to.eq(201);
       assert.equal(created.response.body.task.status, 'created');
     });
+
+    cy.get('.mat-header-row > .cdk-column-author__username').should('be.visible').then(bb => {
+      cy.wrap([0, 0, 0, 0]).each(xy => { // hack to wait for task to complete
+        cy.wrap(bb).click();
+        cy.wait('@getTorchTaggers').then((intercepted) => {
+          console.log(intercepted)
+          if (intercepted?.response?.body?.results[0]?.task?.status === 'completed') {
+            assert.equal(intercepted?.response?.body?.results[0]?.task?.status, 'completed');
+            return true;
+          }else {
+            return cy.wait(5000);
+          }
+        });
+      })
+    });
+
+
+    cy.wait('@getTorchTaggers', {timeout: 50000});
+    // tag text
+    cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
+    cy.get('[data-cy=appTorchTaggerMenuTagText]').should('be.visible').click();
+    cy.get('app-torch-tag-text-dialog input:first()').should('be.visible').click()
+      .clear()
+      .type('Kinnipeetavate arvu vähenedes nende ülalpidamiskulud suurenevad. ');
+    cy.get('.mat-dialog-container [type="submit"]').should('be.visible').click();
+    cy.wait('@postTorchTaggers').its('response.statusCode').should('eq', 200);
+    cy.closeCurrentCdkOverlay();
+    // tag random doc
+    cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
+    cy.get('[data-cy=appTorchTaggerMenuTagRandomDoc]').should('be.visible').click();
+    cy.get('[data-cy=appTorchTaggerTagRandomDocDialogSubmit]').should('be.visible').click();
+    cy.wait('@postTorchTaggers').then(resp => {
+      cy.wrap(resp).its('response.statusCode').should('eq', 200);
+      cy.get('[data-cy=appTorchTaggerTagRandomDocDialogClose]').click();
+    });
+    // edit
+    cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
+    cy.get('[data-cy=appTorchTaggerMenuEdit]').should('be.visible').click();
+    cy.get('app-edit-torch-tagger-dialog input:first()').should('be.visible').click()
+      .clear()
+      .type('newName');
+
+    cy.intercept('PATCH', '**/torchtaggers/**').as('patchTorchTaggers');
+    cy.get('.mat-dialog-container [type="submit"]').should('be.visible').click();
+    cy.wait('@patchTorchTaggers');
+    cy.closeCurrentCdkOverlay();
+
+    cy.intercept('DELETE', '**/torchtaggers/*/').as('deleteTorchTaggers');
+    // delete torchtagger
+    cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
+    cy.get('[data-cy=appTorchTaggerMenuDelete]').should('be.visible').click();
+    cy.get('[data-cy=appConfirmDialogSubmit]').should('be.visible').click();
+    cy.wait('@deleteTorchTaggers');
 
   });
 
