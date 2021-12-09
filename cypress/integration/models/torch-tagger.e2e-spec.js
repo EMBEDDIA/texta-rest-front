@@ -5,14 +5,15 @@ describe('Torch Taggers should work', function () {
       cy.createTestProject().then(x => {
         assert.isNotNull(x.body.id, 'should have project id');
         cy.wrap(x.body.id).as('projectId');
+        cy.intercept('POST', '**/import_model/**').as('importModel');
+        cy.intercept('GET', '**user**').as('getUser');
+        cy.intercept('GET', '**get_fields**').as('getProjectIndices');
+        cy.intercept('GET', '**/torchtaggers/**').as('getTorchTaggers');
       });
     });
   });
 
   function initTorchTagger() {
-    cy.intercept('GET', '**user**').as('getUser');
-    cy.intercept('GET', '**get_fields**').as('getProjectIndices');
-    cy.intercept('GET', '**/torchtaggers/**').as('getTorchTaggers');
     cy.visit('/torch-taggers');
     cy.wait('@getUser')
     cy.wait('@getProjectIndices');
@@ -22,7 +23,6 @@ describe('Torch Taggers should work', function () {
   }
 
   it('should be able to create a new tagger', function () {
-    cy.intercept('POST', '**/import_model/**').as('importModel');
     cy.importTestEmbedding(this.projectId)
     cy.wait('@importModel', {timeout: 50000})
     initTorchTagger();
@@ -73,14 +73,13 @@ describe('Torch Taggers should work', function () {
   });
   it('extra_actions should work', function () {
 
-    cy.intercept('POST', '**/import_model/**').as('importModel');
     cy.importTestTorchTagger(this.projectId)
     cy.wait('@importModel', {timeout: 50000})
     cy.wait(5000);
     initTorchTagger();
     cy.intercept('POST', '**/torchtaggers/**').as('postTorchTaggers');
-    
-    cy.wait(35000);
+
+    cy.wait('@getTorchTaggers', {timeout: 50000});
     // tag text
     cy.get('.cdk-column-Modify:nth(1)').should('be.visible').click();
     cy.get('[data-cy=appTorchTaggerMenuTagText]').should('be.visible').click();
