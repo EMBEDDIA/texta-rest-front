@@ -6,7 +6,7 @@
   <ng-container *ngIf="aggregationData">
     <!--if not dateData-->
     <mat-tab-group *ngIf="aggregationData.dateData && aggregationData.dateData.length === 0" selectedIndex="1" #tabs
-                   mat-stretch-tabs>
+                   mat-stretch-tabs animationDuration="0ms">
       <mat-tab disabled>
         <ng-template mat-tab-label>
           <button (click)="toggleDrawer()" mat-stroked-button >Toggle drawer</button>
