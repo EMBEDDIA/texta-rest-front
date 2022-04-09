@@ -37,7 +37,7 @@
     "core-js": "^3.19.1",
     "http-server": "^14.0.0",
     "linkify-it": "^3.0.3",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "ngx-mat-select-search": "^3.3.2",
     "plotly.js": "^1.58.5",
     "rxjs": "^6.5.5",
