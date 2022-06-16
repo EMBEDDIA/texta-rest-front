@@ -102,7 +102,7 @@ export class SearcherComponentService {
   public getSavedSearch(): Observable<SavedSearch | null> {
     return this.savedSearch.asObservable();
   }
-
+  // NB! this object is mutated via references :(
   public nextAdvancedSearchConstraints$(constraintList: Constraint[]): void {
     this.advancedSearchConstraints$.next(constraintList);
   }

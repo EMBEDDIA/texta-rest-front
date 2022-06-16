@@ -17,7 +17,6 @@ export interface SearchByQueryResponse {
 }
 
 export class SearchOptions {
-  liveSearch: boolean;
   onlyHighlightMatching?: FactConstraint[];
   onlyShowMatchingColumns?: boolean;
   highlightTextaFacts: boolean;

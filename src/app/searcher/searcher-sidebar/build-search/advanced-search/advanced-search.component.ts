@@ -42,7 +42,6 @@ export class AdvancedSearchComponent implements OnInit, OnDestroy {
   // building the whole search query onto this
   elasticQuery: ElasticsearchQuery = new ElasticsearchQuery();
   searchOptions: SearchOptions = {
-    liveSearch: true,
     highlightTextaFacts: true,
     highlightSearcherMatches: true,
   };
@@ -223,18 +222,11 @@ export class AdvancedSearchComponent implements OnInit, OnDestroy {
     return item.path;
   }
 
-  trackByIndex(index: number, item: unknown): number {
-    return index;
-  }
-
-  searchOnChange(event: ElasticsearchQuery): void {
+  updateElasticQuery(query: ElasticsearchQuery): void {
     // dont want left focus events
-    if (event === this.elasticQuery) {
+    // query should always match component elasticQuery
+    if (query === this.elasticQuery) {
       this.searchService.nextElasticQuery(this.elasticQuery);
-      if (this.searchOptions.liveSearch) {
-        // reset page when we change query
-        this.elasticQuery.elasticSearchQuery.from = 0;
-      }
     }
   }
 
@@ -299,7 +291,7 @@ export class AdvancedSearchComponent implements OnInit, OnDestroy {
     this.changeDetectorRef.detectChanges(); // dont use markforcheck because we need updates immediately, so we can update elasticquery
     this.searchService.nextElasticQuery(this.elasticQuery);
     // since we changed the object reference of constraintList update the subject,
-    // for example this is used in fact-chips to create constraints
+    // for example this is used in fact-chips to create constraints, saved queries etc
     this.searchService.nextAdvancedSearchConstraints$(this.constraintList);
   }
 
