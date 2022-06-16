@@ -13,6 +13,7 @@ import {LegibleColor, UtilityFunctions} from '../../../shared/UtilityFunctions';
 import {HighlightSettings} from '../../../shared/SettingVars';
 import {environment} from '../../../../environments/environment';
 import {AppConfigService} from '../../../core/util/app-config.service';
+import {ShowShortVersionData} from '../../../shared/types/Search';
 
 // tslint:disable:no-any
 export interface HighlightSpan {
@@ -32,7 +33,7 @@ export interface HighlightConfig {
   onlyHighlightMatching?: FactConstraint[];
   highlightTextaFacts: boolean;
   highlightHyperlinks: boolean;
-  showShortVersion?: number | undefined;
+  showShortVersion?: ShowShortVersionData;
   data: any;
 }
 
@@ -454,7 +455,7 @@ export class HighlightComponent {
       const colors = HighlightComponent.generateColorsForFacts(highlightTerms);
       const highlights = this.makeHighLights(highlightConfig.data[highlightConfig.currentColumn], highlightTerms, colors);
       if (highlightConfig.showShortVersion) {
-        this.highlightArray = HighlightComponent.makeShowShortVersion(highlightConfig.showShortVersion, highlights,
+        this.highlightArray = HighlightComponent.makeShowShortVersion(highlightConfig.showShortVersion.wordContextDistance, highlights,
           highlightConfig.data[highlightConfig.currentColumn]);
       } else {
         this.highlightArray = highlights;

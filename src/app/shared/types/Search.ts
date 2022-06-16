@@ -16,12 +16,22 @@ export interface SearchByQueryResponse {
   aggs?: any;
 }
 
+export interface ConstraintHighlightedFact {
+  fact: string;
+  factValue?: string;
+}
+
+export interface ShowShortVersionData {
+  wordContextDistance: number;
+  highlightedFacts: ConstraintHighlightedFact[];
+}
+
 export class SearchOptions {
   onlyHighlightMatching?: FactConstraint[];
   onlyShowMatchingColumns?: boolean;
   highlightTextaFacts: boolean;
   highlightSearcherMatches: boolean;
-  showShortVersion?: number;
+  showShortVersion?: ShowShortVersionData;
 }
 
 export interface TextaFact {

@@ -103,8 +103,8 @@ export class SearcherTableComponent implements OnInit, OnDestroy {
     });
 
     this.searchService.getSearch().pipe(takeUntil(this.destroy$)).subscribe(resp => {
-      console.log(resp);
       if (resp && resp.searchOptions) {
+        console.table(resp.searchOptions.showShortVersion?.highlightedFacts);
         this.searchOptions = resp.searchOptions;
         if (this.searchOptions.onlyShowMatchingColumns) {
           const columnsToHighlight: string[] = [];
