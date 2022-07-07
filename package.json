@@ -37,7 +37,7 @@
     "core-js": "^3.19.1",
     "http-server": "^14.0.0",
     "linkify-it": "^3.0.3",
-    "moment": "^2.29.3",
+    "moment": "^2.29.4",
     "ngx-mat-select-search": "^4.1.1",
     "rxjs": "^6.5.5",
     "sass": "^1.43.4",
