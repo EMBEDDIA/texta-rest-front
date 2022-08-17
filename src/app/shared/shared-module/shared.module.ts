@@ -78,6 +78,7 @@ import {
   MatLuxonDateModule
 } from '@angular/material-luxon-adapter';
 import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
+import { TaskMenuComponent } from './components/task-menu/task-menu.component';
 @NgModule({
   declarations: [LoginDialogComponent, GenericTableComponent,
     RegistrationDialogComponent,
@@ -112,6 +113,7 @@ import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
     ConfirmBulkDeleteDialogComponent,
     InfoIconComponent,
     InfoIconPortalComponent,
+    TaskMenuComponent,
   ],
   imports: [
     RouterModule,
@@ -218,6 +220,7 @@ import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
     FileInputComponent,
     ByteFormatPipe,
     InfoIconComponent,
+    TaskMenuComponent,
   ],
   providers: [FocusMonitor,
     {provide: MAT_LUXON_DATE_ADAPTER_OPTIONS, useValue: {useUtc: true}},

@@ -1,4 +1,4 @@
-import {TaskStatus} from './TaskStatus';
+import {TaskStatus, TextaTask} from './TaskStatus';
 import {Index} from '../Index';
 import {UserProfile} from '../UserProfile';
 
@@ -36,7 +36,7 @@ export class Tagger {
   classifier: string;
   pos_label: string;
   minimum_sample_size: number;
-  task: TaskStatus;
+  tasks: TextaTask[];
   snowball_language: string;
   detect_lang: boolean;
   balance: boolean;

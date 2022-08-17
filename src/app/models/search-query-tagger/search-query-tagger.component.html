@@ -53,28 +53,28 @@
       <ng-container matColumnDef="task__time_started">
         <th *matHeaderCellDef mat-header-cell mat-sort-header> Time started</th>
         <td *matCellDef="let element" mat-cell><span
-          *ngIf="element.task">{{element.task.time_started | date:'y-M-d H:mm:ss'}}</span>
+          *ngIf="element.tasks.length">{{element.tasks[0].time_started | date:'y-M-d H:mm:ss'}}</span>
         </td>
       </ng-container>
       <ng-container matColumnDef="task__time_completed">
         <th *matHeaderCellDef mat-header-cell mat-sort-header> Time completed</th>
         <td *matCellDef="let element" mat-cell>
           <span
-            *ngIf="element.task && element.task.time_completed">{{element.task.time_completed | date:'y-M-d H:mm:ss'}}</span>
-          <span *ngIf="element.task && !element.task.time_completed">-</span>
+            *ngIf="element.tasks.length && element.tasks[0].time_completed">{{element.tasks[0].time_completed | date:'y-M-d H:mm:ss'}}</span>
+          <span *ngIf="element.tasks && !element.tasks[0].time_completed">-</span>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="task__status">
         <th *matHeaderCellDef mat-header-cell mat-sort-header> Task</th>
         <td *matCellDef="let element" mat-cell>
-          <mat-progress-bar *ngIf="element.task && element.task.step !== 'training'" [value]="element.task.progress"
+          <mat-progress-bar *ngIf="element.tasks && element.tasks[0].step !== 'training'" [value]="element.tasks[0].progress"
                             mode="determinate">
           </mat-progress-bar>
-          <mat-progress-bar *ngIf="element.task && element.task.step === 'training' && element.task.status !== 'failed'"
+          <mat-progress-bar *ngIf="element.tasks && element.tasks[0].step === 'training' && element.tasks[0].status !== 'failed'"
                             [value]="element.task.progress" mode="indeterminate">
           </mat-progress-bar>
-          <mat-hint *ngIf="element.task">{{element.task.step ? element.task.step : element.task.status}}</mat-hint>
+          <mat-hint *ngIf="element.tasks">{{element.tasks[0].step ? element.tasks[0].step : element.tasks[0].status}}</mat-hint>
         </td>
       </ng-container>
 
