@@ -98,8 +98,8 @@
         <td *matCellDef="let element; let i = dataIndex" [attr.colspan]="displayedColumns.length"
             class="expanded-detail"
             mat-cell>
-          <div *ngIf="expandedElements[i][0]" [@detailExpand] class="element-detail">
-            <div class="flex-col m-l-r-5" fxFlex="100">
+          <div *ngIf="expandedElements[i][0]" [@detailExpand] class="element-detail ">
+            <div class="flex-col m-l-r-5" fxFlex="80">
               <table class="simple-table">
                 <tr>
                   <th class="mat-body-strong">Id</th>
@@ -160,6 +160,8 @@
                 </ng-container>
               </table>
             </div>
+
+            <app-task-table class="flex-item-right" [textaTasks]="element.tasks"></app-task-table>
           </div>
         </td>
       </ng-container>

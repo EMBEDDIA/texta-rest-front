@@ -60,8 +60,6 @@ export class TaggerComponent implements OnInit, OnDestroy, AfterViewInit {
   private updateTable = new Subject<boolean>();
   patchFavoriteRowQueue: Subject<Tagger> = new Subject();
 
-  selectedTasks: number[] = [];
-
   constructor(private projectStore: ProjectStore,
               private taggerService: TaggerService,
               public dialog: MatDialog,
@@ -123,7 +121,6 @@ export class TaggerComponent implements OnInit, OnDestroy, AfterViewInit {
       this.isLoadingResults = false;
       if (data && !(data instanceof HttpErrorResponse)) {
         this.resultsLength = data.count;
-        this.selectedTasks = data.results.map(x => x.tasks.length - 1);
         this.tableData.data = data.results;
       } else if (data) {
         this.logService.snackBarError(data, 2000);

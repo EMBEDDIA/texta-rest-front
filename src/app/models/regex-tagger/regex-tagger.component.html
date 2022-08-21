@@ -130,7 +130,7 @@
         <td *matCellDef="let element; let i = dataIndex" [attr.colspan]="displayedColumns.length" mat-cell
             class="expanded-detail">
           <div *ngIf="expandedElements[i]" [@detailExpand] class="element-detail">
-            <div class="flex-col m-l-r-5" fxFlex="50">
+            <div class="flex-col m-l-r-5" fxFlex="40">
               <table class="simple-table">
                 <tr>
                   <th class="mat-body-strong">Lexicon Words</th>
@@ -140,7 +140,7 @@
                 </tr>
               </table>
             </div>
-            <div class="flex-col m-l-r-5" fxFlex="50">
+            <div class="flex-col m-l-r-5" fxFlex="40">
               <table class="simple-table">
                 <tr>
                   <th class="mat-body-strong">Counter Lexicon Words</th>
@@ -150,6 +150,8 @@
                 </tr>
               </table>
             </div>
+
+            <app-task-table class="flex-item-right" [textaTasks]="element.tasks"></app-task-table>
           </div>
         </td>
       </ng-container>

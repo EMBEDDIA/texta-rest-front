@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {TextaTask} from '../../../types/tasks/TaskStatus';
+import {TextaTask} from '../../../../types/tasks/TaskStatus';
 
 @Component({
   selector: 'app-task-menu',

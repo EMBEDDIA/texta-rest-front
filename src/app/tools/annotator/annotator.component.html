@@ -111,19 +111,19 @@
             </ng-container>
             <ng-container matColumnDef="task__status">
               <th *matHeaderCellDef mat-header-cell mat-sort-header> Task</th>
-              <td *matCellDef="let element" mat-cell [matTooltip]="element.parent.task.errors"
-                  [matTooltipDisabled]="element.parent.task.errors === '[]'">
-                <mat-progress-bar *ngIf="element.parent.task && element.parent.task.status === 'running'"
+              <td *matCellDef="let element" mat-cell [matTooltip]="element.parent.tasks[0].errors"
+                  [matTooltipDisabled]="element.parent.tasks[0].errors === '[]'">
+                <mat-progress-bar *ngIf="element.parent.tasks[0] && element.parent.tasks[0].status === 'running'"
                                   mode="indeterminate">
                 </mat-progress-bar>
-                <mat-progress-bar *ngIf="element.parent.task && element.parent.task.status === 'completed'"
+                <mat-progress-bar *ngIf="element.parent.tasks[0] && element.parent.tasks[0].status === 'completed'"
                                   mode="determinate" value="100">
                 </mat-progress-bar>
 
-                <mat-progress-bar *ngIf="element.parent.task && element.parent.task.status === 'failed'"
+                <mat-progress-bar *ngIf="element.parent.tasks[0] && element.parent.tasks[0].status === 'failed'"
                                   mode="determinate" value="0">
                 </mat-progress-bar>
-                <mat-hint *ngIf="element.parent.task">{{element.parent.task.status}}</mat-hint>
+                <mat-hint *ngIf="element.parent.tasks[0]">{{element.parent.tasks[0].status}}</mat-hint>
 
               </td>
             </ng-container>
