@@ -85,13 +85,13 @@
             mat-cell> {{(element.tagger_groups | getPropertyList: getTaggerGroupDesc) | join: ','}}</td>
       </ng-container>
       <ng-container matColumnDef="tasks__time_started">
-        <th *matHeaderCellDef mat-header-cell mat-sort-header> Time started</th>
+        <th *matHeaderCellDef mat-header-cell > Time started</th>
         <td *matCellDef="let element" mat-cell><span
           *ngIf="element.tasks && element.tasks.length">{{element.tasks[0]?.time_started | date:'y-M-d H:mm:ss'}}</span>
         </td>
       </ng-container>
       <ng-container matColumnDef="tasks__time_completed">
-        <th *matHeaderCellDef mat-header-cell mat-sort-header> Time completed</th>
+        <th *matHeaderCellDef mat-header-cell > Time completed</th>
         <td *matCellDef="let element" mat-cell>
           <span
             *ngIf="element.tasks && element.tasks.length">{{element.tasks[0]?.time_completed | date:'y-M-d H:mm:ss'}}</span>
@@ -120,19 +120,9 @@
         <td *matCellDef="let element" mat-cell> {{element.recall | number:'0.2-2' }}</td>
       </ng-container>
       <ng-container matColumnDef="tasks__status">
-        <th *matHeaderCellDef mat-header-cell mat-sort-header> Task</th>
+        <th *matHeaderCellDef mat-header-cell> Task</th>
         <td *matCellDef="let element" mat-cell>
-          <mat-progress-bar *ngIf="element.tasks?.length && element.tasks[0].step !== 'training'"
-                            [value]="element.tasks[0].progress"
-                            mode="determinate">
-          </mat-progress-bar>
-          <mat-progress-bar
-            *ngIf="element.tasks?.length && element.tasks[0].step === 'training' && element.tasks[0].status !== 'failed'"
-            [value]="element.task.progress" mode="indeterminate">
-          </mat-progress-bar>
-          <mat-hint *ngIf="element.tasks?.length">{{element.tasks[0].status}} {{element.tasks[0].step}}</mat-hint>
-
-
+          <app-task-progress [task]="element.tasks[0]"></app-task-progress>
         </td>
       </ng-container>
 

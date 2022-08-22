@@ -66,11 +66,11 @@
       </ng-container>
 
       <ng-container matColumnDef="task__time_started">
-        <th *matHeaderCellDef mat-header-cell mat-sort-header> Time started</th>
+        <th *matHeaderCellDef mat-header-cell> Time started</th>
         <td *matCellDef="let element" mat-cell> {{element.tasks[0].time_started | date:'y-M-d H:mm:ss'}}</td>
       </ng-container>
       <ng-container matColumnDef="task__time_completed">
-        <th *matHeaderCellDef mat-header-cell mat-sort-header> Time completed</th>
+        <th *matHeaderCellDef mat-header-cell> Time completed</th>
         <td *matCellDef="let element" mat-cell>
           <span *ngIf="element.tasks[0].time_completed">{{element.tasks[0].time_completed | date:'y-M-d H:mm:ss'}}</span>
           <span *ngIf="!element.tasks[0].time_completed">Null</span>
@@ -98,13 +98,9 @@
         <td *matCellDef="let element" mat-cell> {{element.new_index}}</td>
       </ng-container>
       <ng-container matColumnDef="task__status">
-        <th *matHeaderCellDef mat-header-cell mat-sort-header> Task</th>
+        <th *matHeaderCellDef mat-header-cell> Task</th>
         <td *matCellDef="let element" mat-cell style="min-width: 100px">
-          <mat-progress-bar *ngIf="element.tasks[0]"
-            [value]="element.tasks[0].progress"
-            mode="determinate">
-          </mat-progress-bar>
-          <mat-hint *ngIf="element.tasks[0]">{{element.tasks[0].status}} {{element.tasks[0].step}}</mat-hint>
+          <app-task-progress [task]="element.tasks[0]"></app-task-progress>
         </td>
       </ng-container>
 
