@@ -96,6 +96,7 @@ describe('bert-taggers should work', function () {
     initPage();
     cy.get('[data-cy=appBertTaggerCreateBtn]').click();
     cy.wait('@getBertTaggers');
+    cy.wait('@getBertTaggers');
     cy.get('[data-cy=appBertTaggerCreateDialogDesc]').then((desc => {
       cy.wrap(desc).should('have.class', 'mat-focused').type('b').find('input').clear();
       cy.matFormFieldShouldHaveError(desc, 'required');

@@ -73,12 +73,25 @@
       </ng-container>
 
       <ng-container matColumnDef="task__status">
-        <th *matHeaderCellDef mat-header-cell mat-sort-header> Task</th>
+        <th *matHeaderCellDef mat-header-cell> Task</th>
         <td *matCellDef="let element" mat-cell>
-          <mat-progress-bar *ngIf="element.tasks" [value]="element.tasks[element.tasks.length - 1].progress"
-                            mode="determinate">
-          </mat-progress-bar>
-          <mat-hint *ngIf="element.tasks">{{element.tasks[element.tasks.length - 1].status}} {{element.tasks[element.tasks.length - 1].step}}</mat-hint>
+          <ng-container *ngIf="element.tasks[0]">
+            <mat-progress-bar *ngIf="element.tasks[element.tasks.length - 1].status === 'completed'" [value]="100"
+                              mode="determinate">
+            </mat-progress-bar>
+            <mat-progress-bar *ngIf="element.tasks[element.tasks.length - 1].status === 'failed'" [value]="100"
+                              mode="determinate" color="warn">
+            </mat-progress-bar>
+            <mat-progress-bar
+              *ngIf="element.tasks[element.tasks.length - 1].status !== 'completed' && element.tasks[element.tasks.length - 1].status !== 'failed' && element.tasks[element.tasks.length - 1].progress === 0"
+              mode="indeterminate">
+            </mat-progress-bar>
+            <mat-progress-bar
+              *ngIf="element.tasks[element.tasks.length - 1].status !== 'completed' && element.tasks[element.tasks.length - 1].status !== 'failed' && element.tasks[element.tasks.length - 1].progress"
+              mode="determinate" [value]="element.tasks[element.tasks.length - 1].progress">
+            </mat-progress-bar>
+            <mat-hint>{{element.tasks[element.tasks.length - 1].step ? element.tasks[element.tasks.length - 1].step : element.tasks[element.tasks.length - 1].status}}</mat-hint>
+          </ng-container>
         </td>
       </ng-container>
 
