@@ -63,8 +63,8 @@ describe('Elastic Analyzer should work', function () {
       cy.wrap([0, 0, 0, 0]).each(y => { // hack to wait for task to complete
         cy.wrap(bb).click();
         return cy.wait('@getElasticAnalyzerTasks').then((x) => {
-          if (x?.response?.body?.results[0]?.task?.status === 'completed') {
-            assert.equal(x?.response?.body?.results[0]?.task?.status, 'completed');
+          if (x?.response?.body?.results[0]?.tasks[0]?.status === 'completed') {
+            assert.equal(x?.response?.body?.results[0]?.tasks[0]?.status, 'completed');
             return false;
           }
           return cy.wait(5000);

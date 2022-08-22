@@ -125,8 +125,8 @@ describe('bert-taggers should work', function () {
         cy.wrap(bb).click();
          cy.wait('@getBertTaggers').then((intercepted) => {
           console.log(intercepted)
-          if (intercepted?.response?.body?.results[0]?.task?.status === 'completed') {
-            assert.equal(intercepted?.response?.body?.results[0]?.task?.status, 'completed');
+          if (intercepted?.response?.body?.results[0]?.tasks[0]?.status === 'completed') {
+            assert.equal(intercepted?.response?.body?.results[0]?.tasks[0]?.status, 'completed');
             return true;
           }else {
             return cy.wait(25000);
