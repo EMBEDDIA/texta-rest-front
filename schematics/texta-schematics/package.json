@@ -22,6 +22,6 @@
     "@angular-devkit/schematics-cli": "^0.1001.0",
     "@types/jasmine": "~3.5.0",
     "@types/node": "^12.11.1",
-    "jasmine": "^3.5.0"
+    "jasmine": "^3.99.0"
   }
 }
