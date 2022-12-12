@@ -77,11 +77,12 @@ import {
   MatLuxonDateModule
 } from '@angular/material-luxon-adapter';
 import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
-import { TaskMenuComponent } from './components/task-table/task-menu/task-menu.component';
-import { TaskTableComponent } from './components/task-table/task-table.component';
-import { TaskProgressComponent } from './components/task-progress/task-progress.component';
-import { DocsButtonComponent } from './components/docs-button/docs-button.component';
-import {NgxVirtualScrollMatSelectModule} from '@texta/ngx-virtual-scroll-mat-select';
+import {TaskMenuComponent} from './components/task-table/task-menu/task-menu.component';
+import {TaskTableComponent} from './components/task-table/task-table.component';
+import {TaskProgressComponent} from './components/task-progress/task-progress.component';
+import {DocsButtonComponent} from './components/docs-button/docs-button.component';
+import {NgxVirtualScrollMatSelectModule, VS_SELECT_CONFIG_TOKEN} from '@texta/ngx-virtual-scroll-mat-select';
+
 @NgModule({
   declarations: [LoginDialogComponent, GenericTableComponent,
     RegistrationDialogComponent,
@@ -236,6 +237,7 @@ import {NgxVirtualScrollMatSelectModule} from '@texta/ngx-virtual-scroll-mat-sel
     {provide: MAT_LUXON_DATE_ADAPTER_OPTIONS, useValue: {useUtc: true}},
     {provide: MAT_LUXON_DATE_FORMATS, useValue: 'en-NZ'},
     {provide: DateAdapter, useClass: LuxonDateAdapter, deps: [MAT_LUXON_DATE_FORMATS, MAT_LUXON_DATE_ADAPTER_OPTIONS]},
+    {provide: VS_SELECT_CONFIG_TOKEN, useValue: {itemSize: 48}}
   ]
 })
 export class SharedModule {
