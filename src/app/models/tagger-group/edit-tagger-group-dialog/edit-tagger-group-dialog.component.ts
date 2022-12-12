@@ -30,9 +30,9 @@ export class EditTaggerGroupDialogComponent implements OnInit {
   }
 
   taggerGroupForm = new FormGroup({
-    descriptionFormControl: new FormControl(this.data.description),
+    descriptionFormControl: new FormControl(this.data?.description ?? ''),
     nerLexiconsFormControl: new FormControl(),
-    useTaggersAsNerFilterFormControl: new FormControl(this.data.use_taggers_as_ner_filter ?? true),
+    useTaggersAsNerFilterFormControl: new FormControl(this.data?.use_taggers_as_ner_filter ?? true),
   });
   isLoading = false;
   currentProject: Project;
