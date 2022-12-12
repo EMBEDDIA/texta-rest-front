@@ -149,9 +149,7 @@ export class TaggerGroupComponent implements OnInit, OnDestroy, AfterViewInit {
       data: taggerGroup
     }).afterClosed().subscribe((x: TaggerGroup | HttpErrorResponse) => {
       if (x && !(x instanceof HttpErrorResponse)) {
-        taggerGroup.description = x.description;
-      } else if (x instanceof HttpErrorResponse) {
-        this.logService.snackBarError(x, 3000);
+        this.updateTable.next();
       }
     });
   }

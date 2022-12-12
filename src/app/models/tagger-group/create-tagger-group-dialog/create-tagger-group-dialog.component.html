@@ -5,7 +5,8 @@
 <mat-dialog-content>
   <form (ngSubmit)="onSubmit()" [formGroup]="taggerGroupForm" class="flex-col" id="taggerForm">
     <mat-form-field data-cy="appTaggerGroupCreateDialogDesc">
-      <input [errorStateMatcher]="matcher" autocomplete="off" cdkFocusInitial formControlName="descriptionFormControl" matInput
+      <input [errorStateMatcher]="matcher" autocomplete="off" cdkFocusInitial formControlName="descriptionFormControl"
+             matInput
              placeholder="Description" required>
 
       <mat-error *ngIf="taggerGroupForm.get('descriptionFormControl')?.hasError('required')">
@@ -41,8 +42,34 @@
         </ng-template>
       </app-info-icon>
     </div>
-
-    <mat-form-field class="m-top-10">
+    <mat-form-field>
+      <textarea
+        formControlName="blacklistedFactValuesFormControl"
+        placeholder="Blacklisted facts (newline separated)" cdkTextareaAutosize cdkAutosizeMinRows="3"
+        cdkAutosizeMaxRows="6" matInput></textarea>
+      <mat-hint>{{taggerGroupOptions?.actions?.POST?.blacklisted_facts?.help_text || ''}}</mat-hint>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>NER Lexicon</mat-label>
+      <mat-select [disableOptionCentering]="true" multiple="true" formControlName="nerLexiconsFormControl" [compareWith]="idCompare"
+                  panelClass="select-panel-reveal-input">
+        <app-mat-option-select-all></app-mat-option-select-all>
+        <mat-option *ngFor="let item of lexicons" [value]="item">
+          {{item.description}}
+        </mat-option>
+      </mat-select>
+      <mat-hint>{{taggerGroupOptions?.actions?.POST?.ner_lexicons?.help_text || ''}}</mat-hint>
+    </mat-form-field>
+    <div class="checkbox-info-row m-bot-5 m-top-5">
+      <mat-checkbox formControlName="useTaggersAsNerFilterFormControl">Use taggers as ner filter
+      </mat-checkbox>
+      <app-info-icon [textTemplate]="nerFilterTemplate" textTitle="Use taggers as ner filter">
+        <ng-template #nerFilterTemplate>
+          <p>{{taggerGroupOptions?.actions?.POST?.use_taggers_as_ner_filter?.help_text || ''}}</p>
+        </ng-template>
+      </app-info-icon>
+    </div>
+    <mat-form-field>
       <input formControlName="taggerGroupMinSampleSizeFormControl" matInput placeholder="Minimum sample size" step="50"
              type="number">
 
@@ -131,7 +158,8 @@
         <mat-label>Analyzer</mat-label>
         <mat-select [disableOptionCentering]="true" formControlName="analyzerFormControl"
                     panelClass="select-panel-reveal-input" required>
-          <mat-option *ngFor="let item of taggerGroupOptions?.actions?.POST?.tagger?.children?.analyzer?.choices" [value]="item">
+          <mat-option *ngFor="let item of taggerGroupOptions?.actions?.POST?.tagger?.children?.analyzer?.choices"
+                      [value]="item">
             {{item.display_name}}
           </mat-option>
         </mat-select>
@@ -200,7 +228,8 @@
       <button class="flex-item-left" mat-button mat-dialog-close type="button">Close</button>
     </div>
     <div class="flex-item-right">
-      <button [disabled]="!taggerGroupForm.valid || createRequestInProgress" data-cy="appTaggerGroupCreateDialogSubmit" form="taggerForm"
+      <button [disabled]="!taggerGroupForm.valid || createRequestInProgress" data-cy="appTaggerGroupCreateDialogSubmit"
+              form="taggerForm"
               mat-button type="submit">Create
       </button>
     </div>

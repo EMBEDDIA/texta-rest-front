@@ -1,21 +1,46 @@
 <h1 mat-dialog-title>Edit Tagger Group</h1>
-<div mat-dialog-content>
-  <mat-form-field class="max-width">
-    <input [errorStateMatcher]="matcher" autocomplete="off" matInput
-           placeholder="Description" required [(ngModel)]="this.data.description" #ctrl="ngModel">
-    <mat-error *ngIf="ctrl?.hasError('required')">
-      Description is <strong>required</strong>
-    </mat-error>
-  </mat-form-field>
+<mat-dialog-content>
+  <form (ngSubmit)="onSubmit()" [formGroup]="taggerGroupForm" class="flex-col" id="taggerForm">
+    <mat-form-field class="max-width">
+      <input [errorStateMatcher]="matcher" autocomplete="off" matInput
+             placeholder="Description" required formControlName="descriptionFormControl">
+      <mat-error *ngIf="taggerGroupForm.get('descriptionFormControl')?.hasError('required')">
+        Description is <strong>required</strong>
+      </mat-error>
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>NER Lexicon</mat-label>
+      <mat-select [disableOptionCentering]="true" multiple="true" formControlName="nerLexiconsFormControl"
+                  [compareWith]="idCompare"
+                  panelClass="select-panel-reveal-input">
+        <app-mat-option-select-all></app-mat-option-select-all>
+        <mat-option *ngFor="let item of lexicons" [value]="item">
+          {{item.description}}
+        </mat-option>
+      </mat-select>
+      <mat-hint>Lexicon(s) for filtering named-entity tags.</mat-hint>
+    </mat-form-field>
+    <div class="checkbox-info-row m-bot-5 m-top-5">
+      <mat-checkbox formControlName="useTaggersAsNerFilterFormControl">Use taggers as ner filter
+      </mat-checkbox>
+      <app-info-icon [textTemplate]="nerFilterTemplate" textTitle="Use taggers as ner filter">
+        <ng-template #nerFilterTemplate>
+          <p>Use tagger descriptions in addition to lexicons for filtering named-entity tags.</p>
+        </ng-template>
+      </app-info-icon>
+    </div>
+  </form>
   <div class="flex-col">
     <div class="flex-row">
       <div class="flex-item-left">
         <button (click)="closeDialog()" class="flex-item-left" mat-button type="button">Close</button>
       </div>
       <div class="flex-item-right">
-        <button [disabled]="this.data.description == ''" mat-button type="submit" (click)="onSubmit()">Edit</button>
+        <button [disabled]="taggerGroupForm.invalid || isLoading" mat-button type="submit"
+                form="taggerForm">Edit
+        </button>
       </div>
     </div>
 
   </div>
-</div>
+</mat-dialog-content>

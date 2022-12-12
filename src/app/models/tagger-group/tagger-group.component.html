@@ -135,6 +135,18 @@
                     <td>{{element.id}}</td>
                   </tr>
                   <tr>
+                    <th class="mat-body-strong">Blacklisted facts</th>
+                    <td>{{element.blacklisted_facts.join(', ')}}</td>
+                  </tr>
+                  <tr>
+                    <th class="mat-body-strong">Use taggers as ner filter</th>
+                    <td>{{element.use_taggers_as_ner_filter}}</td>
+                  </tr>
+                  <tr>
+                    <th class="mat-body-strong">NER Lexicon IDs</th>
+                    <td>{{element.ner_lexicons.join(', ')}}</td>
+                  </tr>
+                  <tr>
                     <th class="mat-body-strong">Total</th>
                     <td>{{element.tagger_status.total}}</td>
                   </tr>

@@ -13,12 +13,16 @@ import {LiveErrorStateMatcher} from '../../../shared/CustomerErrorStateMatchers'
 import {EmbeddingsService} from '../../../core/models/embeddings/embeddings.service';
 import {Embedding} from '../../../shared/types/tasks/Embedding';
 import {TaggerService} from '../../../core/models/taggers/tagger.service';
-import {BehaviorSubject, forkJoin, of, Subject} from 'rxjs';
+import {BehaviorSubject, forkJoin, Observable, of, Subject} from 'rxjs';
 import {TaggerGroupService} from '../../../core/models/taggers/tagger-group.service';
 import {UtilityFunctions} from '../../../shared/UtilityFunctions';
 import {MatSelect} from '@angular/material/select';
 import {CoreService} from '../../../core/core.service';
 import {Tagger, TaggerGroup} from '../../../shared/types/tasks/Tagger';
+import {ScrollableDataSource} from '@texta/ngx-virtual-scroll-mat-select';
+import {Lexicon} from '../../../shared/types/Lexicon';
+import {LexiconService} from '../../../core/lexicon/lexicon.service';
+import {ResultsWrapper} from '../../../shared/types/Generic';
 
 @Component({
   selector: 'app-create-tagger-group-dialog',
@@ -33,6 +37,9 @@ export class CreateTaggerGroupDialogComponent implements OnInit, OnDestroy {
       Validators.required,
     ]),
     factNameFormControl: new UntypedFormControl(),
+    blacklistedFactValuesFormControl: new UntypedFormControl(this.data?.cloneTagger?.blacklisted_facts ? this.data.cloneTagger.blacklisted_facts.join('\n') : ''),
+    nerLexiconsFormControl: new UntypedFormControl(),
+    useTaggersAsNerFilterFormControl: new UntypedFormControl(this.data?.cloneTagger?.use_taggers_as_ner_filter ?? true),
     taggerGroupMinSampleSizeFormControl: new UntypedFormControl(this.data?.cloneTagger?.minimum_sample_size || 50, [Validators.required]),
     taggerForm: new UntypedFormGroup({
       fieldsFormControl: new UntypedFormControl([], [Validators.required]),
@@ -66,7 +73,11 @@ export class CreateTaggerGroupDialogComponent implements OnInit, OnDestroy {
   taggerGroupOptions: any;
   embeddings: Embedding[];
   projectFields: ProjectIndex[];
-  projectFacts: BehaviorSubject<{ name: string, values: string[] }[]> = new BehaviorSubject<{ name: string, values: string[] }[]>([{name: 'Loading...', values: []}]);
+  projectFacts: BehaviorSubject<{ name: string, values: string[] }[]> = new BehaviorSubject<{ name: string, values: string[] }[]>([{
+    name: 'Loading...',
+    values: []
+  }]);
+  lexicons: Lexicon[] = [];
   currentProject: Project;
   destroyed$ = new Subject<boolean>();
   fieldsUnique: Field[] = [];
@@ -75,11 +86,15 @@ export class CreateTaggerGroupDialogComponent implements OnInit, OnDestroy {
   @ViewChild('indicesSelect') indicesSelect: MatSelect;
   createRequestInProgress = false;
 
+  idCompare = (o1: { id: number }, o2: { id: number }) => o1?.id === o2?.id;
+
+
   constructor(private dialogRef: MatDialogRef<CreateTaggerGroupDialogComponent>,
               private taggerGroupService: TaggerGroupService,
               private logService: LogService,
               private projectService: ProjectService,
               private coreService: CoreService,
+              private lexiconService: LexiconService,
               @Inject(MAT_DIALOG_DATA) public data: { cloneTagger: TaggerGroup },
               private embeddingService: EmbeddingsService,
               private projectStore: ProjectStore) {
@@ -140,7 +155,8 @@ export class CreateTaggerGroupDialogComponent implements OnInit, OnDestroy {
           {
             snowBallLanguages: this.coreService.getSnowballLanguages(),
             taggerOptions: this.taggerGroupService.getTaggerGroupOptions(currentProject.id),
-            embeddings: this.embeddingService.getEmbeddings(currentProject.id),
+            embeddings: this.embeddingService.getEmbeddings(currentProject.id, 'page=1&page_size=999'),
+            lexicons: this.lexiconService.getLexicons(currentProject.id, 'page=1&page_size=999'),
             projectIndices: this.projectStore.getProjectIndices().pipe(take(1)), // take 1 to complete observable
           });
       } else {
@@ -161,12 +177,21 @@ export class CreateTaggerGroupDialogComponent implements OnInit, OnDestroy {
             }
           }
         }
-        if (!(resp.snowBallLanguages instanceof HttpErrorResponse)) {
-            this.snowballLanguages = resp.snowBallLanguages.sort();
-            if (this.data?.cloneTagger?.tagger_params?.snowball_language) {
-              this.taggerGroupForm.get('taggerForm')?.get('snowballFormControl')?.setValue(this.data?.cloneTagger?.tagger_params?.snowball_language);
+        if (!(resp.lexicons instanceof HttpErrorResponse)) {
+          this.lexicons = resp.lexicons.results;
+          if (this.data?.cloneTagger?.ner_lexicons) {
+            const foundLexicons = this.lexicons.filter(x => this.data.cloneTagger.ner_lexicons.includes(x.id));
+            if (foundLexicons) {
+              this.taggerGroupForm?.get('nerLexiconsFormControl')?.setValue(foundLexicons);
             }
           }
+        }
+        if (!(resp.snowBallLanguages instanceof HttpErrorResponse)) {
+          this.snowballLanguages = resp.snowBallLanguages.sort();
+          if (this.data?.cloneTagger?.tagger_params?.snowball_language) {
+            this.taggerGroupForm.get('taggerForm')?.get('snowballFormControl')?.setValue(this.data?.cloneTagger?.tagger_params?.snowball_language);
+          }
+        }
 
         if (resp?.projectIndices && !(resp.projectIndices instanceof HttpErrorResponse)) {
           this.projectIndices = resp.projectIndices;
@@ -247,11 +272,13 @@ export class CreateTaggerGroupDialogComponent implements OnInit, OnDestroy {
       ...formData?.taggerForm?.maxBalanceFormControl ? {balance_to_max_limit: formData.taggerForm.maxBalanceFormControl} : {},
       stop_words: formData?.taggerForm?.stopWordsFormControl.split('\n').filter((x: string) => !!x),
     };
-
     const body = {
       description: formData.descriptionFormControl,
       ...formData.factNameFormControl ? {fact_name: formData.factNameFormControl.name} : {},
       minimum_sample_size: formData.taggerGroupMinSampleSizeFormControl,
+      blacklisted_facts: formData?.blacklistedFactValuesFormControl.split('\n').filter((x: string) => !!x),
+      ner_lexicons: formData?.nerLexiconsFormControl.map((x: { id: number; }) => x.id),
+      use_taggers_as_ner_filter: formData?.useTaggersAsNerFilterFormControl,
       tagger: taggerBody
     };
     if (this.currentProject) {

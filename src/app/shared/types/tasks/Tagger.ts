@@ -114,6 +114,9 @@ export interface TaggerGroup {
   author: Author;
   description: string;
   fact_name: string;
+  blacklisted_facts: string[];
+  use_taggers_as_ner_filter: boolean;
+  ner_lexicons: number[];
   num_tags: number;
   minimum_sample_size: number;
   tagger_status: TaggerStatus;
