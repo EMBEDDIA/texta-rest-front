@@ -38,7 +38,7 @@ export class CreateTaggerGroupDialogComponent implements OnInit, OnDestroy {
     ]),
     factNameFormControl: new UntypedFormControl(),
     blacklistedFactValuesFormControl: new UntypedFormControl(this.data?.cloneTagger?.blacklisted_facts ? this.data.cloneTagger.blacklisted_facts.join('\n') : ''),
-    nerLexiconsFormControl: new UntypedFormControl(),
+    nerLexiconsFormControl: new UntypedFormControl([]),
     useTaggersAsNerFilterFormControl: new UntypedFormControl(this.data?.cloneTagger?.use_taggers_as_ner_filter ?? true),
     taggerGroupMinSampleSizeFormControl: new UntypedFormControl(this.data?.cloneTagger?.minimum_sample_size || 50, [Validators.required]),
     taggerForm: new UntypedFormGroup({
