@@ -69,13 +69,13 @@ export class TaggerGroupService {
   }
 
   tagText(body: unknown, projectId: number, taggerId: number):
-    Observable<{ probability: number, tag: string, tagger_id: number }[] | HttpErrorResponse> {
-    return this.http.post<{ probability: number, tag: string, tagger_id: number }[]>(
+    Observable<{ probability: number, tag: string, tagger_id: number, lexicon_id: number, ner_match: boolean }[] | HttpErrorResponse> {
+    return this.http.post<{ probability: number, tag: string, tagger_id: number, lexicon_id: number, ner_match: boolean }[]>(
       `${this.apiUrl}/projects/${projectId}/${this.apiEndpoint}/${taggerId}/tag_text/`,
       body
     ).pipe(
       tap(e => this.logService.logStatus(e, 'tagText')),
-      catchError(this.logService.handleError<{ probability: number, tag: string, tagger_id: number }[]>('tagText')));
+      catchError(this.logService.handleError('tagText')));
   }
 
   tagDoc(body: unknown, projectId: number, taggerId: number):
@@ -139,12 +139,14 @@ export class TaggerGroupService {
       tap(e => this.logService.logStatus(e, 'applyToIndexOptions')),
       catchError(this.logService.handleError('applyToIndexOptions')));
   }
+
   // tslint:disable-next-line:no-any
   getTagDocOptions(projectId: number, taskId: number): Observable<any | HttpErrorResponse> {
     return this.http.options(`${this.apiUrl}/projects/${projectId}/${this.apiEndpoint}/${taskId}/tag_doc/`).pipe(
       tap(e => this.logService.logStatus(e, 'getTagDocOptions')),
       catchError(this.logService.handleError('getTagDocOptions')));
   }
+
   // tslint:disable-next-line:no-any
   getTagRandomDocOptions(projectId: number, taskId: number): Observable<any | HttpErrorResponse> {
     return this.http.options(`${this.apiUrl}/projects/${projectId}/${this.apiEndpoint}/${taskId}/tag_random_doc/`).pipe(

@@ -15,7 +15,7 @@ import {TaggerGroup} from '../../../shared/types/tasks/Tagger';
 export class TaggerGroupTagTextDialogComponent implements OnInit, OnDestroy {
   lemmatize = false;
   ner = false;
-  results: { probability: number, tag: string, tagger_id: number }[] | null;
+  results: { probability: number, tag: string, tagger_id: number, lexicon_id: number, ner_match: boolean }[] | null;
   nSimilarDocs = 25;
   isLoading = false;
   destroyed$ = new Subject<boolean>();
@@ -50,7 +50,7 @@ export class TaggerGroupTagTextDialogComponent implements OnInit, OnDestroy {
           text: value, lemmatize: this.lemmatize, use_ner: this.ner,
           n_similar_docs: this.nSimilarDocs
         }, this.data.currentProjectId, this.data.tagger.id)
-        .subscribe((resp: { probability: number, tag: string, tagger_id: number }[] | HttpErrorResponse) => {
+        .subscribe((resp: { probability: number, tag: string, tagger_id: number, lexicon_id: number, ner_match: boolean }[] | HttpErrorResponse) => {
           if (resp && !(resp instanceof HttpErrorResponse)) {
             this.results = resp;
           } else if (resp instanceof HttpErrorResponse) {

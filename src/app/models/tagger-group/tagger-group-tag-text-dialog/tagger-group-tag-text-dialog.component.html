@@ -35,11 +35,19 @@
   <span class="mat-hint"> <i>No results</i></span>
 </div>
 <div class="m-top-10" *ngFor="let result of results">
-  <span class="mat-body-strong">Tagger id:</span> {{result.tagger_id}}
-  <br>
+  <ng-container *ngIf="result.tagger_id !== null && result.tagger_id !== undefined">
+    <span class="mat-body-strong">Tagger id:</span> {{result.tagger_id}}
+    <br>
+  </ng-container>
+  <ng-container *ngIf="result.lexicon_id !== null && result.lexicon_id !== undefined">
+    <span class="mat-body-strong">Lexicon id:</span> {{result.lexicon_id}}
+    <br>
+  </ng-container>
   <span class="mat-body-strong">Result: </span>{{result.tag}}
   <br>
   <span class="mat-body-strong">Probability:</span> {{result.probability}}
+  <br>
+  <span class="mat-body-strong">NER Match:</span> {{result.ner_match}}
   <br>
   <br>
 </div>
