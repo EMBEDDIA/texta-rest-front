@@ -14,7 +14,9 @@ import {UserStore} from '../../core/users/user.store';
 import {takeUntil} from 'rxjs/operators';
 import {HttpErrorResponse} from '@angular/common/http';
 import {ConfirmDialogComponent} from '../../shared/shared-module/components/dialogs/confirm-dialog/confirm-dialog.component';
-import {AppConfigService} from "../../core/util/app-config.service";
+import {AppConfigService} from '../../core/util/app-config.service';
+import {FormControl, UntypedFormControl} from '@angular/forms';
+import {TableFilter, TableFilterManager} from '../../shared/shared-module/components/generic-table/TableFilters';
 
 @Component({
   selector: 'app-users',
@@ -32,6 +34,9 @@ export class UsersComponent implements OnInit, OnDestroy {
   @ViewChild(MatSort, {static: true}) sort: MatSort;
   @ViewChild(MatPaginator, {static: true}) paginator: MatPaginator;
   currentUser: UserProfile;
+  tableFilterManager: TableFilterManager;
+  emailFilter = new FormControl();
+  nameFilter = new FormControl();
 
   constructor(private userService: UserService,
               private logService: LogService,
@@ -42,6 +47,9 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.tableFilterManager = new TableFilterManager();
+    this.tableFilterManager.addFilter(new TableFilter('username', '', this.nameFilter));
+    this.tableFilterManager.addFilter(new TableFilter('email', '', this.emailFilter));
     if (AppConfigService.settings.useCloudFoundryUAA) {
       this.displayedColumns.splice(2, 0, 'is_uaa_account');
     }
@@ -51,6 +59,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.userService.getAllUsers().pipe(takeUntil(this.destroyed$)).subscribe(resp => {
       if (resp && !(resp instanceof HttpErrorResponse)) {
         this.tableData.data = resp;
+        this.tableFilterManager.setUpColumnFilters(this.tableData);
         this.isLoadingResults = false;
       }
     });

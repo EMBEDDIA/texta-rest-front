@@ -3,8 +3,18 @@
     <div class="loading-bar">
       <mat-progress-bar mode="indeterminate" *ngIf="isLoadingResults"></mat-progress-bar>
     </div>
+    <div class="paginator-row">
+      <mat-form-field class="m-l-15">
+        <mat-icon matSuffix>search</mat-icon>
+        <input [formControl]="nameFilter" matInput placeholder="Filter username">
+      </mat-form-field>
+      <mat-form-field class="m-l-15">
+        <mat-icon matSuffix>search</mat-icon>
+        <input [formControl]="emailFilter" matInput placeholder="Filter email">
+      </mat-form-field>
     <mat-paginator [pageSizeOptions]="[25, 50, 100]" showFirstLastButtons>
     </mat-paginator>
+    </div>
   </div>
   <div class="table-container overflow-auto" [appScrollTop]="tableData">
 
