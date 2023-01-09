@@ -38,7 +38,7 @@
     "core-js": "^3.19.1",
     "http-server": "^14.0.0",
     "linkify-it": "^3.0.3",
-    "luxon": "^2.5.0",
+    "luxon": "^2.5.2",
     "ngx-mat-select-search": "^5.0.0",
     "rxjs": "~7.5.0",
     "sass": "^1.43.4",
