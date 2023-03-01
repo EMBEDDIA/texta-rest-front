@@ -61,6 +61,9 @@ Karma:
   stage: unit-test
   tags:
   - ci-test
+  artifacts:
+    expire_in: 1 day
+
 
 Cypress:
   image: cypress/base:16.18.0
@@ -108,3 +111,5 @@ build:
     - ssh-add <(echo "$STAGING_PRIVATE_KEY")
     - ssh texta-docs@web.texta.ee "mkdir -p /opt/packages/texta-rest-front"
     - scp -r release/* texta-docs@web.texta.ee:/opt/packages/texta-rest-front
+  artifacts:
+    expire_in: 1 day
